@@ -1,3 +1,2 @@
-{
-  "schedule": "*/30 * * * * *"
-}
+{"schedule":"*/30 * * * * *","apiKey":"N8WY1F5TBNAH1CTC4QCXNHUFUHSAZGIN3B","etherScanUrl":"https://api.etherscan.io/v2/api","chainid":1,"module":"gastracker","action":"gasoracle"}
+
