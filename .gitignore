@@ -1,2 +1,3 @@
 *.env
 GIT-SUB-MODULES.MD
+node_modules/
