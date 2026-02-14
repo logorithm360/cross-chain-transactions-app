@@ -1,53 +1,78 @@
-import { 
-  ConsensusAggregationByFields, 
-  CronCapability, 
-  handler, 
-  median, 
-  HTTPClient, 
-  Runner, 
-  type Runtime 
+/**
+ * Main Workflow Entry Point - SIMPLIFIED FOR DEBUGGING
+ *
+ * Cross-chain transaction automation workflow with token security checks
+ * NOTE: HTTPClient temporarily disabled for debugging WASM error
+ */
+
+import {
+  cre,
+  Runner,
+  type Runtime
 } from "@chainlink/cre-sdk";
-import { fetchGasPrices, type Config, type GasPriceData } from "./fetchInfo";
+import type { Config } from "./fetchInfo";
 
-const onCronTrigger = async (runtime: Runtime<Config>): Promise<string> => {
-  const httpClient = new HTTPClient();
+// ============================================================================
+// Configuration
+// ============================================================================
 
-  const requestFn = httpClient.sendRequest(
-    runtime,
-    fetchGasPrices,
-    ConsensusAggregationByFields<GasPriceData>({
-      safeGasPrice: () => median<number>(),
-      proposeGasPrice: () => median<number>(),
-      fastGasPrice: () => median<number>(),
-      baseFee: () => median<number>(),
-      lastBlock: () => median<number>(),
-    })
-  );
+interface WorkflowConfig extends Config {
+  enableTokenSecurityCheck: boolean;
+  requiredRiskLevel: string;
+  minSecurityScore: number;
+  trustedTokens?: string[];
+  blockedTokens?: string[];
+  etherscanApiKey: string;
+  schedule: string;
+}
 
-  const response = requestFn(runtime.config);
-  const result = response.result();
+// ============================================================================
+// Main Workflow Handlers
+// ============================================================================
 
-  runtime.log(`Gas Prices Retrieved:`);
-  runtime.log(`  Safe Gas Price: ${result.safeGasPrice} Gwei`);
-  runtime.log(`  Propose Gas Price: ${result.proposeGasPrice} Gwei`);
-  runtime.log(`  Fast Gas Price: ${result.fastGasPrice} Gwei`);
-  runtime.log(`  Base Fee: ${result.baseFee} Gwei`);
-  runtime.log(`  Last Block: ${result.lastBlock}`);
+const onCronTrigger = async (runtime: Runtime<WorkflowConfig>): Promise<string> => {
+  try {
+    runtime.log(`Cron trigger activated at ${new Date().toISOString()}`);
 
-  return JSON.stringify(result);
+    const config = runtime.config;
+    runtime.log(`Workflow Config:`);
+    runtime.log(`  Schedule: ${config.schedule}`);
+    runtime.log(`  Token Security Check: ${config.enableTokenSecurityCheck}`);
+    runtime.log(`  Min Security Score: ${config.minSecurityScore}`);
+
+    // Simple response for now
+    const result = {
+      status: "success",
+      timestamp: new Date().toISOString(),
+      configReceived: true
+    };
+
+    runtime.log(`Workflow completed successfully`);
+    return JSON.stringify(result);
+
+  } catch (error) {
+    const errorMsg = error instanceof Error ? error.message : String(error);
+    runtime.log(`Error in onCronTrigger: ${errorMsg}`);
+    return JSON.stringify({ status: "error", message: errorMsg });
+  }
 };
 
-const initWorkflow = (config: Config) => {
+const initWorkflow = (config: WorkflowConfig) => {
+  const cron = new cre.capabilities.CronCapability();
   return [
-    handler(
-      new CronCapability().trigger({ schedule: config.schedule }), 
+    cre.handler(
+      cron.trigger({ schedule: config.schedule }),
       onCronTrigger
     ),
   ];
 };
 
+// ============================================================================
+// Export - Only main() is exported for CRE SDK WASM compatibility
+// ============================================================================
+
 export async function main() {
-  const runner = await Runner.newRunner<Config>();
+  const runner = await Runner.newRunner<WorkflowConfig>();
   await runner.run(initWorkflow);
 }
 
@@ -55,4 +80,3 @@ main().catch((error: unknown) => {
   console.log("Workflow failed:", error);
   process.exit(1);
 });
-
