@@ -1,3 +1,6 @@
 *.env
 node_modules/
 GIT-SUB-MODULES.MD
+TODO.md
+GEMINI.md
+CRE_FIXES_AND_TROUBLESHOOTING.md
