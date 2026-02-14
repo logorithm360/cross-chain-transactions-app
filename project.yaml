@@ -15,10 +15,16 @@
 #       url: "<select your own rpc url>"
 
 # ==========================================================================
+default-settings:
+  rpcs:
+    - chain-name: ethereum-testnet-sepolia
+      url: https://sepolia.infura.io/v3/89fbdbed48754cdc9bc2d473729fc0dd
+
+# ==========================================================================
 staging-settings:
   rpcs:
     - chain-name: ethereum-testnet-sepolia
-      url: https://ethereum-sepolia-rpc.publicnode.com
+      url: https://sepolia.infura.io/v3/89fbdbed48754cdc9bc2d473729fc0dd
 
 # ==========================================================================
 production-settings:
