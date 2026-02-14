@@ -1,3 +1,10 @@
 {
-  "schedule": "*/30 * * * * *"
+  "schedule": "*/1 * * * *",
+  "rpcUrl": "",
+  "enableTokenSecurityCheck": true,
+  "requiredRiskLevel": "MEDIUM",
+  "minSecurityScore": 80,
+  "etherscanApiKey": "",
+  "trustedTokens": [],
+  "blockedTokens": []
 }
