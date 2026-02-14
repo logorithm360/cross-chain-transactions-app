@@ -4,6 +4,7 @@ import z from "zod";
 // ============================================================================
 // Schemas
 // ============================================================================
+
 const gasOracleResponseSchema = z.object({
   status: z.string(),
   message: z.string(),
@@ -29,6 +30,7 @@ const configSchema = z.object({
 // ============================================================================
 // Types
 // ============================================================================
+
 export type Config = z.infer<typeof configSchema>;
 
 export type GasPriceData = {
@@ -41,16 +43,14 @@ export type GasPriceData = {
 
 // ============================================================================
 // Fetch and Parse Gas Prices from Etherscan
-// // ============================================================================
-
+// ============================================================================
 
 export const fetchGasPrices = (sendRequester: HTTPSendRequester, config: Config): GasPriceData => {
-
   // requesting data from Etherscan
   const request = {
     url: `${config.etherScanUrl}?chainid=${config.chainid}&module=${config.module}&action=${config.action}&apikey=${config.apiKey}`,
     method: "GET" as const,
-  }
+  };
 
   // getting result
   const response = sendRequester.sendRequest(request).result();
@@ -70,5 +70,4 @@ export const fetchGasPrices = (sendRequester: HTTPSendRequester, config: Config)
     baseFee: parseFloat(gasOracleData.result.suggestBaseFee),
     lastBlock: parseFloat(gasOracleData.result.LastBlock)
   };
-}
-
+};

@@ -1,16 +1,22 @@
 /**
- * Main Workflow Entry Point - SIMPLIFIED FOR DEBUGGING
+ * Main Workflow Entry Point
  *
- * Cross-chain transaction automation workflow with token security checks
- * NOTE: HTTPClient temporarily disabled for debugging WASM error
+ * Cross-chain transaction automation workflow
+ * Fetches and returns real-time gas prices from Etherscan
  */
 
 import {
   cre,
+  ConsensusAggregationByFields,
+  median,
   Runner,
   type Runtime
 } from "@chainlink/cre-sdk";
-import type { Config } from "./fetchInfo";
+import {
+  fetchGasPrices,
+  type Config,
+  type GasPriceData
+} from "./fetchInfo";
 
 // ============================================================================
 // Configuration
@@ -32,28 +38,45 @@ interface WorkflowConfig extends Config {
 
 const onCronTrigger = async (runtime: Runtime<WorkflowConfig>): Promise<string> => {
   try {
-    runtime.log(`Cron trigger activated at ${new Date().toISOString()}`);
-
     const config = runtime.config;
-    runtime.log(`Workflow Config:`);
-    runtime.log(`  Schedule: ${config.schedule}`);
-    runtime.log(`  Token Security Check: ${config.enableTokenSecurityCheck}`);
-    runtime.log(`  Min Security Score: ${config.minSecurityScore}`);
 
-    // Simple response for now
-    const result = {
-      status: "success",
-      timestamp: new Date().toISOString(),
-      configReceived: true
-    };
+    // Create HTTP client for fetching gas prices
+    const httpClient = new cre.capabilities.HTTPClient();
 
-    runtime.log(`Workflow completed successfully`);
-    return JSON.stringify(result);
+    // Set up consensus aggregation
+    const aggregationConfig = ConsensusAggregationByFields<GasPriceData>({
+      safeGasPrice: () => median<number>(),
+      proposeGasPrice: () => median<number>(),
+      fastGasPrice: () => median<number>(),
+      baseFee: () => median<number>(),
+      lastBlock: () => median<number>()
+    });
+
+    // Execute the HTTP request with consensus aggregation
+    const requestFn = httpClient.sendRequest(
+      runtime,
+      fetchGasPrices,
+      aggregationConfig
+    );
+
+    const response = requestFn(config);
+    const gasPrices = response.result();
+
+    // Log each parameter individually
+    runtime.log("=== Gas Prices Report ===");
+    runtime.log(`Safe Gas Price: ${gasPrices.safeGasPrice}`);
+    runtime.log(`Propose Gas Price: ${gasPrices.proposeGasPrice}`);
+    runtime.log(`Fast Gas Price: ${gasPrices.fastGasPrice}`);
+    runtime.log(`Base Fee: ${gasPrices.baseFee}`);
+    runtime.log(`Last Block: ${gasPrices.lastBlock}`);
+
+    // Return raw data as JSON
+    return JSON.stringify(gasPrices);
 
   } catch (error) {
     const errorMsg = error instanceof Error ? error.message : String(error);
-    runtime.log(`Error in onCronTrigger: ${errorMsg}`);
-    return JSON.stringify({ status: "error", message: errorMsg });
+    runtime.log(`Error: ${errorMsg}`);
+    return JSON.stringify({ error: errorMsg });
   }
 };
 
@@ -63,7 +86,7 @@ const initWorkflow = (config: WorkflowConfig) => {
     cre.handler(
       cron.trigger({ schedule: config.schedule }),
       onCronTrigger
-    ),
+    )
   ];
 };
 
