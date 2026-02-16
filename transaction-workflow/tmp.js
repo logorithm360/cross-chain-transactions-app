@@ -3811,6 +3811,26 @@ var Mode;
   Mode2[Mode2["NODE"] = 2] = "NODE";
 })(Mode || (Mode = {}));
 var file_tools_generator_v1alpha_cre_metadata = /* @__PURE__ */ fileDesc("Cip0b29scy9nZW5lcmF0b3IvdjFhbHBoYS9jcmVfbWV0YWRhdGEucHJvdG8SF3Rvb2xzLmdlbmVyYXRvci52MWFscGhhIoQBCgtTdHJpbmdMYWJlbBJECghkZWZhdWx0cxgBIAMoCzIyLnRvb2xzLmdlbmVyYXRvci52MWFscGhhLlN0cmluZ0xhYmVsLkRlZmF1bHRzRW50cnkaLwoNRGVmYXVsdHNFbnRyeRILCgNrZXkYASABKAkSDQoFdmFsdWUYAiABKAk6AjgBIogBCgtVaW50NjRMYWJlbBJECghkZWZhdWx0cxgBIAMoCzIyLnRvb2xzLmdlbmVyYXRvci52MWFscGhhLlVpbnQ2NExhYmVsLkRlZmF1bHRzRW50cnkaMwoNRGVmYXVsdHNFbnRyeRILCgNrZXkYASABKAkSEQoFdmFsdWUYAiABKARCAjAAOgI4ASKEAQoLVWludDMyTGFiZWwSRAoIZGVmYXVsdHMYASADKAsyMi50b29scy5nZW5lcmF0b3IudjFhbHBoYS5VaW50MzJMYWJlbC5EZWZhdWx0c0VudHJ5Gi8KDURlZmF1bHRzRW50cnkSCwoDa2V5GAEgASgJEg0KBXZhbHVlGAIgASgNOgI4ASKGAQoKSW50NjRMYWJlbBJDCghkZWZhdWx0cxgBIAMoCzIxLnRvb2xzLmdlbmVyYXRvci52MWFscGhhLkludDY0TGFiZWwuRGVmYXVsdHNFbnRyeRozCg1EZWZhdWx0c0VudHJ5EgsKA2tleRgBIAEoCRIRCgV2YWx1ZRgCIAEoA0ICMAA6AjgBIoIBCgpJbnQzMkxhYmVsEkMKCGRlZmF1bHRzGAEgAygLMjEudG9vbHMuZ2VuZXJhdG9yLnYxYWxwaGEuSW50MzJMYWJlbC5EZWZhdWx0c0VudHJ5Gi8KDURlZmF1bHRzRW50cnkSCwoDa2V5GAEgASgJEg0KBXZhbHVlGAIgASgFOgI4ASLBAgoFTGFiZWwSPAoMc3RyaW5nX2xhYmVsGAEgASgLMiQudG9vbHMuZ2VuZXJhdG9yLnYxYWxwaGEuU3RyaW5nTGFiZWxIABI8Cgx1aW50NjRfbGFiZWwYAiABKAsyJC50b29scy5nZW5lcmF0b3IudjFhbHBoYS5VaW50NjRMYWJlbEgAEjoKC2ludDY0X2xhYmVsGAMgASgLMiMudG9vbHMuZ2VuZXJhdG9yLnYxYWxwaGEuSW50NjRMYWJlbEgAEjwKDHVpbnQzMl9sYWJlbBgEIAEoCzIkLnRvb2xzLmdlbmVyYXRvci52MWFscGhhLlVpbnQzMkxhYmVsSAASOgoLaW50MzJfbGFiZWwYBSABKAsyIy50b29scy5nZW5lcmF0b3IudjFhbHBoYS5JbnQzMkxhYmVsSABCBgoEa2luZCLkAQoSQ2FwYWJpbGl0eU1ldGFkYXRhEh8KBG1vZGUYASABKA4yES5zZGsudjFhbHBoYS5Nb2RlEhUKDWNhcGFiaWxpdHlfaWQYAiABKAkSRwoGbGFiZWxzGAMgAygLMjcudG9vbHMuZ2VuZXJhdG9yLnYxYWxwaGEuQ2FwYWJpbGl0eU1ldGFkYXRhLkxhYmVsc0VudHJ5Gk0KC0xhYmVsc0VudHJ5EgsKA2tleRgBIAEoCRItCgV2YWx1ZRgCIAEoCzIeLnRvb2xzLmdlbmVyYXRvci52MWFscGhhLkxhYmVsOgI4ASI2ChhDYXBhYmlsaXR5TWV0aG9kTWV0YWRhdGESGgoSbWFwX3RvX3VudHlwZWRfYXBpGAEgASgIOm4KCmNhcGFiaWxpdHkSHy5nb29nbGUucHJvdG9idWYuU2VydmljZU9wdGlvbnMY0IYDIAEoCzIrLnRvb2xzLmdlbmVyYXRvci52MWFscGhhLkNhcGFiaWxpdHlNZXRhZGF0YVIKY2FwYWJpbGl0eTprCgZtZXRob2QSHi5nb29nbGUucHJvdG9idWYuTWV0aG9kT3B0aW9ucxjRhgMgASgLMjEudG9vbHMuZ2VuZXJhdG9yLnYxYWxwaGEuQ2FwYWJpbGl0eU1ldGhvZE1ldGFkYXRhUgZtZXRob2RCrwEKG2NvbS50b29scy5nZW5lcmF0b3IudjFhbHBoYUIQQ3JlTWV0YWRhdGFQcm90b1ABogIDVEdYqgIXVG9vbHMuR2VuZXJhdG9yLlYxYWxwaGHKAhhUb29sc1xHZW5lcmF0b3JfXFYxYWxwaGHiAiRUb29sc1xHZW5lcmF0b3JfXFYxYWxwaGFcR1BCTWV0YWRhdGHqAhlUb29sczo6R2VuZXJhdG9yOjpWMWFscGhhYgZwcm90bzM", [file_google_protobuf_descriptor, file_sdk_v1alpha_sdk]);
+var file_capabilities_blockchain_evm_v1alpha_client = /* @__PURE__ */ fileDesc("CjBjYXBhYmlsaXRpZXMvYmxvY2tjaGFpbi9ldm0vdjFhbHBoYS9jbGllbnQucHJvdG8SI2NhcGFiaWxpdGllcy5ibG9ja2NoYWluLmV2bS52MWFscGhhIh0KC1RvcGljVmFsdWVzEg4KBnZhbHVlcxgBIAMoDCK4AQoXRmlsdGVyTG9nVHJpZ2dlclJlcXVlc3QSEQoJYWRkcmVzc2VzGAEgAygMEkAKBnRvcGljcxgCIAMoCzIwLmNhcGFiaWxpdGllcy5ibG9ja2NoYWluLmV2bS52MWFscGhhLlRvcGljVmFsdWVzEkgKCmNvbmZpZGVuY2UYAyABKA4yNC5jYXBhYmlsaXRpZXMuYmxvY2tjaGFpbi5ldm0udjFhbHBoYS5Db25maWRlbmNlTGV2ZWwiegoTQ2FsbENvbnRyYWN0UmVxdWVzdBI6CgRjYWxsGAEgASgLMiwuY2FwYWJpbGl0aWVzLmJsb2NrY2hhaW4uZXZtLnYxYWxwaGEuQ2FsbE1zZxInCgxibG9ja19udW1iZXIYAiABKAsyES52YWx1ZXMudjEuQmlnSW50IiEKEUNhbGxDb250cmFjdFJlcGx5EgwKBGRhdGEYASABKAwiWwoRRmlsdGVyTG9nc1JlcXVlc3QSRgoMZmlsdGVyX3F1ZXJ5GAEgASgLMjAuY2FwYWJpbGl0aWVzLmJsb2NrY2hhaW4uZXZtLnYxYWxwaGEuRmlsdGVyUXVlcnkiSQoPRmlsdGVyTG9nc1JlcGx5EjYKBGxvZ3MYASADKAsyKC5jYXBhYmlsaXRpZXMuYmxvY2tjaGFpbi5ldm0udjFhbHBoYS5Mb2cixwEKA0xvZxIPCgdhZGRyZXNzGAEgASgMEg4KBnRvcGljcxgCIAMoDBIPCgd0eF9oYXNoGAMgASgMEhIKCmJsb2NrX2hhc2gYBCABKAwSDAoEZGF0YRgFIAEoDBIRCglldmVudF9zaWcYBiABKAwSJwoMYmxvY2tfbnVtYmVyGAcgASgLMhEudmFsdWVzLnYxLkJpZ0ludBIQCgh0eF9pbmRleBgIIAEoDRINCgVpbmRleBgJIAEoDRIPCgdyZW1vdmVkGAogASgIIjEKB0NhbGxNc2cSDAoEZnJvbRgBIAEoDBIKCgJ0bxgCIAEoDBIMCgRkYXRhGAMgASgMIr0BCgtGaWx0ZXJRdWVyeRISCgpibG9ja19oYXNoGAEgASgMEiUKCmZyb21fYmxvY2sYAiABKAsyES52YWx1ZXMudjEuQmlnSW50EiMKCHRvX2Jsb2NrGAMgASgLMhEudmFsdWVzLnYxLkJpZ0ludBIRCglhZGRyZXNzZXMYBCADKAwSOwoGdG9waWNzGAUgAygLMisuY2FwYWJpbGl0aWVzLmJsb2NrY2hhaW4uZXZtLnYxYWxwaGEuVG9waWNzIhcKBlRvcGljcxINCgV0b3BpYxgBIAMoDCJMChBCYWxhbmNlQXRSZXF1ZXN0Eg8KB2FjY291bnQYASABKAwSJwoMYmxvY2tfbnVtYmVyGAIgASgLMhEudmFsdWVzLnYxLkJpZ0ludCI0Cg5CYWxhbmNlQXRSZXBseRIiCgdiYWxhbmNlGAEgASgLMhEudmFsdWVzLnYxLkJpZ0ludCJPChJFc3RpbWF0ZUdhc1JlcXVlc3QSOQoDbXNnGAEgASgLMiwuY2FwYWJpbGl0aWVzLmJsb2NrY2hhaW4uZXZtLnYxYWxwaGEuQ2FsbE1zZyIjChBFc3RpbWF0ZUdhc1JlcGx5Eg8KA2dhcxgBIAEoBEICMAAiKwobR2V0VHJhbnNhY3Rpb25CeUhhc2hSZXF1ZXN0EgwKBGhhc2gYASABKAwiYgoZR2V0VHJhbnNhY3Rpb25CeUhhc2hSZXBseRJFCgt0cmFuc2FjdGlvbhgBIAEoCzIwLmNhcGFiaWxpdGllcy5ibG9ja2NoYWluLmV2bS52MWFscGhhLlRyYW5zYWN0aW9uIqEBCgtUcmFuc2FjdGlvbhIRCgVub25jZRgBIAEoBEICMAASDwoDZ2FzGAIgASgEQgIwABIKCgJ0bxgDIAEoDBIMCgRkYXRhGAQgASgMEgwKBGhhc2gYBSABKAwSIAoFdmFsdWUYBiABKAsyES52YWx1ZXMudjEuQmlnSW50EiQKCWdhc19wcmljZRgHIAEoCzIRLnZhbHVlcy52MS5CaWdJbnQiLAocR2V0VHJhbnNhY3Rpb25SZWNlaXB0UmVxdWVzdBIMCgRoYXNoGAEgASgMIlsKGkdldFRyYW5zYWN0aW9uUmVjZWlwdFJlcGx5Ej0KB3JlY2VpcHQYASABKAsyLC5jYXBhYmlsaXRpZXMuYmxvY2tjaGFpbi5ldm0udjFhbHBoYS5SZWNlaXB0IpkCCgdSZWNlaXB0EhIKBnN0YXR1cxgBIAEoBEICMAASFAoIZ2FzX3VzZWQYAiABKARCAjAAEhQKCHR4X2luZGV4GAMgASgEQgIwABISCgpibG9ja19oYXNoGAQgASgMEjYKBGxvZ3MYBiADKAsyKC5jYXBhYmlsaXRpZXMuYmxvY2tjaGFpbi5ldm0udjFhbHBoYS5Mb2cSDwoHdHhfaGFzaBgHIAEoDBIuChNlZmZlY3RpdmVfZ2FzX3ByaWNlGAggASgLMhEudmFsdWVzLnYxLkJpZ0ludBInCgxibG9ja19udW1iZXIYCSABKAsyES52YWx1ZXMudjEuQmlnSW50EhgKEGNvbnRyYWN0X2FkZHJlc3MYCiABKAwiQAoVSGVhZGVyQnlOdW1iZXJSZXF1ZXN0EicKDGJsb2NrX251bWJlchgBIAEoCzIRLnZhbHVlcy52MS5CaWdJbnQiUgoTSGVhZGVyQnlOdW1iZXJSZXBseRI7CgZoZWFkZXIYASABKAsyKy5jYXBhYmlsaXRpZXMuYmxvY2tjaGFpbi5ldm0udjFhbHBoYS5IZWFkZXIiawoGSGVhZGVyEhUKCXRpbWVzdGFtcBgBIAEoBEICMAASJwoMYmxvY2tfbnVtYmVyGAIgASgLMhEudmFsdWVzLnYxLkJpZ0ludBIMCgRoYXNoGAMgASgMEhMKC3BhcmVudF9oYXNoGAQgASgMIqsBChJXcml0ZVJlcG9ydFJlcXVlc3QSEAoIcmVjZWl2ZXIYASABKAwSKwoGcmVwb3J0GAIgASgLMhsuc2RrLnYxYWxwaGEuUmVwb3J0UmVzcG9uc2USRwoKZ2FzX2NvbmZpZxgDIAEoCzIuLmNhcGFiaWxpdGllcy5ibG9ja2NoYWluLmV2bS52MWFscGhhLkdhc0NvbmZpZ0gAiAEBQg0KC19nYXNfY29uZmlnIiIKCUdhc0NvbmZpZxIVCglnYXNfbGltaXQYASABKARCAjAAIocDChBXcml0ZVJlcG9ydFJlcGx5EkAKCXR4X3N0YXR1cxgBIAEoDjItLmNhcGFiaWxpdGllcy5ibG9ja2NoYWluLmV2bS52MWFscGhhLlR4U3RhdHVzEnUKInJlY2VpdmVyX2NvbnRyYWN0X2V4ZWN1dGlvbl9zdGF0dXMYAiABKA4yRC5jYXBhYmlsaXRpZXMuYmxvY2tjaGFpbi5ldm0udjFhbHBoYS5SZWNlaXZlckNvbnRyYWN0RXhlY3V0aW9uU3RhdHVzSACIAQESFAoHdHhfaGFzaBgDIAEoDEgBiAEBEi8KD3RyYW5zYWN0aW9uX2ZlZRgEIAEoCzIRLnZhbHVlcy52MS5CaWdJbnRIAogBARIaCg1lcnJvcl9tZXNzYWdlGAUgASgJSAOIAQFCJQojX3JlY2VpdmVyX2NvbnRyYWN0X2V4ZWN1dGlvbl9zdGF0dXNCCgoIX3R4X2hhc2hCEgoQX3RyYW5zYWN0aW9uX2ZlZUIQCg5fZXJyb3JfbWVzc2FnZSppCg9Db25maWRlbmNlTGV2ZWwSGQoVQ09ORklERU5DRV9MRVZFTF9TQUZFEAASGwoXQ09ORklERU5DRV9MRVZFTF9MQVRFU1QQARIeChpDT05GSURFTkNFX0xFVkVMX0ZJTkFMSVpFRBACKoIBCh9SZWNlaXZlckNvbnRyYWN0RXhlY3V0aW9uU3RhdHVzEi4KKlJFQ0VJVkVSX0NPTlRSQUNUX0VYRUNVVElPTl9TVEFUVVNfU1VDQ0VTUxAAEi8KK1JFQ0VJVkVSX0NPTlRSQUNUX0VYRUNVVElPTl9TVEFUVVNfUkVWRVJURUQQASpOCghUeFN0YXR1cxITCg9UWF9TVEFUVVNfRkFUQUwQABIWChJUWF9TVEFUVVNfUkVWRVJURUQQARIVChFUWF9TVEFUVVNfU1VDQ0VTUxACMssRCgZDbGllbnQSgAEKDENhbGxDb250cmFjdBI4LmNhcGFiaWxpdGllcy5ibG9ja2NoYWluLmV2bS52MWFscGhhLkNhbGxDb250cmFjdFJlcXVlc3QaNi5jYXBhYmlsaXRpZXMuYmxvY2tjaGFpbi5ldm0udjFhbHBoYS5DYWxsQ29udHJhY3RSZXBseRJ6CgpGaWx0ZXJMb2dzEjYuY2FwYWJpbGl0aWVzLmJsb2NrY2hhaW4uZXZtLnYxYWxwaGEuRmlsdGVyTG9nc1JlcXVlc3QaNC5jYXBhYmlsaXRpZXMuYmxvY2tjaGFpbi5ldm0udjFhbHBoYS5GaWx0ZXJMb2dzUmVwbHkSdwoJQmFsYW5jZUF0EjUuY2FwYWJpbGl0aWVzLmJsb2NrY2hhaW4uZXZtLnYxYWxwaGEuQmFsYW5jZUF0UmVxdWVzdBozLmNhcGFiaWxpdGllcy5ibG9ja2NoYWluLmV2bS52MWFscGhhLkJhbGFuY2VBdFJlcGx5En0KC0VzdGltYXRlR2FzEjcuY2FwYWJpbGl0aWVzLmJsb2NrY2hhaW4uZXZtLnYxYWxwaGEuRXN0aW1hdGVHYXNSZXF1ZXN0GjUuY2FwYWJpbGl0aWVzLmJsb2NrY2hhaW4uZXZtLnYxYWxwaGEuRXN0aW1hdGVHYXNSZXBseRKYAQoUR2V0VHJhbnNhY3Rpb25CeUhhc2gSQC5jYXBhYmlsaXRpZXMuYmxvY2tjaGFpbi5ldm0udjFhbHBoYS5HZXRUcmFuc2FjdGlvbkJ5SGFzaFJlcXVlc3QaPi5jYXBhYmlsaXRpZXMuYmxvY2tjaGFpbi5ldm0udjFhbHBoYS5HZXRUcmFuc2FjdGlvbkJ5SGFzaFJlcGx5EpsBChVHZXRUcmFuc2FjdGlvblJlY2VpcHQSQS5jYXBhYmlsaXRpZXMuYmxvY2tjaGFpbi5ldm0udjFhbHBoYS5HZXRUcmFuc2FjdGlvblJlY2VpcHRSZXF1ZXN0Gj8uY2FwYWJpbGl0aWVzLmJsb2NrY2hhaW4uZXZtLnYxYWxwaGEuR2V0VHJhbnNhY3Rpb25SZWNlaXB0UmVwbHkShgEKDkhlYWRlckJ5TnVtYmVyEjouY2FwYWJpbGl0aWVzLmJsb2NrY2hhaW4uZXZtLnYxYWxwaGEuSGVhZGVyQnlOdW1iZXJSZXF1ZXN0GjguY2FwYWJpbGl0aWVzLmJsb2NrY2hhaW4uZXZtLnYxYWxwaGEuSGVhZGVyQnlOdW1iZXJSZXBseRJ2CgpMb2dUcmlnZ2VyEjwuY2FwYWJpbGl0aWVzLmJsb2NrY2hhaW4uZXZtLnYxYWxwaGEuRmlsdGVyTG9nVHJpZ2dlclJlcXVlc3QaKC5jYXBhYmlsaXRpZXMuYmxvY2tjaGFpbi5ldm0udjFhbHBoYS5Mb2cwARJ9CgtXcml0ZVJlcG9ydBI3LmNhcGFiaWxpdGllcy5ibG9ja2NoYWluLmV2bS52MWFscGhhLldyaXRlUmVwb3J0UmVxdWVzdBo1LmNhcGFiaWxpdGllcy5ibG9ja2NoYWluLmV2bS52MWFscGhhLldyaXRlUmVwb3J0UmVwbHkakAiCtRiLCAgBEglldm1AMS4wLjAa+wcKDUNoYWluU2VsZWN0b3IS6QcS5gcKJAoXYXBlY2hhaW4tdGVzdG5ldC1jdXJ0aXMQwcO0+I3EkrKJAQoXCgthcmMtdGVzdG5ldBDnxoye19fQjSoKHQoRYXZhbGFuY2hlLW1haW5uZXQQ1eeKwOHVmKRZCiMKFmF2YWxhbmNoZS10ZXN0bmV0LWZ1amkQm/n8kKLjqPjMAQooChtiaW5hbmNlX3NtYXJ0X2NoYWluLW1haW5uZXQQz/eU8djtlbidAQooChtiaW5hbmNlX3NtYXJ0X2NoYWluLXRlc3RuZXQQ+62+nICu5Iq4AQocChBldGhlcmV1bS1tYWlubmV0EJX28eTPsqbCRQonChtldGhlcmV1bS1tYWlubmV0LWFyYml0cnVtLTEQxOiNzY6boddECiQKF2V0aGVyZXVtLW1haW5uZXQtYmFzZS0xEIL/q6L+uZDT3QEKJwobZXRoZXJldW0tbWFpbm5ldC1vcHRpbWlzbS0xELiVj8P3/tDpMwopCh1ldGhlcmV1bS1tYWlubmV0LXdvcmxkY2hhaW4tMRCH77q3xbbCuBwKJQoZZXRoZXJldW0tbWFpbm5ldC16a3N5bmMtMRCU7pfZ7bSx1xUKJQoYZXRoZXJldW0tdGVzdG5ldC1zZXBvbGlhENm15M78ye6g3gEKLwojZXRoZXJldW0tdGVzdG5ldC1zZXBvbGlhLWFyYml0cnVtLTEQ6s7u/+q2hKMwCiwKH2V0aGVyZXVtLXRlc3RuZXQtc2Vwb2xpYS1iYXNlLTEQuMq57/aQrsiPAQosCiBldGhlcmV1bS10ZXN0bmV0LXNlcG9saWEtbGluZWEtMRDrqtT+gvnmr08KLwojZXRoZXJldW0tdGVzdG5ldC1zZXBvbGlhLW9wdGltaXNtLTEQn4bFob7Yw8BICjEKJWV0aGVyZXVtLXRlc3RuZXQtc2Vwb2xpYS13b3JsZGNoYWluLTEQut/gxcep88VJCi0KIWV0aGVyZXVtLXRlc3RuZXQtc2Vwb2xpYS16a3N5bmMtMRC3wfz98sSA3l8KHwoTaHlwZXJsaXF1aWQtdGVzdG5ldBCIzt3Il+DJvTsKIAoTaW5rLXRlc3RuZXQtc2Vwb2xpYRDo9Kel8+aWwIcBChkKDWpvdmF5LXRlc3RuZXQQ5M+KhN6y3o4NChoKDnBsYXNtYS10ZXN0bmV0ENWbv6XDtJmHNwobCg9wb2x5Z29uLW1haW5uZXQQsavk8JqShp04CiEKFHBvbHlnb24tdGVzdG5ldC1hbW95EM2P1t/xx5D64QEKJAoYcHJpdmF0ZS10ZXN0bmV0LWFuZGVzaXRlENSmmKXBj9z8X0LlAQonY29tLmNhcGFiaWxpdGllcy5ibG9ja2NoYWluLmV2bS52MWFscGhhQgtDbGllbnRQcm90b1ABogIDQ0JFqgIjQ2FwYWJpbGl0aWVzLkJsb2NrY2hhaW4uRXZtLlYxYWxwaGHKAiNDYXBhYmlsaXRpZXNcQmxvY2tjaGFpblxFdm1cVjFhbHBoYeICL0NhcGFiaWxpdGllc1xCbG9ja2NoYWluXEV2bVxWMWFscGhhXEdQQk1ldGFkYXRh6gImQ2FwYWJpbGl0aWVzOjpCbG9ja2NoYWluOjpFdm06OlYxYWxwaGFiBnByb3RvMw", [file_sdk_v1alpha_sdk, file_tools_generator_v1alpha_cre_metadata, file_values_v1_values]);
+var FilterLogTriggerRequestSchema = /* @__PURE__ */ messageDesc(file_capabilities_blockchain_evm_v1alpha_client, 1);
+var CallContractRequestSchema = /* @__PURE__ */ messageDesc(file_capabilities_blockchain_evm_v1alpha_client, 2);
+var CallContractReplySchema = /* @__PURE__ */ messageDesc(file_capabilities_blockchain_evm_v1alpha_client, 3);
+var FilterLogsRequestSchema = /* @__PURE__ */ messageDesc(file_capabilities_blockchain_evm_v1alpha_client, 4);
+var FilterLogsReplySchema = /* @__PURE__ */ messageDesc(file_capabilities_blockchain_evm_v1alpha_client, 5);
+var LogSchema = /* @__PURE__ */ messageDesc(file_capabilities_blockchain_evm_v1alpha_client, 6);
+var BalanceAtRequestSchema = /* @__PURE__ */ messageDesc(file_capabilities_blockchain_evm_v1alpha_client, 10);
+var BalanceAtReplySchema = /* @__PURE__ */ messageDesc(file_capabilities_blockchain_evm_v1alpha_client, 11);
+var EstimateGasRequestSchema = /* @__PURE__ */ messageDesc(file_capabilities_blockchain_evm_v1alpha_client, 12);
+var EstimateGasReplySchema = /* @__PURE__ */ messageDesc(file_capabilities_blockchain_evm_v1alpha_client, 13);
+var GetTransactionByHashRequestSchema = /* @__PURE__ */ messageDesc(file_capabilities_blockchain_evm_v1alpha_client, 14);
+var GetTransactionByHashReplySchema = /* @__PURE__ */ messageDesc(file_capabilities_blockchain_evm_v1alpha_client, 15);
+var GetTransactionReceiptRequestSchema = /* @__PURE__ */ messageDesc(file_capabilities_blockchain_evm_v1alpha_client, 17);
+var GetTransactionReceiptReplySchema = /* @__PURE__ */ messageDesc(file_capabilities_blockchain_evm_v1alpha_client, 18);
+var HeaderByNumberRequestSchema = /* @__PURE__ */ messageDesc(file_capabilities_blockchain_evm_v1alpha_client, 20);
+var HeaderByNumberReplySchema = /* @__PURE__ */ messageDesc(file_capabilities_blockchain_evm_v1alpha_client, 21);
+var WriteReportRequestSchema = /* @__PURE__ */ messageDesc(file_capabilities_blockchain_evm_v1alpha_client, 23);
+var GasConfigSchema = /* @__PURE__ */ messageDesc(file_capabilities_blockchain_evm_v1alpha_client, 24);
+var WriteReportReplySchema = /* @__PURE__ */ messageDesc(file_capabilities_blockchain_evm_v1alpha_client, 25);
 var ConfidenceLevel;
 (function(ConfidenceLevel2) {
   ConfidenceLevel2[ConfidenceLevel2["SAFE"] = 0] = "SAFE";
@@ -3838,9 +3858,287 @@ class Report {
     return this.report;
   }
 }
-var file_capabilities_networking_http_v1alpha_client = /* @__PURE__ */ fileDesc("CjFjYXBhYmlsaXRpZXMvbmV0d29ya2luZy9odHRwL3YxYWxwaGEvY2xpZW50LnByb3RvEiRjYXBhYmlsaXRpZXMubmV0d29ya2luZy5odHRwLnYxYWxwaGEiSgoNQ2FjaGVTZXR0aW5ncxINCgVzdG9yZRgBIAEoCBIqCgdtYXhfYWdlGAIgASgLMhkuZ29vZ2xlLnByb3RvYnVmLkR1cmF0aW9uIqoCCgdSZXF1ZXN0EgsKA3VybBgBIAEoCRIOCgZtZXRob2QYAiABKAkSSwoHaGVhZGVycxgDIAMoCzI6LmNhcGFiaWxpdGllcy5uZXR3b3JraW5nLmh0dHAudjFhbHBoYS5SZXF1ZXN0LkhlYWRlcnNFbnRyeRIMCgRib2R5GAQgASgMEioKB3RpbWVvdXQYBSABKAsyGS5nb29nbGUucHJvdG9idWYuRHVyYXRpb24SSwoOY2FjaGVfc2V0dGluZ3MYBiABKAsyMy5jYXBhYmlsaXRpZXMubmV0d29ya2luZy5odHRwLnYxYWxwaGEuQ2FjaGVTZXR0aW5ncxouCgxIZWFkZXJzRW50cnkSCwoDa2V5GAEgASgJEg0KBXZhbHVlGAIgASgJOgI4ASKrAQoIUmVzcG9uc2USEwoLc3RhdHVzX2NvZGUYASABKA0STAoHaGVhZGVycxgCIAMoCzI7LmNhcGFiaWxpdGllcy5uZXR3b3JraW5nLmh0dHAudjFhbHBoYS5SZXNwb25zZS5IZWFkZXJzRW50cnkSDAoEYm9keRgDIAEoDBouCgxIZWFkZXJzRW50cnkSCwoDa2V5GAEgASgJEg0KBXZhbHVlGAIgASgJOgI4ATKYAQoGQ2xpZW50EmwKC1NlbmRSZXF1ZXN0Ei0uY2FwYWJpbGl0aWVzLm5ldHdvcmtpbmcuaHR0cC52MWFscGhhLlJlcXVlc3QaLi5jYXBhYmlsaXRpZXMubmV0d29ya2luZy5odHRwLnYxYWxwaGEuUmVzcG9uc2UaIIK1GBwIAhIYaHR0cC1hY3Rpb25zQDEuMC4wLWFscGhhQuoBCihjb20uY2FwYWJpbGl0aWVzLm5ldHdvcmtpbmcuaHR0cC52MWFscGhhQgtDbGllbnRQcm90b1ABogIDQ05IqgIkQ2FwYWJpbGl0aWVzLk5ldHdvcmtpbmcuSHR0cC5WMWFscGhhygIkQ2FwYWJpbGl0aWVzXE5ldHdvcmtpbmdcSHR0cFxWMWFscGhh4gIwQ2FwYWJpbGl0aWVzXE5ldHdvcmtpbmdcSHR0cFxWMWFscGhhXEdQQk1ldGFkYXRh6gInQ2FwYWJpbGl0aWVzOjpOZXR3b3JraW5nOjpIdHRwOjpWMWFscGhhYgZwcm90bzM", [file_google_protobuf_duration, file_tools_generator_v1alpha_cre_metadata]);
-var RequestSchema = /* @__PURE__ */ messageDesc(file_capabilities_networking_http_v1alpha_client, 1);
-var ResponseSchema = /* @__PURE__ */ messageDesc(file_capabilities_networking_http_v1alpha_client, 2);
+var hexToBytes = (hexStr) => {
+  if (!hexStr.startsWith("0x")) {
+    throw new Error(`Invalid hex string: ${hexStr}`);
+  }
+  if (!/^0x[0-9a-fA-F]*$/.test(hexStr)) {
+    throw new Error(`Invalid hex string: ${hexStr}`);
+  }
+  if ((hexStr.length - 2) % 2 !== 0) {
+    throw new Error(`Hex string must have an even number of characters: ${hexStr}`);
+  }
+  const hex = hexStr.slice(2);
+  const bytes = new Uint8Array(hex.length / 2);
+  for (let i = 0;i < hex.length; i += 2) {
+    bytes[i / 2] = Number.parseInt(hex.slice(i, i + 2), 16);
+  }
+  return bytes;
+};
+function createWriteCreReportRequest(input) {
+  return {
+    receiver: hexToBytes(input.receiver),
+    report: input.report,
+    gasConfig: input.gasConfig !== undefined ? fromJson(GasConfigSchema, input.gasConfig) : undefined,
+    $report: true
+  };
+}
+function x_generatedCodeOnly_unwrap_WriteCreReportRequest(input) {
+  return create(WriteReportRequestSchema, {
+    receiver: input.receiver,
+    report: input.report !== undefined ? input.report.x_generatedCodeOnly_unwrap() : undefined,
+    gasConfig: input.gasConfig
+  });
+}
+
+class ClientCapability {
+  ChainSelector;
+  static CAPABILITY_ID = "evm@1.0.0";
+  static CAPABILITY_NAME = "evm";
+  static CAPABILITY_VERSION = "1.0.0";
+  static SUPPORTED_CHAIN_SELECTORS = {
+    "apechain-testnet-curtis": 9900119385908781505n,
+    "arc-testnet": 3034092155422581607n,
+    "avalanche-mainnet": 6433500567565415381n,
+    "avalanche-testnet-fuji": 14767482510784806043n,
+    "binance_smart_chain-mainnet": 11344663589394136015n,
+    "binance_smart_chain-testnet": 13264668187771770619n,
+    "ethereum-mainnet": 5009297550715157269n,
+    "ethereum-mainnet-arbitrum-1": 4949039107694359620n,
+    "ethereum-mainnet-base-1": 15971525489660198786n,
+    "ethereum-mainnet-optimism-1": 3734403246176062136n,
+    "ethereum-mainnet-worldchain-1": 2049429975587534727n,
+    "ethereum-mainnet-zksync-1": 1562403441176082196n,
+    "ethereum-testnet-sepolia": 16015286601757825753n,
+    "ethereum-testnet-sepolia-arbitrum-1": 3478487238524512106n,
+    "ethereum-testnet-sepolia-base-1": 10344971235874465080n,
+    "ethereum-testnet-sepolia-linea-1": 5719461335882077547n,
+    "ethereum-testnet-sepolia-optimism-1": 5224473277236331295n,
+    "ethereum-testnet-sepolia-worldchain-1": 5299555114858065850n,
+    "ethereum-testnet-sepolia-zksync-1": 6898391096552792247n,
+    "hyperliquid-testnet": 4286062357653186312n,
+    "ink-testnet-sepolia": 9763904284804119144n,
+    "jovay-testnet": 945045181441419236n,
+    "plasma-testnet": 3967220077692964309n,
+    "polygon-mainnet": 4051577828743386545n,
+    "polygon-testnet-amoy": 16281711391670634445n,
+    "private-testnet-andesite": 6915682381028791124n
+  };
+  constructor(ChainSelector) {
+    this.ChainSelector = ChainSelector;
+  }
+  callContract(runtime, input) {
+    let payload;
+    if (input.$typeName) {
+      payload = input;
+    } else {
+      payload = fromJson(CallContractRequestSchema, input);
+    }
+    const capabilityId = `${ClientCapability.CAPABILITY_NAME}:ChainSelector:${this.ChainSelector}@${ClientCapability.CAPABILITY_VERSION}`;
+    const capabilityResponse = runtime.callCapability({
+      capabilityId,
+      method: "CallContract",
+      payload,
+      inputSchema: CallContractRequestSchema,
+      outputSchema: CallContractReplySchema
+    });
+    return {
+      result: () => {
+        const result = capabilityResponse.result();
+        return result;
+      }
+    };
+  }
+  filterLogs(runtime, input) {
+    let payload;
+    if (input.$typeName) {
+      payload = input;
+    } else {
+      payload = fromJson(FilterLogsRequestSchema, input);
+    }
+    const capabilityId = `${ClientCapability.CAPABILITY_NAME}:ChainSelector:${this.ChainSelector}@${ClientCapability.CAPABILITY_VERSION}`;
+    const capabilityResponse = runtime.callCapability({
+      capabilityId,
+      method: "FilterLogs",
+      payload,
+      inputSchema: FilterLogsRequestSchema,
+      outputSchema: FilterLogsReplySchema
+    });
+    return {
+      result: () => {
+        const result = capabilityResponse.result();
+        return result;
+      }
+    };
+  }
+  balanceAt(runtime, input) {
+    let payload;
+    if (input.$typeName) {
+      payload = input;
+    } else {
+      payload = fromJson(BalanceAtRequestSchema, input);
+    }
+    const capabilityId = `${ClientCapability.CAPABILITY_NAME}:ChainSelector:${this.ChainSelector}@${ClientCapability.CAPABILITY_VERSION}`;
+    const capabilityResponse = runtime.callCapability({
+      capabilityId,
+      method: "BalanceAt",
+      payload,
+      inputSchema: BalanceAtRequestSchema,
+      outputSchema: BalanceAtReplySchema
+    });
+    return {
+      result: () => {
+        const result = capabilityResponse.result();
+        return result;
+      }
+    };
+  }
+  estimateGas(runtime, input) {
+    let payload;
+    if (input.$typeName) {
+      payload = input;
+    } else {
+      payload = fromJson(EstimateGasRequestSchema, input);
+    }
+    const capabilityId = `${ClientCapability.CAPABILITY_NAME}:ChainSelector:${this.ChainSelector}@${ClientCapability.CAPABILITY_VERSION}`;
+    const capabilityResponse = runtime.callCapability({
+      capabilityId,
+      method: "EstimateGas",
+      payload,
+      inputSchema: EstimateGasRequestSchema,
+      outputSchema: EstimateGasReplySchema
+    });
+    return {
+      result: () => {
+        const result = capabilityResponse.result();
+        return result;
+      }
+    };
+  }
+  getTransactionByHash(runtime, input) {
+    let payload;
+    if (input.$typeName) {
+      payload = input;
+    } else {
+      payload = fromJson(GetTransactionByHashRequestSchema, input);
+    }
+    const capabilityId = `${ClientCapability.CAPABILITY_NAME}:ChainSelector:${this.ChainSelector}@${ClientCapability.CAPABILITY_VERSION}`;
+    const capabilityResponse = runtime.callCapability({
+      capabilityId,
+      method: "GetTransactionByHash",
+      payload,
+      inputSchema: GetTransactionByHashRequestSchema,
+      outputSchema: GetTransactionByHashReplySchema
+    });
+    return {
+      result: () => {
+        const result = capabilityResponse.result();
+        return result;
+      }
+    };
+  }
+  getTransactionReceipt(runtime, input) {
+    let payload;
+    if (input.$typeName) {
+      payload = input;
+    } else {
+      payload = fromJson(GetTransactionReceiptRequestSchema, input);
+    }
+    const capabilityId = `${ClientCapability.CAPABILITY_NAME}:ChainSelector:${this.ChainSelector}@${ClientCapability.CAPABILITY_VERSION}`;
+    const capabilityResponse = runtime.callCapability({
+      capabilityId,
+      method: "GetTransactionReceipt",
+      payload,
+      inputSchema: GetTransactionReceiptRequestSchema,
+      outputSchema: GetTransactionReceiptReplySchema
+    });
+    return {
+      result: () => {
+        const result = capabilityResponse.result();
+        return result;
+      }
+    };
+  }
+  headerByNumber(runtime, input) {
+    let payload;
+    if (input.$typeName) {
+      payload = input;
+    } else {
+      payload = fromJson(HeaderByNumberRequestSchema, input);
+    }
+    const capabilityId = `${ClientCapability.CAPABILITY_NAME}:ChainSelector:${this.ChainSelector}@${ClientCapability.CAPABILITY_VERSION}`;
+    const capabilityResponse = runtime.callCapability({
+      capabilityId,
+      method: "HeaderByNumber",
+      payload,
+      inputSchema: HeaderByNumberRequestSchema,
+      outputSchema: HeaderByNumberReplySchema
+    });
+    return {
+      result: () => {
+        const result = capabilityResponse.result();
+        return result;
+      }
+    };
+  }
+  logTrigger(config) {
+    const capabilityId = `${ClientCapability.CAPABILITY_NAME}:ChainSelector:${this.ChainSelector}@${ClientCapability.CAPABILITY_VERSION}`;
+    return new ClientLogTrigger(config, capabilityId, "LogTrigger", this.ChainSelector);
+  }
+  writeReport(runtime, input) {
+    let payload;
+    if (input.$report) {
+      payload = x_generatedCodeOnly_unwrap_WriteCreReportRequest(input);
+    } else {
+      payload = x_generatedCodeOnly_unwrap_WriteCreReportRequest(createWriteCreReportRequest(input));
+    }
+    const capabilityId = `${ClientCapability.CAPABILITY_NAME}:ChainSelector:${this.ChainSelector}@${ClientCapability.CAPABILITY_VERSION}`;
+    const capabilityResponse = runtime.callCapability({
+      capabilityId,
+      method: "WriteReport",
+      payload,
+      inputSchema: WriteReportRequestSchema,
+      outputSchema: WriteReportReplySchema
+    });
+    return {
+      result: () => {
+        const result = capabilityResponse.result();
+        return result;
+      }
+    };
+  }
+}
+
+class ClientLogTrigger {
+  _capabilityId;
+  _method;
+  ChainSelector;
+  config;
+  constructor(config, _capabilityId, _method, ChainSelector) {
+    this._capabilityId = _capabilityId;
+    this._method = _method;
+    this.ChainSelector = ChainSelector;
+    this.config = config.$typeName ? config : fromJson(FilterLogTriggerRequestSchema, config);
+  }
+  capabilityId() {
+    return this._capabilityId;
+  }
+  method() {
+    return this._method;
+  }
+  outputSchema() {
+    return LogSchema;
+  }
+  configAsAny() {
+    return anyPack(FilterLogTriggerRequestSchema, this.config);
+  }
+  adapt(rawOutput) {
+    return rawOutput;
+  }
+}
+var file_capabilities_networking_confidentialhttp_v1alpha_client = /* @__PURE__ */ fileDesc("Cj1jYXBhYmlsaXRpZXMvbmV0d29ya2luZy9jb25maWRlbnRpYWxodHRwL3YxYWxwaGEvY2xpZW50LnByb3RvEjBjYXBhYmlsaXRpZXMubmV0d29ya2luZy5jb25maWRlbnRpYWxodHRwLnYxYWxwaGEiUAoQU2VjcmV0SWRlbnRpZmllchILCgNrZXkYASABKAkSEQoJbmFtZXNwYWNlGAIgASgJEhIKBW93bmVyGAMgASgJSACIAQFCCAoGX293bmVyIh4KDEhlYWRlclZhbHVlcxIOCgZ2YWx1ZXMYASADKAkivwQKC0hUVFBSZXF1ZXN0EgsKA3VybBgBIAEoCRIOCgZtZXRob2QYAiABKAkSFQoLYm9keV9zdHJpbmcYAyABKAlIABIUCgpib2R5X2J5dGVzGAggASgMSAASZgoNbXVsdGlfaGVhZGVycxgEIAMoCzJPLmNhcGFiaWxpdGllcy5uZXR3b3JraW5nLmNvbmZpZGVudGlhbGh0dHAudjFhbHBoYS5IVFRQUmVxdWVzdC5NdWx0aUhlYWRlcnNFbnRyeRJ3ChZ0ZW1wbGF0ZV9wdWJsaWNfdmFsdWVzGAUgAygLMlcuY2FwYWJpbGl0aWVzLm5ldHdvcmtpbmcuY29uZmlkZW50aWFsaHR0cC52MWFscGhhLkhUVFBSZXF1ZXN0LlRlbXBsYXRlUHVibGljVmFsdWVzRW50cnkSHwoXY3VzdG9tX3Jvb3RfY2FfY2VydF9wZW0YBiABKAwSKgoHdGltZW91dBgHIAEoCzIZLmdvb2dsZS5wcm90b2J1Zi5EdXJhdGlvbhpzChFNdWx0aUhlYWRlcnNFbnRyeRILCgNrZXkYASABKAkSTQoFdmFsdWUYAiABKAsyPi5jYXBhYmlsaXRpZXMubmV0d29ya2luZy5jb25maWRlbnRpYWxodHRwLnYxYWxwaGEuSGVhZGVyVmFsdWVzOgI4ARo7ChlUZW1wbGF0ZVB1YmxpY1ZhbHVlc0VudHJ5EgsKA2tleRgBIAEoCRINCgV2YWx1ZRgCIAEoCToCOAFCBgoEYm9keSKPAgoMSFRUUFJlc3BvbnNlEhMKC3N0YXR1c19jb2RlGAEgASgNEgwKBGJvZHkYAiABKAwSZwoNbXVsdGlfaGVhZGVycxgDIAMoCzJQLmNhcGFiaWxpdGllcy5uZXR3b3JraW5nLmNvbmZpZGVudGlhbGh0dHAudjFhbHBoYS5IVFRQUmVzcG9uc2UuTXVsdGlIZWFkZXJzRW50cnkacwoRTXVsdGlIZWFkZXJzRW50cnkSCwoDa2V5GAEgASgJEk0KBXZhbHVlGAIgASgLMj4uY2FwYWJpbGl0aWVzLm5ldHdvcmtpbmcuY29uZmlkZW50aWFsaHR0cC52MWFscGhhLkhlYWRlclZhbHVlczoCOAEi4AEKF0NvbmZpZGVudGlhbEhUVFBSZXF1ZXN0El0KEXZhdWx0X2Rvbl9zZWNyZXRzGAEgAygLMkIuY2FwYWJpbGl0aWVzLm5ldHdvcmtpbmcuY29uZmlkZW50aWFsaHR0cC52MWFscGhhLlNlY3JldElkZW50aWZpZXISTgoHcmVxdWVzdBgCIAEoCzI9LmNhcGFiaWxpdGllcy5uZXR3b3JraW5nLmNvbmZpZGVudGlhbGh0dHAudjFhbHBoYS5IVFRQUmVxdWVzdBIWCg5lbmNyeXB0X291dHB1dBgDIAEoCDLKAQoGQ2xpZW50EpgBCgtTZW5kUmVxdWVzdBJJLmNhcGFiaWxpdGllcy5uZXR3b3JraW5nLmNvbmZpZGVudGlhbGh0dHAudjFhbHBoYS5Db25maWRlbnRpYWxIVFRQUmVxdWVzdBo+LmNhcGFiaWxpdGllcy5uZXR3b3JraW5nLmNvbmZpZGVudGlhbGh0dHAudjFhbHBoYS5IVFRQUmVzcG9uc2UaJYK1GCEIAhIdY29uZmlkZW50aWFsLWh0dHBAMS4wLjAtYWxwaGFCpgIKNGNvbS5jYXBhYmlsaXRpZXMubmV0d29ya2luZy5jb25maWRlbnRpYWxodHRwLnYxYWxwaGFCC0NsaWVudFByb3RvUAGiAgNDTkOqAjBDYXBhYmlsaXRpZXMuTmV0d29ya2luZy5Db25maWRlbnRpYWxodHRwLlYxYWxwaGHKAjBDYXBhYmlsaXRpZXNcTmV0d29ya2luZ1xDb25maWRlbnRpYWxodHRwXFYxYWxwaGHiAjxDYXBhYmlsaXRpZXNcTmV0d29ya2luZ1xDb25maWRlbnRpYWxodHRwXFYxYWxwaGFcR1BCTWV0YWRhdGHqAjNDYXBhYmlsaXRpZXM6Ok5ldHdvcmtpbmc6OkNvbmZpZGVudGlhbGh0dHA6OlYxYWxwaGFiBnByb3RvMw", [file_google_protobuf_duration, file_tools_generator_v1alpha_cre_metadata]);
+var HTTPResponseSchema = /* @__PURE__ */ messageDesc(file_capabilities_networking_confidentialhttp_v1alpha_client, 3);
+var ConfidentialHTTPRequestSchema = /* @__PURE__ */ messageDesc(file_capabilities_networking_confidentialhttp_v1alpha_client, 4);
 
 class SendRequester {
   runtime;
@@ -3854,7 +4152,65 @@ class SendRequester {
   }
 }
 
-class ClientCapability {
+class ClientCapability2 {
+  static CAPABILITY_ID = "confidential-http@1.0.0-alpha";
+  static CAPABILITY_NAME = "confidential-http";
+  static CAPABILITY_VERSION = "1.0.0-alpha";
+  sendRequest(...args) {
+    if (typeof args[1] === "function") {
+      const [runtime2, fn, consensusAggregation, unwrapOptions] = args;
+      return this.sendRequestSugarHelper(runtime2, fn, consensusAggregation, unwrapOptions);
+    }
+    const [runtime, input] = args;
+    return this.sendRequestCallHelper(runtime, input);
+  }
+  sendRequestCallHelper(runtime, input) {
+    let payload;
+    if (input.$typeName) {
+      payload = input;
+    } else {
+      payload = fromJson(ConfidentialHTTPRequestSchema, input);
+    }
+    const capabilityId = ClientCapability2.CAPABILITY_ID;
+    const capabilityResponse = runtime.callCapability({
+      capabilityId,
+      method: "SendRequest",
+      payload,
+      inputSchema: ConfidentialHTTPRequestSchema,
+      outputSchema: HTTPResponseSchema
+    });
+    return {
+      result: () => {
+        const result = capabilityResponse.result();
+        return result;
+      }
+    };
+  }
+  sendRequestSugarHelper(runtime, fn, consensusAggregation, unwrapOptions) {
+    const wrappedFn = (runtime2, ...args) => {
+      const sendRequester = new SendRequester(runtime2, this);
+      return fn(sendRequester, ...args);
+    };
+    return runtime.runInNodeMode(wrappedFn, consensusAggregation, unwrapOptions);
+  }
+}
+var file_capabilities_networking_http_v1alpha_client = /* @__PURE__ */ fileDesc("CjFjYXBhYmlsaXRpZXMvbmV0d29ya2luZy9odHRwL3YxYWxwaGEvY2xpZW50LnByb3RvEiRjYXBhYmlsaXRpZXMubmV0d29ya2luZy5odHRwLnYxYWxwaGEiSgoNQ2FjaGVTZXR0aW5ncxINCgVzdG9yZRgBIAEoCBIqCgdtYXhfYWdlGAIgASgLMhkuZ29vZ2xlLnByb3RvYnVmLkR1cmF0aW9uIqoCCgdSZXF1ZXN0EgsKA3VybBgBIAEoCRIOCgZtZXRob2QYAiABKAkSSwoHaGVhZGVycxgDIAMoCzI6LmNhcGFiaWxpdGllcy5uZXR3b3JraW5nLmh0dHAudjFhbHBoYS5SZXF1ZXN0LkhlYWRlcnNFbnRyeRIMCgRib2R5GAQgASgMEioKB3RpbWVvdXQYBSABKAsyGS5nb29nbGUucHJvdG9idWYuRHVyYXRpb24SSwoOY2FjaGVfc2V0dGluZ3MYBiABKAsyMy5jYXBhYmlsaXRpZXMubmV0d29ya2luZy5odHRwLnYxYWxwaGEuQ2FjaGVTZXR0aW5ncxouCgxIZWFkZXJzRW50cnkSCwoDa2V5GAEgASgJEg0KBXZhbHVlGAIgASgJOgI4ASKrAQoIUmVzcG9uc2USEwoLc3RhdHVzX2NvZGUYASABKA0STAoHaGVhZGVycxgCIAMoCzI7LmNhcGFiaWxpdGllcy5uZXR3b3JraW5nLmh0dHAudjFhbHBoYS5SZXNwb25zZS5IZWFkZXJzRW50cnkSDAoEYm9keRgDIAEoDBouCgxIZWFkZXJzRW50cnkSCwoDa2V5GAEgASgJEg0KBXZhbHVlGAIgASgJOgI4ATKYAQoGQ2xpZW50EmwKC1NlbmRSZXF1ZXN0Ei0uY2FwYWJpbGl0aWVzLm5ldHdvcmtpbmcuaHR0cC52MWFscGhhLlJlcXVlc3QaLi5jYXBhYmlsaXRpZXMubmV0d29ya2luZy5odHRwLnYxYWxwaGEuUmVzcG9uc2UaIIK1GBwIAhIYaHR0cC1hY3Rpb25zQDEuMC4wLWFscGhhQuoBCihjb20uY2FwYWJpbGl0aWVzLm5ldHdvcmtpbmcuaHR0cC52MWFscGhhQgtDbGllbnRQcm90b1ABogIDQ05IqgIkQ2FwYWJpbGl0aWVzLk5ldHdvcmtpbmcuSHR0cC5WMWFscGhhygIkQ2FwYWJpbGl0aWVzXE5ldHdvcmtpbmdcSHR0cFxWMWFscGhh4gIwQ2FwYWJpbGl0aWVzXE5ldHdvcmtpbmdcSHR0cFxWMWFscGhhXEdQQk1ldGFkYXRh6gInQ2FwYWJpbGl0aWVzOjpOZXR3b3JraW5nOjpIdHRwOjpWMWFscGhhYgZwcm90bzM", [file_google_protobuf_duration, file_tools_generator_v1alpha_cre_metadata]);
+var RequestSchema = /* @__PURE__ */ messageDesc(file_capabilities_networking_http_v1alpha_client, 1);
+var ResponseSchema = /* @__PURE__ */ messageDesc(file_capabilities_networking_http_v1alpha_client, 2);
+
+class SendRequester2 {
+  runtime;
+  client;
+  constructor(runtime, client) {
+    this.runtime = runtime;
+    this.client = client;
+  }
+  sendRequest(input) {
+    return this.client.sendRequest(this.runtime, input);
+  }
+}
+
+class ClientCapability3 {
   static CAPABILITY_ID = "http-actions@1.0.0-alpha";
   static CAPABILITY_NAME = "http-actions";
   static CAPABILITY_VERSION = "1.0.0-alpha";
@@ -3873,7 +4229,7 @@ class ClientCapability {
     } else {
       payload = fromJson(RequestSchema, input);
     }
-    const capabilityId = ClientCapability.CAPABILITY_ID;
+    const capabilityId = ClientCapability3.CAPABILITY_ID;
     const capabilityResponse = runtime.callCapability({
       capabilityId,
       method: "SendRequest",
@@ -3890,17 +4246,56 @@ class ClientCapability {
   }
   sendRequestSugarHelper(runtime, fn, consensusAggregation, unwrapOptions) {
     const wrappedFn = (runtime2, ...args) => {
-      const sendRequester = new SendRequester(runtime2, this);
+      const sendRequester = new SendRequester2(runtime2, this);
       return fn(sendRequester, ...args);
     };
     return runtime.runInNodeMode(wrappedFn, consensusAggregation, unwrapOptions);
   }
 }
+var file_capabilities_networking_http_v1alpha_trigger = /* @__PURE__ */ fileDesc("CjJjYXBhYmlsaXRpZXMvbmV0d29ya2luZy9odHRwL3YxYWxwaGEvdHJpZ2dlci5wcm90bxIkY2FwYWJpbGl0aWVzLm5ldHdvcmtpbmcuaHR0cC52MWFscGhhIlYKBkNvbmZpZxJMCg9hdXRob3JpemVkX2tleXMYASADKAsyMy5jYXBhYmlsaXRpZXMubmV0d29ya2luZy5odHRwLnYxYWxwaGEuQXV0aG9yaXplZEtleSJaCgdQYXlsb2FkEg0KBWlucHV0GAEgASgMEkAKA2tleRgCIAEoCzIzLmNhcGFiaWxpdGllcy5uZXR3b3JraW5nLmh0dHAudjFhbHBoYS5BdXRob3JpemVkS2V5ImAKDUF1dGhvcml6ZWRLZXkSOwoEdHlwZRgBIAEoDjItLmNhcGFiaWxpdGllcy5uZXR3b3JraW5nLmh0dHAudjFhbHBoYS5LZXlUeXBlEhIKCnB1YmxpY19rZXkYAiABKAkqOwoHS2V5VHlwZRIYChRLRVlfVFlQRV9VTlNQRUNJRklFRBAAEhYKEktFWV9UWVBFX0VDRFNBX0VWTRABMpIBCgRIVFRQEmgKB1RyaWdnZXISLC5jYXBhYmlsaXRpZXMubmV0d29ya2luZy5odHRwLnYxYWxwaGEuQ29uZmlnGi0uY2FwYWJpbGl0aWVzLm5ldHdvcmtpbmcuaHR0cC52MWFscGhhLlBheWxvYWQwARoggrUYHAgBEhhodHRwLXRyaWdnZXJAMS4wLjAtYWxwaGFC6wEKKGNvbS5jYXBhYmlsaXRpZXMubmV0d29ya2luZy5odHRwLnYxYWxwaGFCDFRyaWdnZXJQcm90b1ABogIDQ05IqgIkQ2FwYWJpbGl0aWVzLk5ldHdvcmtpbmcuSHR0cC5WMWFscGhhygIkQ2FwYWJpbGl0aWVzXE5ldHdvcmtpbmdcSHR0cFxWMWFscGhh4gIwQ2FwYWJpbGl0aWVzXE5ldHdvcmtpbmdcSHR0cFxWMWFscGhhXEdQQk1ldGFkYXRh6gInQ2FwYWJpbGl0aWVzOjpOZXR3b3JraW5nOjpIdHRwOjpWMWFscGhhYgZwcm90bzM", [file_tools_generator_v1alpha_cre_metadata]);
+var ConfigSchema = /* @__PURE__ */ messageDesc(file_capabilities_networking_http_v1alpha_trigger, 0);
+var PayloadSchema = /* @__PURE__ */ messageDesc(file_capabilities_networking_http_v1alpha_trigger, 1);
 var KeyType;
 (function(KeyType2) {
   KeyType2[KeyType2["UNSPECIFIED"] = 0] = "UNSPECIFIED";
   KeyType2[KeyType2["ECDSA_EVM"] = 1] = "ECDSA_EVM";
 })(KeyType || (KeyType = {}));
+
+class HTTPCapability {
+  static CAPABILITY_ID = "http-trigger@1.0.0-alpha";
+  static CAPABILITY_NAME = "http-trigger";
+  static CAPABILITY_VERSION = "1.0.0-alpha";
+  trigger(config) {
+    const capabilityId = HTTPCapability.CAPABILITY_ID;
+    return new HTTPTrigger(config, capabilityId, "Trigger");
+  }
+}
+
+class HTTPTrigger {
+  _capabilityId;
+  _method;
+  config;
+  constructor(config, _capabilityId, _method) {
+    this._capabilityId = _capabilityId;
+    this._method = _method;
+    this.config = config.$typeName ? config : fromJson(ConfigSchema, config);
+  }
+  capabilityId() {
+    return this._capabilityId;
+  }
+  method() {
+    return this._method;
+  }
+  outputSchema() {
+    return PayloadSchema;
+  }
+  configAsAny() {
+    return anyPack(ConfigSchema, this.config);
+  }
+  adapt(rawOutput) {
+    return rawOutput;
+  }
+}
 var file_capabilities_scheduler_cron_v1_trigger = /* @__PURE__ */ fileDesc("CixjYXBhYmlsaXRpZXMvc2NoZWR1bGVyL2Nyb24vdjEvdHJpZ2dlci5wcm90bxIeY2FwYWJpbGl0aWVzLnNjaGVkdWxlci5jcm9uLnYxIhoKBkNvbmZpZxIQCghzY2hlZHVsZRgBIAEoCSJHCgdQYXlsb2FkEjwKGHNjaGVkdWxlZF9leGVjdXRpb25fdGltZRgBIAEoCzIaLmdvb2dsZS5wcm90b2J1Zi5UaW1lc3RhbXAiNQoNTGVnYWN5UGF5bG9hZBIgChhzY2hlZHVsZWRfZXhlY3V0aW9uX3RpbWUYASABKAk6AhgBMvUBCgRDcm9uElwKB1RyaWdnZXISJi5jYXBhYmlsaXRpZXMuc2NoZWR1bGVyLmNyb24udjEuQ29uZmlnGicuY2FwYWJpbGl0aWVzLnNjaGVkdWxlci5jcm9uLnYxLlBheWxvYWQwARJzCg1MZWdhY3lUcmlnZ2VyEiYuY2FwYWJpbGl0aWVzLnNjaGVkdWxlci5jcm9uLnYxLkNvbmZpZxotLmNhcGFiaWxpdGllcy5zY2hlZHVsZXIuY3Jvbi52MS5MZWdhY3lQYXlsb2FkIgmIAgGKtRgCCAEwARoagrUYFggBEhJjcm9uLXRyaWdnZXJAMS4wLjBCzQEKImNvbS5jYXBhYmlsaXRpZXMuc2NoZWR1bGVyLmNyb24udjFCDFRyaWdnZXJQcm90b1ABogIDQ1NDqgIeQ2FwYWJpbGl0aWVzLlNjaGVkdWxlci5Dcm9uLlYxygIeQ2FwYWJpbGl0aWVzXFNjaGVkdWxlclxDcm9uXFYx4gIqQ2FwYWJpbGl0aWVzXFNjaGVkdWxlclxDcm9uXFYxXEdQQk1ldGFkYXRh6gIhQ2FwYWJpbGl0aWVzOjpTY2hlZHVsZXI6OkNyb246OlYxYgZwcm90bzM", [file_google_protobuf_timestamp, file_tools_generator_v1alpha_cre_metadata]);
 var ConfigSchema2 = /* @__PURE__ */ messageDesc(file_capabilities_scheduler_cron_v1_trigger, 0);
 var PayloadSchema2 = /* @__PURE__ */ messageDesc(file_capabilities_scheduler_cron_v1_trigger, 1);
@@ -5261,6 +5656,16 @@ var handler = (trigger, fn) => ({
   fn
 });
 prepareRuntime();
+var cre = {
+  capabilities: {
+    CronCapability,
+    HTTPCapability,
+    ConfidentialHTTPClient: ClientCapability2,
+    HTTPClient: ClientCapability3,
+    EVMClient: ClientCapability
+  },
+  handler
+};
 var LAST_FINALIZED_BLOCK_NUMBER = {
   absVal: Buffer.from([3]).toString("base64"),
   sign: "-1"
@@ -5268,6 +5673,11 @@ var LAST_FINALIZED_BLOCK_NUMBER = {
 var LATEST_BLOCK_NUMBER = {
   absVal: Buffer.from([2]).toString("base64"),
   sign: "-1"
+};
+var decodeJson = (input) => {
+  const decoder = new TextDecoder("utf-8");
+  const textBody = decoder.decode(input);
+  return JSON.parse(textBody);
 };
 function sendReport(runtime, report, fn) {
   const rawReport = report.x_generatedCodeOnly_unwrap();
@@ -5279,8 +5689,8 @@ function sendRequesterSendReport(report, fn) {
   const request = fn(rawReport);
   return this.sendRequest(request);
 }
-ClientCapability.prototype.sendReport = sendReport;
-SendRequester.prototype.sendReport = sendRequesterSendReport;
+ClientCapability3.prototype.sendReport = sendReport;
+SendRequester2.prototype.sendReport = sendRequesterSendReport;
 var network = {
   chainId: "1",
   chainSelector: {
@@ -13836,36 +14246,1610 @@ var fetchGasPrices = (sendRequester, config) => {
     lastBlock: parseFloat(gasOracleData.result.LastBlock)
   };
 };
-var onCronTrigger = async (runtime2) => {
-  const httpClient = new ClientCapability;
-  const requestFn = httpClient.sendRequest(runtime2, fetchGasPrices, ConsensusAggregationByFields({
-    safeGasPrice: () => median(),
-    proposeGasPrice: () => median(),
-    fastGasPrice: () => median(),
-    baseFee: () => median(),
-    lastBlock: () => median()
+var RPC_ENDPOINTS = {
+  1: "https://eth-mainnet.alchemyapi.io/v2/demo",
+  5: "https://eth-goerli.alchemyapi.io/v2/demo",
+  11155111: "https://eth-sepolia.alchemyapi.io/v2/demo",
+  56: "https://bsc-dataseed.binance.org:443",
+  97: "https://data-seed-prebsc.binance.org:8545",
+  137: "https://polygon-rpc.com",
+  80001: "https://rpc-mumbai.maticvigil.com",
+  42161: "https://arb1.arbitrum.io/rpc",
+  421613: "https://goerli-rollup.arbitrum.io/rpc",
+  10: "https://mainnet.optimism.io",
+  420: "https://goerli.optimism.io",
+  8453: "https://mainnet.base.org",
+  84532: "https://sepolia.base.org"
+};
+var ERC20_SELECTORS = {
+  totalSupply: "0x18160ddd",
+  balanceOf: "0x70a08231",
+  transfer: "0xa9059cbb",
+  transferFrom: "0x23b872dd",
+  approve: "0x095ea7b3",
+  allowance: "0xdd62ed3e",
+  name: "0x06fdde03",
+  symbol: "0x95d89b41",
+  decimals: "0x313ce567"
+};
+var ERC721_SELECTORS = {
+  ownerOf: "0x6352211e",
+  balanceOf: "0x70a08231",
+  safeTransferFrom: "0x42842e0e",
+  setApprovalForAll: "0xa22cb465",
+  isApprovedForAll: "0xe985e9c5",
+  approve: "0x095ea7b3",
+  getApproved: "0x081812fc"
+};
+var ERC1155_SELECTORS = {
+  balanceOf: "0x00fdd58e",
+  balanceOfBatch: "0x4e1273f4",
+  setApprovalForAll: "0xa22cb465",
+  isApprovedForAll: "0xe985e9c5",
+  safeTransferFrom: "0xf242432a",
+  safeBatchTransferFrom: "0x2eb2c2d6"
+};
+
+class RPCClient {
+  rpcUrl;
+  chainId;
+  timeout;
+  constructor(config) {
+    this.rpcUrl = config.rpcUrl;
+    this.chainId = config.chainId;
+    this.timeout = config.timeout || 30000;
+  }
+  async call(method, params) {
+    try {
+      const controller = new AbortController;
+      const timeoutId = setTimeout(() => controller.abort(), this.timeout);
+      const response = await fetch(this.rpcUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          jsonrpc: "2.0",
+          method,
+          params,
+          id: Date.now()
+        }),
+        signal: controller.signal
+      });
+      clearTimeout(timeoutId);
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+      const data = await response.json();
+      if (data.error) {
+        throw new Error(data.error.message);
+      }
+      return data.result;
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      throw new Error(`RPC call failed: ${message}`);
+    }
+  }
+  async getBytecode(address) {
+    try {
+      const bytecode = await this.call("eth_getCode", [address.toLowerCase(), "latest"]);
+      return {
+        bytecode: bytecode || "0x",
+        bytecodeLength: (bytecode?.length || 0) / 2,
+        isContract: bytecode !== "0x" && bytecode !== "",
+        hasCode: bytecode !== "0x" && bytecode !== ""
+      };
+    } catch (error) {
+      throw new Error(`Failed to get bytecode: ${error}`);
+    }
+  }
+  async callContractMethod(contractAddress, data) {
+    try {
+      return await this.call("eth_call", [
+        {
+          to: contractAddress.toLowerCase(),
+          data
+        },
+        "latest"
+      ]);
+    } catch (error) {
+      throw new Error(`Failed to call contract: ${error}`);
+    }
+  }
+  async getERC20Name(tokenAddress) {
+    try {
+      const result = await this.callContractMethod(tokenAddress, ERC20_SELECTORS.name);
+      if (result === "0x")
+        return null;
+      const hexString = result.substring(2);
+      const bytes = Buffer.from(hexString, "hex");
+      const offset = parseInt(hexString.substring(0, 64), 16) / 2;
+      const length = parseInt(hexString.substring(64, 128), 16);
+      return bytes.toString("utf8", offset, offset + length).trim() || null;
+    } catch {
+      return null;
+    }
+  }
+  async getERC20Symbol(tokenAddress) {
+    try {
+      const result = await this.callContractMethod(tokenAddress, ERC20_SELECTORS.symbol);
+      if (result === "0x")
+        return null;
+      const hexString = result.substring(2);
+      const bytes = Buffer.from(hexString, "hex");
+      const offset = parseInt(hexString.substring(0, 64), 16) / 2;
+      const length = parseInt(hexString.substring(64, 128), 16);
+      return bytes.toString("utf8", offset, offset + length).trim() || null;
+    } catch {
+      return null;
+    }
+  }
+  async getERC20Decimals(tokenAddress) {
+    try {
+      const result = await this.callContractMethod(tokenAddress, ERC20_SELECTORS.decimals);
+      if (result === "0x")
+        return null;
+      return parseInt(result, 16);
+    } catch {
+      return null;
+    }
+  }
+  async getERC20TotalSupply(tokenAddress) {
+    try {
+      const result = await this.callContractMethod(tokenAddress, ERC20_SELECTORS.totalSupply);
+      if (result === "0x")
+        return null;
+      return BigInt(result).toString();
+    } catch {
+      return null;
+    }
+  }
+  async getBalance(address) {
+    try {
+      const balance = await this.call("eth_getBalance", [address.toLowerCase(), "latest"]);
+      return BigInt(balance || "0").toString();
+    } catch (error) {
+      throw new Error(`Failed to get balance: ${error}`);
+    }
+  }
+  async getBlockNumber() {
+    try {
+      const blockNum = await this.call("eth_blockNumber", []);
+      return parseInt(blockNum || "0", 16);
+    } catch (error) {
+      throw new Error(`Failed to get block number: ${error}`);
+    }
+  }
+  async getTransaction(txHash) {
+    try {
+      return await this.call("eth_getTransactionByHash", [txHash]);
+    } catch {
+      return null;
+    }
+  }
+  async detectTokenStandard(tokenAddress) {
+    try {
+      const bytecode = await this.getBytecode(tokenAddress);
+      if (!bytecode.isContract) {
+        return {
+          hasERC20: false,
+          hasERC721: false,
+          hasERC1155: false,
+          selectors: []
+        };
+      }
+      const hex = bytecode.bytecode.toLowerCase();
+      const selectors = [];
+      for (const [key, selector] of Object.entries(ERC20_SELECTORS)) {
+        if (hex.includes(selector.toLowerCase())) {
+          selectors.push(selector);
+        }
+      }
+      const erc20Matches = Object.values(ERC20_SELECTORS).filter((s) => selectors.includes(s.toLowerCase())).length;
+      const erc721Matches = Object.values(ERC721_SELECTORS).filter((s) => hex.includes(s.toLowerCase())).length;
+      const erc1155Matches = Object.values(ERC1155_SELECTORS).filter((s) => hex.includes(s.toLowerCase())).length;
+      return {
+        hasERC20: erc20Matches >= 6,
+        hasERC721: erc721Matches >= 5,
+        hasERC1155: erc1155Matches >= 4,
+        selectors
+      };
+    } catch {
+      return {
+        hasERC20: false,
+        hasERC721: false,
+        hasERC1155: false,
+        selectors: []
+      };
+    }
+  }
+}
+function createRPCClient(chainId = 1, rpcUrl, timeout = 30000) {
+  const url = rpcUrl || RPC_ENDPOINTS[chainId];
+  if (!url) {
+    throw new Error(`Unsupported chain ID: ${chainId}`);
+  }
+  return new RPCClient({
+    rpcUrl: url,
+    chainId,
+    timeout
+  });
+}
+var ETHERSCAN_ENDPOINTS = {
+  1: "https://api.etherscan.io/api",
+  5: "https://api-goerli.etherscan.io/api",
+  11155111: "https://api-sepolia.etherscan.io/api",
+  56: "https://api.bscscan.com/api",
+  97: "https://api-testnet.bscscan.com/api",
+  137: "https://api.polygonscan.com/api",
+  80001: "https://api-mumbai.polygonscan.com/api",
+  42161: "https://api.arbiscan.io/api",
+  421613: "https://api-goerli.arbiscan.io/api",
+  10: "https://api-optimistic.etherscan.io/api",
+  420: "https://api-goerli-optimistic.etherscan.io/api",
+  8453: "https://api.basescan.org/api",
+  84532: "https://api-sepolia.basescan.org/api"
+};
+
+class EtherscanAPIClient {
+  apiKey;
+  chainId;
+  baseUrl;
+  timeout;
+  constructor(config) {
+    this.apiKey = config.apiKey;
+    this.chainId = config.chainId;
+    this.timeout = config.timeout || 30000;
+    const url = ETHERSCAN_ENDPOINTS[config.chainId];
+    if (!url) {
+      throw new Error(`Unsupported chain ID: ${config.chainId}`);
+    }
+    this.baseUrl = url;
+  }
+  async request(params) {
+    try {
+      const queryParams = new URLSearchParams({
+        ...params,
+        apikey: this.apiKey
+      });
+      const url = `${this.baseUrl}?${queryParams.toString()}`;
+      const controller = new AbortController;
+      const timeoutId = setTimeout(() => controller.abort(), this.timeout);
+      const response = await fetch(url, { signal: controller.signal });
+      clearTimeout(timeoutId);
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+      const data = await response.json();
+      if (data.status !== "1") {
+        throw new Error(data.message || "API error");
+      }
+      return data.result;
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      throw new Error(`Etherscan API error: ${message}`);
+    }
+  }
+  async getContractSourceCode(address) {
+    try {
+      const results = await this.request({
+        module: "contract",
+        action: "getsourcecode",
+        address: address.toLowerCase()
+      });
+      if (!results || results.length === 0) {
+        return null;
+      }
+      return results[0];
+    } catch (error) {
+      throw new Error(`Failed to get contract source: ${error}`);
+    }
+  }
+  async isContractVerified(address) {
+    try {
+      const sourceCode = await this.getContractSourceCode(address);
+      return sourceCode !== null && sourceCode.SourceCode !== "";
+    } catch {
+      return false;
+    }
+  }
+  async getContractABI(address) {
+    try {
+      const response = await this.request({
+        module: "contract",
+        action: "getabi",
+        address: address.toLowerCase()
+      });
+      return response || null;
+    } catch {
+      return null;
+    }
+  }
+  async getTokenHolders(tokenAddress, pageSize = 100) {
+    try {
+      const holders = await this.request({
+        module: "token",
+        action: "tokenholderlist",
+        contractaddress: tokenAddress.toLowerCase(),
+        page: "1",
+        offset: pageSize.toString()
+      });
+      return holders || [];
+    } catch (error) {
+      throw new Error(`Failed to get token holders: ${error}`);
+    }
+  }
+  async getTokenInfo(tokenAddress) {
+    try {
+      const info = await this.request({
+        module: "token",
+        action: "tokeninfo",
+        contractaddress: tokenAddress.toLowerCase()
+      });
+      return info || null;
+    } catch {
+      return null;
+    }
+  }
+  async getGasPrices() {
+    try {
+      return await this.request({
+        module: "gastracker",
+        action: "gasoracle"
+      });
+    } catch (error) {
+      throw new Error(`Failed to get gas prices: ${error}`);
+    }
+  }
+  async getContractCreation(address) {
+    try {
+      const results = await this.request({
+        module: "contract",
+        action: "getcontractcreation",
+        contractaddresses: address.toLowerCase()
+      });
+      return results?.[0] || null;
+    } catch {
+      return null;
+    }
+  }
+  async getAddressLabel(address) {
+    try {
+      const results = await this.request({
+        module: "account",
+        action: "addresslabellookup",
+        address: address.toLowerCase()
+      });
+      return results?.[0] || null;
+    } catch {
+      return null;
+    }
+  }
+  async getLogs(address, topic0, fromBlock = 0, toBlock = 99999999) {
+    try {
+      const params = {
+        module: "logs",
+        action: "getLogs",
+        address: address.toLowerCase(),
+        fromBlock: fromBlock.toString(),
+        toBlock: toBlock.toString(),
+        page: "1",
+        offset: "1000"
+      };
+      if (topic0) {
+        params.topic0 = topic0;
+      }
+      return await this.request(params);
+    } catch (error) {
+      throw new Error(`Failed to get logs: ${error}`);
+    }
+  }
+  async getBalance(address) {
+    try {
+      return await this.request({
+        module: "account",
+        action: "balance",
+        address: address.toLowerCase(),
+        tag: "latest"
+      });
+    } catch (error) {
+      throw new Error(`Failed to get balance: ${error}`);
+    }
+  }
+  async getTransactionCount(address) {
+    try {
+      return await this.request({
+        module: "account",
+        action: "txlistinternal",
+        address: address.toLowerCase(),
+        startblock: "0",
+        endblock: "99999999",
+        sort: "desc",
+        page: "1",
+        offset: "1"
+      });
+    } catch (error) {
+      throw new Error(`Failed to get transaction count: ${error}`);
+    }
+  }
+}
+function createEtherscanClient(apiKey, chainId = 1, timeout = 30000) {
+  return new EtherscanAPIClient({
+    apiKey,
+    chainId,
+    timeout,
+    baseUrl: ETHERSCAN_ENDPOINTS[chainId] || ""
+  });
+}
+async function analyzeTokenStandard(tokenAddress, config) {
+  try {
+    const rpcClient = createRPCClient(config.chainId, config.rpcUrl, config.timeout);
+    const detection = await rpcClient.detectTokenStandard(tokenAddress);
+    let detectedType = "Unknown";
+    if (detection.hasERC20)
+      detectedType = "ERC20";
+    else if (detection.hasERC721)
+      detectedType = "ERC721";
+    else if (detection.hasERC1155)
+      detectedType = "ERC1155";
+    return {
+      isERC20: detection.hasERC20,
+      isERC721: detection.hasERC721,
+      isERC1155: detection.hasERC1155,
+      detectedType,
+      functionSelectors: detection.selectors
+    };
+  } catch (error) {
+    return {
+      isERC20: false,
+      isERC721: false,
+      isERC1155: false,
+      detectedType: "Error",
+      functionSelectors: []
+    };
+  }
+}
+async function analyzeOwnership(tokenAddress, config) {
+  try {
+    const etherscanClient = createEtherscanClient(config.etherscanApiKey, config.chainId, config.timeout);
+    const creationInfo = await etherscanClient.getContractCreation(tokenAddress);
+    if (!creationInfo) {
+      return {
+        owner: null,
+        ownerLabel: null,
+        isMultisig: false,
+        isProxy: false,
+        proxyImplementation: null,
+        ownershipRisks: ["Unable to get contract creation info"]
+      };
+    }
+    const ownerLabel = await etherscanClient.getAddressLabel(creationInfo.ContractCreator);
+    const ownershipRisks = [];
+    let isMultisig = false;
+    let isProxy = false;
+    let proxyImplementation = null;
+    if (ownerLabel?.Label && (ownerLabel.Label.includes("Multisig") || ownerLabel.Label.includes("Safe"))) {
+      isMultisig = true;
+    }
+    const rpcClient = createRPCClient(config.chainId, config.rpcUrl, config.timeout);
+    const bytecode = await rpcClient.getBytecode(tokenAddress);
+    if (bytecode.bytecode.includes("3d82803d3d3d3d363d3d37")) {
+      isProxy = true;
+      ownershipRisks.push("Uses proxy pattern (upgradeable)");
+    }
+    if (!isMultisig) {
+      ownershipRisks.push("Single owner address (high centralization risk)");
+    }
+    if (!creationInfo.ContractCreator || creationInfo.ContractCreator === "0x0000000000000000000000000000000000000000") {
+      ownershipRisks.push("Unknown or null owner");
+    }
+    return {
+      owner: creationInfo.ContractCreator,
+      ownerLabel: ownerLabel?.Label || null,
+      isMultisig,
+      isProxy,
+      proxyImplementation,
+      ownershipRisks
+    };
+  } catch (error) {
+    return {
+      owner: null,
+      ownerLabel: null,
+      isMultisig: false,
+      isProxy: false,
+      proxyImplementation: null,
+      ownershipRisks: ["Failed to analyze ownership"]
+    };
+  }
+}
+async function analyzeHolderDistribution(tokenAddress, config) {
+  try {
+    const etherscanClient = createEtherscanClient(config.etherscanApiKey, config.chainId, config.timeout);
+    const holders = await etherscanClient.getTokenHolders(tokenAddress, 10);
+    if (!holders || holders.length === 0) {
+      return {
+        totalHolders: 0,
+        topHolder: null,
+        top5HoldersCombined: 0,
+        top10HoldersCombined: 0,
+        concentrationRisks: ["Cannot analyze holder distribution"],
+        isHighlyConcentrated: false
+      };
+    }
+    const topHolder = holders[0];
+    const top5Percentage = holders.slice(0, 5).reduce((sum, h) => sum + parseFloat(h.TokenHolderPercentage), 0);
+    const top10Percentage = holders.reduce((sum, h) => sum + parseFloat(h.TokenHolderPercentage), 0);
+    const concentrationRisks = [];
+    let isHighlyConcentrated = false;
+    if (parseFloat(topHolder.TokenHolderPercentage) > 50) {
+      concentrationRisks.push(`Top holder owns ${parseFloat(topHolder.TokenHolderPercentage).toFixed(2)}% - extreme concentration`);
+      isHighlyConcentrated = true;
+    } else if (parseFloat(topHolder.TokenHolderPercentage) > 30) {
+      concentrationRisks.push(`Top holder owns ${parseFloat(topHolder.TokenHolderPercentage).toFixed(2)}% - high concentration`);
+      isHighlyConcentrated = true;
+    }
+    if (top5Percentage > 80) {
+      concentrationRisks.push(`Top 5 holders own ${top5Percentage.toFixed(2)}% - highly concentrated`);
+      isHighlyConcentrated = true;
+    }
+    if (top10Percentage > 95) {
+      concentrationRisks.push(`Top 10 holders own ${top10Percentage.toFixed(2)}% - effectively centralized`);
+      isHighlyConcentrated = true;
+    }
+    return {
+      totalHolders: holders.length,
+      topHolder: {
+        address: topHolder.TokenHolderAddress,
+        percentage: parseFloat(topHolder.TokenHolderPercentage)
+      },
+      top5HoldersCombined: top5Percentage,
+      top10HoldersCombined: top10Percentage,
+      concentrationRisks,
+      isHighlyConcentrated
+    };
+  } catch (error) {
+    return {
+      totalHolders: 0,
+      topHolder: null,
+      top5HoldersCombined: 0,
+      top10HoldersCombined: 0,
+      concentrationRisks: ["Failed to analyze holder distribution"],
+      isHighlyConcentrated: false
+    };
+  }
+}
+async function detectSecurityRisks(tokenAddress, config) {
+  try {
+    const etherscanClient = createEtherscanClient(config.etherscanApiKey, config.chainId, config.timeout);
+    const rpcClient = createRPCClient(config.chainId, config.rpcUrl, config.timeout);
+    const risks = [];
+    let hasSelfdestruct = false;
+    let hasMinting = false;
+    let isPausable = false;
+    let hasBlacklist = false;
+    const proxyPatterns = [];
+    const sourceCode = await etherscanClient.getContractSourceCode(tokenAddress);
+    const unverifiedCode = !sourceCode || sourceCode.SourceCode === "";
+    if (unverifiedCode) {
+      risks.push("Contract source code not verified");
+    } else {
+      const lowerSource = sourceCode.SourceCode.toLowerCase();
+      if (lowerSource.includes("selfdestruct") || lowerSource.includes("suicide")) {
+        hasSelfdestruct = true;
+        risks.push("Contract has selfdestruct function - can be destroyed");
+      }
+      if (lowerSource.includes("mint(") || lowerSource.includes("_mint")) {
+        hasMinting = true;
+        risks.push("Contract has minting capabilities - can create new tokens");
+      }
+      if (lowerSource.includes("pause") || lowerSource.includes("_pause")) {
+        isPausable = true;
+        risks.push("Contract has pausable functions - transfers can be frozen");
+      }
+      if (lowerSource.includes("blacklist") || lowerSource.includes("_blacklist")) {
+        hasBlacklist = true;
+        risks.push("Contract has blacklist functionality - can block addresses");
+      }
+      if (lowerSource.includes("proxy") || lowerSource.includes("delegatecall")) {
+        proxyPatterns.push("Uses delegate call pattern");
+        risks.push("Uses proxy pattern - can be upgraded by owner");
+      }
+      if (lowerSource.includes("upgradeable") || lowerSource.includes("uups")) {
+        proxyPatterns.push("UUPS proxy detected");
+        risks.push("UUPS proxy pattern - upgradeable contract");
+      }
+    }
+    const bytecode = await rpcClient.getBytecode(tokenAddress);
+    if (bytecode.bytecode.includes("fe")) {}
+    return {
+      hasSelfdestruct,
+      hasMinting,
+      isPausable,
+      hasBlacklist,
+      proxyPatterns,
+      unverifiedCode,
+      risks,
+      riskCount: risks.length
+    };
+  } catch (error) {
+    return {
+      hasSelfdestruct: false,
+      hasMinting: false,
+      isPausable: false,
+      hasBlacklist: false,
+      proxyPatterns: [],
+      unverifiedCode: true,
+      risks: ["Failed to detect security risks"],
+      riskCount: 1
+    };
+  }
+}
+function scoreTokenRisk(analysis) {
+  let score = 100;
+  score -= analysis.ownershipAnalysis.ownershipRisks.length * 5;
+  if (analysis.ownershipAnalysis.isMultisig)
+    score += 10;
+  if (analysis.ownershipAnalysis.isProxy)
+    score -= 15;
+  if (analysis.holderAnalysis.isHighlyConcentrated) {
+    score -= 20;
+  }
+  if (analysis.holderAnalysis.concentrationRisks.length > 2) {
+    score -= 10;
+  }
+  if (analysis.riskAnalysis.unverifiedCode)
+    score -= 20;
+  if (analysis.riskAnalysis.hasSelfdestruct)
+    score -= 15;
+  if (analysis.riskAnalysis.hasMinting)
+    score -= 10;
+  if (analysis.riskAnalysis.isPausable)
+    score -= 10;
+  if (analysis.riskAnalysis.hasBlacklist)
+    score -= 10;
+  if (analysis.riskAnalysis.proxyPatterns.length > 0)
+    score -= 5;
+  score -= Math.min(analysis.riskAnalysis.riskCount * 2, 30);
+  if (analysis.standardAnalysis.isERC20)
+    score += 5;
+  return Math.max(0, Math.min(100, score));
+}
+function getRiskLevel(score) {
+  if (score >= 80)
+    return "LOW";
+  if (score >= 60)
+    return "MEDIUM";
+  if (score >= 40)
+    return "HIGH";
+  return "CRITICAL";
+}
+function generateRecommendations(analysis) {
+  const recommendations = [];
+  if (analysis.riskAnalysis.unverifiedCode) {
+    recommendations.push("❌ Do not interact - contract source is not verified");
+  }
+  if (analysis.riskAnalysis.hasSelfdestruct) {
+    recommendations.push("⚠️ High risk - contract can be destroyed by owner");
+  }
+  if (analysis.riskAnalysis.hasBlacklist) {
+    recommendations.push("⚠️ Medium risk - your address can be blacklisted");
+  }
+  if (analysis.riskAnalysis.hasMinting) {
+    recommendations.push("⚠️ Inflation risk - owner can mint unlimited tokens");
+  }
+  if (analysis.holderAnalysis.isHighlyConcentrated) {
+    recommendations.push("⚠️ Liquidity risk - token is highly concentrated among few holders");
+  }
+  if (analysis.ownershipAnalysis.isProxy && !analysis.ownershipAnalysis.isMultisig) {
+    recommendations.push("⚠️ Single owner can upgrade contract at any time");
+  }
+  if (analysis.riskLevel === "LOW") {
+    recommendations.push("✅ This token appears to be safe for interaction");
+  }
+  if (analysis.riskLevel === "MEDIUM") {
+    recommendations.push("⚠️ Proceed with caution - manual review recommended");
+  }
+  if (analysis.riskLevel === "HIGH") {
+    recommendations.push("❌ Not recommended for automated transactions - manual approval required");
+  }
+  if (analysis.riskLevel === "CRITICAL") {
+    recommendations.push("\uD83D\uDEAB Do not interact - this token has critical security issues");
+  }
+  return recommendations.length > 0 ? recommendations : ["No specific recommendations"];
+}
+async function analyzeToken(tokenAddress, config) {
+  try {
+    const normalizedAddress = tokenAddress.toLowerCase();
+    const [standard, ownership, holders, risks] = await Promise.all([
+      analyzeTokenStandard(normalizedAddress, config),
+      analyzeOwnership(normalizedAddress, config),
+      analyzeHolderDistribution(normalizedAddress, config),
+      detectSecurityRisks(normalizedAddress, config)
+    ]);
+    const result = {
+      tokenAddress: normalizedAddress,
+      chainId: config.chainId,
+      analysisTimestamp: new Date().toISOString(),
+      standardAnalysis: standard,
+      ownershipAnalysis: ownership,
+      holderAnalysis: holders,
+      riskAnalysis: risks,
+      overallScore: 0,
+      riskLevel: "LOW",
+      recommendations: []
+    };
+    result.overallScore = scoreTokenRisk(result);
+    result.riskLevel = getRiskLevel(result.overallScore);
+    result.recommendations = generateRecommendations(result);
+    return result;
+  } catch (error) {
+    const errorMsg = error instanceof Error ? error.message : String(error);
+    return {
+      tokenAddress: tokenAddress.toLowerCase(),
+      chainId: config.chainId,
+      analysisTimestamp: new Date().toISOString(),
+      standardAnalysis: {
+        isERC20: false,
+        isERC721: false,
+        isERC1155: false,
+        detectedType: "Error",
+        functionSelectors: []
+      },
+      ownershipAnalysis: {
+        owner: null,
+        ownerLabel: null,
+        isMultisig: false,
+        isProxy: false,
+        proxyImplementation: null,
+        ownershipRisks: ["Analysis failed"]
+      },
+      holderAnalysis: {
+        totalHolders: 0,
+        topHolder: null,
+        top5HoldersCombined: 0,
+        top10HoldersCombined: 0,
+        concentrationRisks: ["Analysis failed"],
+        isHighlyConcentrated: false
+      },
+      riskAnalysis: {
+        hasSelfdestruct: false,
+        hasMinting: false,
+        isPausable: false,
+        hasBlacklist: false,
+        proxyPatterns: [],
+        unverifiedCode: true,
+        risks: [errorMsg],
+        riskCount: 1
+      },
+      overallScore: 0,
+      riskLevel: "CRITICAL",
+      recommendations: ["Analysis failed - cannot determine if token is safe"],
+      error: errorMsg
+    };
+  }
+}
+function formatAnalysisResult(analysis) {
+  const lines = [
+    "=== Token Analysis Report ===",
+    `Token Address: ${analysis.tokenAddress}`,
+    `Chain ID: ${analysis.chainId}`,
+    `Timestamp: ${analysis.analysisTimestamp}`,
+    "",
+    "--- Token Standard ---",
+    `Type: ${analysis.standardAnalysis.detectedType}`,
+    `ERC20: ${analysis.standardAnalysis.isERC20}`,
+    `ERC721: ${analysis.standardAnalysis.isERC721}`,
+    `ERC1155: ${analysis.standardAnalysis.isERC1155}`,
+    "",
+    "--- Ownership ---",
+    `Owner: ${analysis.ownershipAnalysis.owner || "Unknown"}`,
+    `Multisig: ${analysis.ownershipAnalysis.isMultisig}`,
+    `Proxy: ${analysis.ownershipAnalysis.isProxy}`,
+    `Risks: ${analysis.ownershipAnalysis.ownershipRisks.length}`,
+    "",
+    "--- Holder Distribution ---",
+    `Total Holders: ${analysis.holderAnalysis.totalHolders}`,
+    `Top Holder %: ${analysis.holderAnalysis.topHolder?.percentage.toFixed(2) || "N/A"}%`,
+    `Top 5 Combined: ${analysis.holderAnalysis.top5HoldersCombined.toFixed(2)}%`,
+    `Concentration Risk: ${analysis.holderAnalysis.isHighlyConcentrated ? "YES" : "NO"}`,
+    "",
+    "--- Security Risks ---",
+    `Verified: ${analysis.riskAnalysis.unverifiedCode ? "NO" : "YES"}`,
+    `Selfdestruct: ${analysis.riskAnalysis.hasSelfdestruct}`,
+    `Minting: ${analysis.riskAnalysis.hasMinting}`,
+    `Pausable: ${analysis.riskAnalysis.isPausable}`,
+    `Blacklist: ${analysis.riskAnalysis.hasBlacklist}`,
+    `Total Risks: ${analysis.riskAnalysis.riskCount}`,
+    "",
+    "--- Overall Assessment ---",
+    `Security Score: ${analysis.overallScore}/100`,
+    `Risk Level: ${analysis.riskLevel}`,
+    "",
+    "--- Recommendations ---",
+    ...analysis.recommendations
+  ];
+  return lines.join(`
+`);
+}
+var SUPPORTED_CHAINS = {
+  1: {
+    id: 1,
+    name: "Ethereum Mainnet",
+    explorerUrl: "https://etherscan.io"
+  },
+  56: {
+    id: 56,
+    name: "BSC Mainnet",
+    explorerUrl: "https://bscscan.com"
+  },
+  137: {
+    id: 137,
+    name: "Polygon Mainnet",
+    explorerUrl: "https://polygonscan.com"
+  },
+  8453: {
+    id: 8453,
+    name: "Base Mainnet",
+    explorerUrl: "https://basescan.org"
+  },
+  10: {
+    id: 10,
+    name: "Optimism",
+    explorerUrl: "https://optimistic.etherscan.io"
+  },
+  42161: {
+    id: 42161,
+    name: "Arbitrum One",
+    explorerUrl: "https://arbiscan.io"
+  },
+  43114: {
+    id: 43114,
+    name: "Avalanche C-Chain",
+    explorerUrl: "https://snowtrace.io"
+  },
+  250: {
+    id: 250,
+    name: "Fantom",
+    explorerUrl: "https://ftmscan.com"
+  }
+};
+var WRAPPED_TOKEN_PATTERNS = {
+  W: { name: "Wrapped", indicator: "bridge" },
+  wst: { name: "Wrapped Staked", indicator: "liquid_staking" },
+  x: { name: "Cross-chain", indicator: "bridge" },
+  anyCall: { name: "Multichain (AnyCall)", indicator: "bridge" },
+  ark: { name: "Ark Bridge", indicator: "bridge" },
+  stargate: { name: "Stargate", indicator: "bridge" }
+};
+function detectWrappedTokenPattern(tokenName) {
+  const lowerName = tokenName.toLowerCase();
+  for (const [pattern, info] of Object.entries(WRAPPED_TOKEN_PATTERNS)) {
+    if (lowerName.includes(pattern)) {
+      return {
+        chain: 0,
+        wrappedAddress: "",
+        bridgeAddress: null,
+        wrapperName: info.name
+      };
+    }
+  }
+  return null;
+}
+async function analyzeTokenOnMultipleChains(tokenAddress, chainIds, etherscanApiKey, timeout) {
+  const normalizedAddress = tokenAddress.toLowerCase();
+  const results = [];
+  const analyses = await Promise.all(chainIds.map(async (chainId) => {
+    try {
+      const chainConfig = SUPPORTED_CHAINS[chainId];
+      if (!chainConfig) {
+        return {
+          chainId,
+          chainName: `Chain ${chainId}`,
+          tokenAddress: normalizedAddress,
+          exists: false,
+          error: "Unsupported chain"
+        };
+      }
+      try {
+        const analysis = await analyzeToken(normalizedAddress, {
+          chainId,
+          etherscanApiKey,
+          timeout: timeout || 30000
+        });
+        return {
+          chainId,
+          chainName: chainConfig.name,
+          tokenAddress: normalizedAddress,
+          exists: true,
+          analysis
+        };
+      } catch {
+        return {
+          chainId,
+          chainName: chainConfig.name,
+          tokenAddress: normalizedAddress,
+          exists: false
+        };
+      }
+    } catch (error) {
+      return {
+        chainId,
+        chainName: `Chain ${chainId}`,
+        tokenAddress: normalizedAddress,
+        exists: false,
+        error: error instanceof Error ? error.message : "Analysis error"
+      };
+    }
   }));
-  const response = requestFn(runtime2.config);
-  const result = response.result();
-  runtime2.log(`Gas Prices Retrieved:`);
-  runtime2.log(`  Safe Gas Price: ${result.safeGasPrice} Gwei`);
-  runtime2.log(`  Propose Gas Price: ${result.proposeGasPrice} Gwei`);
-  runtime2.log(`  Fast Gas Price: ${result.fastGasPrice} Gwei`);
-  runtime2.log(`  Base Fee: ${result.baseFee} Gwei`);
-  runtime2.log(`  Last Block: ${result.lastBlock}`);
-  return JSON.stringify(result);
+  return analyses;
+}
+function detectBridgePatterns(results) {
+  const patterns = [];
+  const existingChains = results.filter((r) => r.exists).length;
+  if (existingChains > 1) {
+    patterns.push(`Token deployed on ${existingChains} chains`);
+  }
+  const riskLevels = results.filter((r) => r.analysis).map((r) => r.analysis.riskLevel);
+  const highRiskCount = riskLevels.filter((l) => l === "HIGH").length;
+  const criticalCount = riskLevels.filter((l) => l === "CRITICAL").length;
+  if (highRiskCount > 0 || criticalCount > 0) {
+    patterns.push(`High risk on ${highRiskCount + criticalCount} chains`);
+  }
+  const verifiedCount = results.filter((r) => r.analysis && !r.analysis.riskAnalysis.unverifiedCode).length;
+  if (verifiedCount < existingChains && verifiedCount > 0) {
+    patterns.push("Verification status varies across chains");
+  }
+  const owners = results.filter((r) => r.analysis).map((r) => r.analysis.ownershipAnalysis.owner).filter((o) => o !== null);
+  const uniqueOwners = new Set(owners).size;
+  if (uniqueOwners > 1) {
+    patterns.push(`Multiple owner addresses across chains (${uniqueOwners})`);
+  }
+  const concentrations = results.filter((r) => r.analysis?.holderAnalysis.isHighlyConcentrated).length;
+  if (concentrations > existingChains / 2) {
+    patterns.push("High holder concentration across most chains");
+  }
+  return patterns;
+}
+function generateCrossChainRecommendations(analysis) {
+  const recommendations = [];
+  if (analysis.highRiskOnChains > 0) {
+    recommendations.push(`⚠️ Token rated HIGH or CRITICAL risk on ${analysis.highRiskOnChains} chain(s)`);
+  }
+  if (analysis.tokensFound > 4) {
+    recommendations.push("⚠️ Token deployed on many chains - verify legitimacy of all versions");
+  }
+  if (analysis.wrappedVersions.length > 0) {
+    recommendations.push(`ℹ️ Token has ${analysis.wrappedVersions.length} wrapped version(s) detected`);
+  }
+  if (analysis.verifiedOnChains < analysis.tokensFound) {
+    const unverified = analysis.tokensFound - analysis.verifiedOnChains;
+    recommendations.push(`❌ ${unverified} version(s) not verified - increased risk`);
+  }
+  if (analysis.verifiedOnChains === 0) {
+    recommendations.push("\uD83D\uDEAB No verified versions found - do not interact");
+  }
+  if (analysis.bridgeIndicators.length > 0) {
+    recommendations.push("ℹ️ Potential cross-chain bridge token detected");
+  }
+  if (analysis.tokensFound === 0) {
+    recommendations.push("ℹ️ Token not found on any network");
+  } else if (analysis.tokensFound === 1) {
+    recommendations.push("ℹ️ Token exists on single chain only");
+  } else if (analysis.highRiskOnChains === 0 && analysis.mediumRiskOnChains <= 1) {
+    recommendations.push("✅ Token appears safe on all verified chains");
+  }
+  return recommendations;
+}
+async function verifyTokenCrossChain(tokenAddress, etherscanApiKey, chainIds) {
+  try {
+    const normalizedAddress = tokenAddress.toLowerCase();
+    const targetChains = chainIds || Object.keys(SUPPORTED_CHAINS).map(Number);
+    const chainResults = await analyzeTokenOnMultipleChains(normalizedAddress, targetChains.filter((c) => SUPPORTED_CHAINS[c]), etherscanApiKey);
+    const tokensFound = chainResults.filter((r) => r.exists).length;
+    const verifiedOnChains = chainResults.filter((r) => r.analysis && !r.analysis.riskAnalysis.unverifiedCode).length;
+    const highRiskOnChains = chainResults.filter((r) => r.analysis && (r.analysis.riskLevel === "HIGH" || r.analysis.riskLevel === "CRITICAL")).length;
+    const mediumRiskOnChains = chainResults.filter((r) => r.analysis && r.analysis.riskLevel === "MEDIUM").length;
+    const bridgeIndicators = detectBridgePatterns(chainResults);
+    const wrappedVersions = [];
+    chainResults.forEach((result) => {
+      if (result.analysis?.standardAnalysis.detectedType !== "Unknown") {
+        const wrapped = detectWrappedTokenPattern(result.analysis?.standardAnalysis.detectedType || "");
+        if (wrapped) {
+          wrappedVersions.push({
+            ...wrapped,
+            chain: result.chainId,
+            wrappedAddress: result.tokenAddress
+          });
+        }
+      }
+    });
+    const baseAnalysis = {
+      baseTokenAddress: normalizedAddress,
+      baseChainId: 1,
+      chainVerifications: chainResults,
+      tokensFound,
+      verifiedOnChains,
+      highRiskOnChains,
+      mediumRiskOnChains,
+      bridgeIndicators,
+      wrappedVersions,
+      recommendations: [],
+      analysisTimestamp: new Date().toISOString()
+    };
+    baseAnalysis.recommendations = generateCrossChainRecommendations(baseAnalysis);
+    return baseAnalysis;
+  } catch (error) {
+    const errorMsg = error instanceof Error ? error.message : String(error);
+    return {
+      baseTokenAddress: tokenAddress.toLowerCase(),
+      baseChainId: 1,
+      chainVerifications: [],
+      tokensFound: 0,
+      verifiedOnChains: 0,
+      highRiskOnChains: 0,
+      mediumRiskOnChains: 0,
+      bridgeIndicators: [errorMsg],
+      wrappedVersions: [],
+      recommendations: ["Cross-chain verification failed"],
+      analysisTimestamp: new Date().toISOString()
+    };
+  }
+}
+function formatCrossChainResult(analysis) {
+  const lines = [
+    "=== Cross-Chain Token Analysis ===",
+    `Base Token Address: ${analysis.baseTokenAddress}`,
+    `Analysis Timestamp: ${analysis.analysisTimestamp}`,
+    "",
+    "--- Chain Summary ---",
+    `Total Chains Checked: ${analysis.chainVerifications.length}`,
+    `Tokens Found: ${analysis.tokensFound}`,
+    `Verified on Chains: ${analysis.verifiedOnChains}`,
+    `High/Critical Risk on Chains: ${analysis.highRiskOnChains}`,
+    `Medium Risk on Chains: ${analysis.mediumRiskOnChains}`,
+    ""
+  ];
+  if (analysis.chainVerifications.length > 0) {
+    lines.push("--- Per-Chain Status ---");
+    analysis.chainVerifications.forEach((result) => {
+      const status = result.analysis ? `${result.analysis.riskLevel} (${result.analysis.overallScore}/100)` : result.exists ? "UNKNOWN" : "NOT FOUND";
+      lines.push(`${result.chainName}: ${status}`);
+    });
+    lines.push("");
+  }
+  if (analysis.bridgeIndicators.length > 0) {
+    lines.push("--- Bridge Indicators ---");
+    analysis.bridgeIndicators.forEach((indicator) => {
+      lines.push(`• ${indicator}`);
+    });
+    lines.push("");
+  }
+  if (analysis.wrappedVersions.length > 0) {
+    lines.push("--- Wrapped Versions ---");
+    analysis.wrappedVersions.forEach((wrapped) => {
+      lines.push(`${wrapped.wrapperName} on Chain ${wrapped.chain}`);
+    });
+    lines.push("");
+  }
+  lines.push("--- Recommendations ---");
+  analysis.recommendations.forEach((rec) => {
+    lines.push(`• ${rec}`);
+  });
+  return lines.join(`
+`);
+}
+function makeVerificationDecision(analysis, crossChainAnalysis) {
+  const risks = [];
+  let isSafe = false;
+  let canAutomate = false;
+  let requiresApproval = false;
+  if (analysis.error) {
+    risks.push(`Verification Error: ${analysis.error}`);
+    return {
+      isSafe: false,
+      canAutomate: false,
+      requiresApproval: false,
+      risks,
+      reason: `Cannot verify token: ${analysis.error}`
+    };
+  }
+  if (analysis.riskLevel === "CRITICAL") {
+    risks.push("Token rated CRITICAL risk");
+    isSafe = false;
+  } else if (analysis.riskLevel === "HIGH") {
+    risks.push("Token rated HIGH risk");
+    isSafe = false;
+    requiresApproval = true;
+  } else if (analysis.riskLevel === "MEDIUM") {
+    risks.push("Token rated MEDIUM risk");
+    isSafe = false;
+    requiresApproval = true;
+  } else if (analysis.riskLevel === "LOW") {
+    isSafe = true;
+    canAutomate = true;
+  } else {
+    risks.push(`Unknown risk level: ${analysis.riskLevel}`);
+    isSafe = false;
+  }
+  risks.push(...analysis.riskAnalysis.risks);
+  if (crossChainAnalysis) {
+    if (crossChainAnalysis.highRiskOnChains > 0) {
+      risks.push(`High risk on ${crossChainAnalysis.highRiskOnChains} chain(s)`);
+      isSafe = false;
+    }
+    if (crossChainAnalysis.tokensFound === 0) {
+      risks.push("Token not found on any network");
+      isSafe = false;
+    } else if (crossChainAnalysis.verifiedOnChains === 0) {
+      risks.push("Not verified on any chain");
+      isSafe = false;
+    }
+  }
+  if (analysis.riskAnalysis.unverifiedCode) {
+    canAutomate = false;
+    if (isSafe) {
+      isSafe = false;
+      risks.push("Unverified contract source code");
+    }
+  }
+  if (analysis.holderAnalysis.isHighlyConcentrated) {
+    requiresApproval = true;
+    if (isSafe) {
+      isSafe = false;
+      risks.push("Highly concentrated token holdings");
+    }
+  }
+  if (!isSafe && !risks.includes("Token rated CRITICAL risk") && !risks.includes("Token rated HIGH risk") && !risks.includes("Token rated MEDIUM risk")) {
+    risks.push("Unable to verify token safety with confidence");
+  }
+  const reason = isSafe ? canAutomate ? "Token appears safe for automated transactions" : "Token is safe but requires user interaction" : requiresApproval ? "Token has risks and requires approval" : "Token is not safe to interact with";
+  return {
+    isSafe,
+    canAutomate,
+    requiresApproval,
+    risks: [...new Set(risks)],
+    reason
+  };
+}
+
+class VerificationEngine {
+  config;
+  cache = new Map;
+  requestCounter = 0;
+  constructor(config) {
+    this.config = {
+      enableCaching: true,
+      cacheExpiration: 3600000,
+      timeout: 30000,
+      chainId: 1,
+      ...config
+    };
+  }
+  generateRequestId() {
+    this.requestCounter++;
+    return `req_${Date.now()}_${this.requestCounter}`;
+  }
+  getCacheKey(request) {
+    return `${request.tokenAddress}:${request.chainId || this.config.chainId}:${request.crossChainVerification || false}`;
+  }
+  getCachedResult(request) {
+    if (!this.config.enableCaching)
+      return null;
+    const cacheKey = this.getCacheKey(request);
+    const cached = this.cache.get(cacheKey);
+    if (!cached)
+      return null;
+    const now = Date.now();
+    const age = now - cached.timestamp;
+    if (age > (this.config.cacheExpiration || 3600000)) {
+      this.cache.delete(cacheKey);
+      return null;
+    }
+    return cached.result;
+  }
+  cacheResult(request, result) {
+    if (!this.config.enableCaching)
+      return;
+    const cacheKey = this.getCacheKey(request);
+    this.cache.set(cacheKey, {
+      result,
+      timestamp: Date.now()
+    });
+  }
+  clearCache() {
+    this.cache.clear();
+  }
+  getCacheStats() {
+    return {
+      size: this.cache.size,
+      entries: Array.from(this.cache.keys())
+    };
+  }
+  async verify(request) {
+    try {
+      const cached = this.getCachedResult(request);
+      if (cached) {
+        return { ...cached, requestId: this.generateRequestId() };
+      }
+      const requestId = this.generateRequestId();
+      const timestamp = new Date().toISOString();
+      const chainId = request.chainId || this.config.chainId || 1;
+      let chainAnalysis;
+      try {
+        chainAnalysis = await analyzeToken(request.tokenAddress, {
+          chainId,
+          etherscanApiKey: this.config.etherscanApiKey,
+          timeout: this.config.timeout
+        });
+      } catch (error) {
+        if (!request.crossChainVerification)
+          throw error;
+      }
+      let crossChainAnalysis;
+      if (request.crossChainVerification) {
+        try {
+          crossChainAnalysis = await verifyTokenCrossChain(request.tokenAddress, this.config.etherscanApiKey, request.chainIds);
+        } catch (error) {}
+      }
+      const decision = makeVerificationDecision(chainAnalysis || {
+        tokenAddress: request.tokenAddress,
+        chainId,
+        analysisTimestamp: timestamp,
+        standardAnalysis: {
+          isERC20: false,
+          isERC721: false,
+          isERC1155: false,
+          detectedType: "Unknown",
+          functionSelectors: []
+        },
+        ownershipAnalysis: {
+          owner: null,
+          ownerLabel: null,
+          isMultisig: false,
+          isProxy: false,
+          proxyImplementation: null,
+          ownershipRisks: ["Analysis failed"]
+        },
+        holderAnalysis: {
+          totalHolders: 0,
+          topHolder: null,
+          top5HoldersCombined: 0,
+          top10HoldersCombined: 0,
+          concentrationRisks: ["Analysis failed"],
+          isHighlyConcentrated: false
+        },
+        riskAnalysis: {
+          hasSelfdestruct: false,
+          hasMinting: false,
+          isPausable: false,
+          hasBlacklist: false,
+          proxyPatterns: [],
+          unverifiedCode: true,
+          risks: ["Analysis failed"],
+          riskCount: 1
+        },
+        overallScore: 0,
+        riskLevel: "CRITICAL",
+        recommendations: ["Analysis failed"]
+      }, crossChainAnalysis);
+      let formattedReport = "";
+      if (chainAnalysis) {
+        formattedReport = formatAnalysisResult(chainAnalysis);
+      }
+      if (crossChainAnalysis && request.crossChainVerification) {
+        formattedReport += `
+
+` + formatCrossChainResult(crossChainAnalysis);
+      }
+      const result = {
+        requestId,
+        timestamp,
+        request,
+        chainAnalysis,
+        crossChainAnalysis,
+        decision,
+        formattedReport: formattedReport || "No analysis available"
+      };
+      this.cacheResult(request, result);
+      return result;
+    } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
+      return {
+        requestId: this.generateRequestId(),
+        timestamp: new Date().toISOString(),
+        request,
+        decision: {
+          isSafe: false,
+          canAutomate: false,
+          requiresApproval: false,
+          risks: [errorMsg],
+          reason: `Verification failed: ${errorMsg}`
+        },
+        formattedReport: `Error during verification: ${errorMsg}`
+      };
+    }
+  }
+  async quickVerify(tokenAddress, chainId) {
+    return this.verify({
+      tokenAddress,
+      chainId: chainId || this.config.chainId,
+      crossChainVerification: false
+    });
+  }
+  async deepVerify(tokenAddress, chainIds) {
+    return this.verify({
+      tokenAddress,
+      chainId: this.config.chainId,
+      crossChainVerification: true,
+      chainIds
+    });
+  }
+  async verifyBatch(requests) {
+    const results = await Promise.all(requests.map((request) => this.verify(request)));
+    return results;
+  }
+}
+function createVerificationEngine(config) {
+  return new VerificationEngine(config);
+}
+function generateVerificationReport(result) {
+  const lines = [
+    "═════════════════════════════════════════",
+    "TOKEN VERIFICATION REPORT",
+    "═════════════════════════════════════════",
+    `Request ID: ${result.requestId}`,
+    `Timestamp: ${result.timestamp}`,
+    "",
+    "--- Verification Decision ---",
+    `Safe to Interact: ${result.decision.isSafe ? "✅ YES" : "❌ NO"}`,
+    `Can Automate: ${result.decision.canAutomate ? "✅ YES" : "⚠️ NO"}`,
+    `Requires Approval: ${result.decision.requiresApproval ? "⚠️ YES" : "❌ NO"}`,
+    `Reason: ${result.decision.reason}`,
+    ""
+  ];
+  if (result.decision.risks.length > 0) {
+    lines.push("--- Detected Risks ---");
+    result.decision.risks.forEach((risk) => {
+      lines.push(`• ${risk}`);
+    });
+    lines.push("");
+  }
+  lines.push("--- Detailed Analysis ---");
+  lines.push(result.formattedReport);
+  lines.push("");
+  lines.push("═════════════════════════════════════════");
+  return lines.join(`
+`);
+}
+function generateRequestId() {
+  return `req_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+}
+function formatVerificationForUser(analysis, format = "summary") {
+  if (format === "json") {
+    return JSON.stringify(analysis, null, 2);
+  }
+  if (format === "report") {
+    return generateVerificationReport(analysis);
+  }
+  const decision = analysis.decision;
+  const status = decision.isSafe ? "✅ SAFE" : "❌ UNSAFE";
+  const automation = decision.canAutomate ? "✅ YES" : "❌ NO";
+  const lines = [
+    "═══════════════════════════════════════",
+    "TOKEN VERIFICATION RESULT",
+    "═══════════════════════════════════════",
+    "",
+    `Token Address: ${analysis.request.tokenAddress}`,
+    `Status: ${status}`,
+    `Risk Level: ${analysis.chainAnalysis?.riskLevel || "UNKNOWN"}`,
+    `Security Score: ${analysis.chainAnalysis?.overallScore || 0}/100`,
+    `Can Automate: ${automation}`,
+    `Reason: ${decision.reason}`,
+    ""
+  ];
+  if (decision.risks.length > 0) {
+    lines.push("⚠️  DETECTED RISKS:");
+    decision.risks.forEach((risk) => {
+      lines.push(`  • ${risk}`);
+    });
+    lines.push("");
+  }
+  if (analysis.chainAnalysis?.recommendations) {
+    lines.push("\uD83D\uDCA1 RECOMMENDATIONS:");
+    analysis.chainAnalysis.recommendations.forEach((rec) => {
+      lines.push(`  ${rec}`);
+    });
+    lines.push("");
+  }
+  lines.push("═══════════════════════════════════════");
+  return lines.join(`
+`);
+}
+var onHttpVerifyToken = async (runtime2, payload) => {
+  const requestId = generateRequestId();
+  const timestamp = new Date().toISOString();
+  try {
+    if (!payload.input || payload.input.length === 0) {
+      runtime2.log(`[${requestId}] ❌ Empty request payload`);
+      return JSON.stringify({
+        success: false,
+        requestId,
+        timestamp,
+        error: "Empty request body"
+      });
+    }
+    let request;
+    try {
+      request = decodeJson(payload.input);
+    } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
+      runtime2.log(`[${requestId}] ❌ Failed to parse JSON: ${errorMsg}`);
+      return JSON.stringify({
+        success: false,
+        requestId,
+        timestamp,
+        error: `Invalid JSON: ${errorMsg}`
+      });
+    }
+    const config = runtime2.config;
+    if (!config.etherscanApiKey) {
+      runtime2.log(`[${requestId}] ❌ Error: ETHERSCAN_API_KEY not configured`);
+      return JSON.stringify({
+        success: false,
+        requestId,
+        timestamp,
+        error: "Etherscan API key not configured. Please set ETHERSCAN_API_KEY environment variable."
+      });
+    }
+    if (!request.tokenAddress) {
+      runtime2.log(`[${requestId}] ❌ Error: Token address not provided`);
+      return JSON.stringify({
+        success: false,
+        requestId,
+        timestamp,
+        error: "Token address is required. Please provide a valid Ethereum address (0x format)"
+      });
+    }
+    const tokenAddress = request.tokenAddress.toLowerCase();
+    if (!/^0x[a-f0-9]{40}$/.test(tokenAddress)) {
+      runtime2.log(`[${requestId}] ❌ Error: Invalid token address format`);
+      return JSON.stringify({
+        success: false,
+        requestId,
+        timestamp,
+        error: `Invalid token address format. Expected: 0x followed by 40 hex characters. Got: ${request.tokenAddress}`
+      });
+    }
+    const chainId = request.chainId || config.defaultChainId || 1;
+    const crossChain = request.crossChain || false;
+    const format = request.format || "summary";
+    runtime2.log(`[${requestId}] \uD83D\uDD0D Starting verification for ${tokenAddress} on chain ${chainId}`);
+    const engine = createVerificationEngine({
+      etherscanApiKey: config.etherscanApiKey,
+      enableCaching: true,
+      cacheExpiration: 3600000,
+      timeout: 30000,
+      chainId
+    });
+    let verificationResult;
+    if (crossChain && config.chainIds) {
+      runtime2.log(`[${requestId}] \uD83C\uDF0D Performing cross-chain verification`);
+      verificationResult = await engine.deepVerify(tokenAddress, config.chainIds);
+    } else {
+      runtime2.log(`[${requestId}] ⚙️  Performing single-chain verification`);
+      verificationResult = await engine.quickVerify(tokenAddress, chainId);
+    }
+    const formattedResult = formatVerificationForUser(verificationResult, format);
+    if (verificationResult.decision.isSafe) {
+      runtime2.log(`[${requestId}] ✅ Token verified as SAFE`);
+    } else {
+      runtime2.log(`[${requestId}] ❌ Token verified as UNSAFE - Risks: ${verificationResult.decision.risks.length}`);
+    }
+    runtime2.log(formattedResult);
+    let responseData;
+    if (format === "json") {
+      responseData = verificationResult;
+    } else if (format === "report") {
+      responseData = {
+        formatted: formattedResult,
+        raw: verificationResult
+      };
+    } else {
+      responseData = {
+        tokenAddress,
+        chainId,
+        isSafe: verificationResult.decision.isSafe,
+        canAutomate: verificationResult.decision.canAutomate,
+        riskLevel: verificationResult.chainAnalysis?.riskLevel,
+        score: verificationResult.chainAnalysis?.overallScore,
+        risks: verificationResult.decision.risks,
+        reason: verificationResult.decision.reason,
+        formatted: formattedResult
+      };
+    }
+    return JSON.stringify({
+      success: true,
+      requestId,
+      timestamp,
+      data: responseData
+    });
+  } catch (error) {
+    const errorMsg = error instanceof Error ? error.message : String(error);
+    runtime2.log(`[${requestId}] ❌ Verification failed: ${errorMsg}`);
+    return JSON.stringify({
+      success: false,
+      requestId,
+      timestamp,
+      error: `Verification failed: ${errorMsg}`
+    });
+  }
+};
+var onCronTrigger = async (runtime2) => {
+  try {
+    const config = runtime2.config;
+    runtime2.log(`[DEBUG_CRON] enableTokenVerification: ${config.enableTokenVerification}`);
+    runtime2.log(`[DEBUG_CRON] etherscanApiKey: ${config.etherscanApiKey ? "***" : "undefined"}`);
+    runtime2.log("\uD83D\uDCCA Fetching gas prices from Etherscan...");
+    const httpClient = new cre.capabilities.HTTPClient;
+    const aggregationConfig = ConsensusAggregationByFields({
+      safeGasPrice: () => median(),
+      proposeGasPrice: () => median(),
+      fastGasPrice: () => median(),
+      baseFee: () => median(),
+      lastBlock: () => median()
+    });
+    const requestFn = httpClient.sendRequest(runtime2, fetchGasPrices, aggregationConfig);
+    const response = requestFn(config);
+    const gasPrices = response.result();
+    runtime2.log("═══════════════════════════════════════");
+    runtime2.log("⛽ GAS PRICES REPORT");
+    runtime2.log("═══════════════════════════════════════");
+    runtime2.log(`Safe Gas Price: ${gasPrices.safeGasPrice} gwei`);
+    runtime2.log(`Propose Gas Price: ${gasPrices.proposeGasPrice} gwei`);
+    runtime2.log(`Fast Gas Price: ${gasPrices.fastGasPrice} gwei`);
+    runtime2.log(`Base Fee: ${gasPrices.baseFee} gwei`);
+    runtime2.log(`Last Block: ${gasPrices.lastBlock}`);
+    runtime2.log("═══════════════════════════════════════");
+    return JSON.stringify(gasPrices);
+  } catch (error) {
+    const errorMsg = error instanceof Error ? error.message : String(error);
+    runtime2.log(`❌ Gas price fetch error: ${errorMsg}`);
+    return JSON.stringify({ error: errorMsg });
+  }
 };
 var initWorkflow = (config) => {
-  return [
-    handler(new CronCapability().trigger({ schedule: config.schedule }), onCronTrigger)
-  ];
+  const handlers = [];
+  console.log("⚙️  Initializing workflow handlers...");
+  console.log(`[DEBUG] enableTokenVerification: ${config.enableTokenVerification}`);
+  console.log(`[DEBUG] etherscanApiKey: ${config.etherscanApiKey ? "***" : "undefined"}`);
+  const cron = new cre.capabilities.CronCapability;
+  const cronHandler = cre.handler(cron.trigger({ schedule: config.schedule }), onCronTrigger);
+  handlers.push(cronHandler);
+  console.log("✅ Gas price Cron trigger registered");
+  if (config.enableTokenVerification) {
+    try {
+      const httpCapability = new cre.capabilities.HTTPCapability;
+      const httpTrigger = httpCapability.trigger({});
+      const httpHandler = cre.handler(httpTrigger, onHttpVerifyToken);
+      if (httpHandler) {
+        handlers.push(httpHandler);
+        console.log("✅ Token verification HTTP trigger registered");
+      }
+    } catch (error) {
+      console.log(`ℹ️  HTTP trigger registration note: ${error instanceof Error ? error.message : error}`);
+      console.log("   Gas price fetching (Cron trigger) is still active");
+    }
+  } else {
+    console.log("⚠️  Token verification HTTP trigger disabled");
+  }
+  console.log(`✅ Workflow initialization complete
+`);
+  return handlers;
 };
 async function main() {
   const runner = await Runner.newRunner();
   await runner.run(initWorkflow);
 }
 main().catch((error) => {
-  console.log("Workflow failed:", error);
+  console.log("❌ Workflow failed:", error);
   process.exit(1);
 });
 export {
