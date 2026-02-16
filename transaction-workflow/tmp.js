@@ -5674,6 +5674,11 @@ var LATEST_BLOCK_NUMBER = {
   absVal: Buffer.from([2]).toString("base64"),
   sign: "-1"
 };
+var decodeJson = (input) => {
+  const decoder = new TextDecoder("utf-8");
+  const textBody = decoder.decode(input);
+  return JSON.parse(textBody);
+};
 function sendReport(runtime, report, fn) {
   const rawReport = report.x_generatedCodeOnly_unwrap();
   const request = fn(rawReport);
@@ -14241,9 +14246,1548 @@ var fetchGasPrices = (sendRequester, config) => {
     lastBlock: parseFloat(gasOracleData.result.LastBlock)
   };
 };
+var RPC_ENDPOINTS = {
+  1: "https://eth-mainnet.alchemyapi.io/v2/demo",
+  5: "https://eth-goerli.alchemyapi.io/v2/demo",
+  11155111: "https://eth-sepolia.alchemyapi.io/v2/demo",
+  56: "https://bsc-dataseed.binance.org:443",
+  97: "https://data-seed-prebsc.binance.org:8545",
+  137: "https://polygon-rpc.com",
+  80001: "https://rpc-mumbai.maticvigil.com",
+  42161: "https://arb1.arbitrum.io/rpc",
+  421613: "https://goerli-rollup.arbitrum.io/rpc",
+  10: "https://mainnet.optimism.io",
+  420: "https://goerli.optimism.io",
+  8453: "https://mainnet.base.org",
+  84532: "https://sepolia.base.org"
+};
+var ERC20_SELECTORS = {
+  totalSupply: "0x18160ddd",
+  balanceOf: "0x70a08231",
+  transfer: "0xa9059cbb",
+  transferFrom: "0x23b872dd",
+  approve: "0x095ea7b3",
+  allowance: "0xdd62ed3e",
+  name: "0x06fdde03",
+  symbol: "0x95d89b41",
+  decimals: "0x313ce567"
+};
+var ERC721_SELECTORS = {
+  ownerOf: "0x6352211e",
+  balanceOf: "0x70a08231",
+  safeTransferFrom: "0x42842e0e",
+  setApprovalForAll: "0xa22cb465",
+  isApprovedForAll: "0xe985e9c5",
+  approve: "0x095ea7b3",
+  getApproved: "0x081812fc"
+};
+var ERC1155_SELECTORS = {
+  balanceOf: "0x00fdd58e",
+  balanceOfBatch: "0x4e1273f4",
+  setApprovalForAll: "0xa22cb465",
+  isApprovedForAll: "0xe985e9c5",
+  safeTransferFrom: "0xf242432a",
+  safeBatchTransferFrom: "0x2eb2c2d6"
+};
+
+class RPCClient {
+  rpcUrl;
+  chainId;
+  timeout;
+  constructor(config) {
+    this.rpcUrl = config.rpcUrl;
+    this.chainId = config.chainId;
+    this.timeout = config.timeout || 30000;
+  }
+  async call(method, params) {
+    try {
+      const controller = new AbortController;
+      const timeoutId = setTimeout(() => controller.abort(), this.timeout);
+      const response = await fetch(this.rpcUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          jsonrpc: "2.0",
+          method,
+          params,
+          id: Date.now()
+        }),
+        signal: controller.signal
+      });
+      clearTimeout(timeoutId);
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+      const data = await response.json();
+      if (data.error) {
+        throw new Error(data.error.message);
+      }
+      return data.result;
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      throw new Error(`RPC call failed: ${message}`);
+    }
+  }
+  async getBytecode(address) {
+    try {
+      const bytecode = await this.call("eth_getCode", [address.toLowerCase(), "latest"]);
+      return {
+        bytecode: bytecode || "0x",
+        bytecodeLength: (bytecode?.length || 0) / 2,
+        isContract: bytecode !== "0x" && bytecode !== "",
+        hasCode: bytecode !== "0x" && bytecode !== ""
+      };
+    } catch (error) {
+      throw new Error(`Failed to get bytecode: ${error}`);
+    }
+  }
+  async callContractMethod(contractAddress, data) {
+    try {
+      return await this.call("eth_call", [
+        {
+          to: contractAddress.toLowerCase(),
+          data
+        },
+        "latest"
+      ]);
+    } catch (error) {
+      throw new Error(`Failed to call contract: ${error}`);
+    }
+  }
+  async getERC20Name(tokenAddress) {
+    try {
+      const result = await this.callContractMethod(tokenAddress, ERC20_SELECTORS.name);
+      if (result === "0x")
+        return null;
+      const hexString = result.substring(2);
+      const bytes = Buffer.from(hexString, "hex");
+      const offset = parseInt(hexString.substring(0, 64), 16) / 2;
+      const length = parseInt(hexString.substring(64, 128), 16);
+      return bytes.toString("utf8", offset, offset + length).trim() || null;
+    } catch {
+      return null;
+    }
+  }
+  async getERC20Symbol(tokenAddress) {
+    try {
+      const result = await this.callContractMethod(tokenAddress, ERC20_SELECTORS.symbol);
+      if (result === "0x")
+        return null;
+      const hexString = result.substring(2);
+      const bytes = Buffer.from(hexString, "hex");
+      const offset = parseInt(hexString.substring(0, 64), 16) / 2;
+      const length = parseInt(hexString.substring(64, 128), 16);
+      return bytes.toString("utf8", offset, offset + length).trim() || null;
+    } catch {
+      return null;
+    }
+  }
+  async getERC20Decimals(tokenAddress) {
+    try {
+      const result = await this.callContractMethod(tokenAddress, ERC20_SELECTORS.decimals);
+      if (result === "0x")
+        return null;
+      return parseInt(result, 16);
+    } catch {
+      return null;
+    }
+  }
+  async getERC20TotalSupply(tokenAddress) {
+    try {
+      const result = await this.callContractMethod(tokenAddress, ERC20_SELECTORS.totalSupply);
+      if (result === "0x")
+        return null;
+      return BigInt(result).toString();
+    } catch {
+      return null;
+    }
+  }
+  async getBalance(address) {
+    try {
+      const balance = await this.call("eth_getBalance", [address.toLowerCase(), "latest"]);
+      return BigInt(balance || "0").toString();
+    } catch (error) {
+      throw new Error(`Failed to get balance: ${error}`);
+    }
+  }
+  async getBlockNumber() {
+    try {
+      const blockNum = await this.call("eth_blockNumber", []);
+      return parseInt(blockNum || "0", 16);
+    } catch (error) {
+      throw new Error(`Failed to get block number: ${error}`);
+    }
+  }
+  async getTransaction(txHash) {
+    try {
+      return await this.call("eth_getTransactionByHash", [txHash]);
+    } catch {
+      return null;
+    }
+  }
+  async detectTokenStandard(tokenAddress) {
+    try {
+      const bytecode = await this.getBytecode(tokenAddress);
+      if (!bytecode.isContract) {
+        return {
+          hasERC20: false,
+          hasERC721: false,
+          hasERC1155: false,
+          selectors: []
+        };
+      }
+      const hex = bytecode.bytecode.toLowerCase();
+      const selectors = [];
+      for (const [key, selector] of Object.entries(ERC20_SELECTORS)) {
+        if (hex.includes(selector.toLowerCase())) {
+          selectors.push(selector);
+        }
+      }
+      const erc20Matches = Object.values(ERC20_SELECTORS).filter((s) => selectors.includes(s.toLowerCase())).length;
+      const erc721Matches = Object.values(ERC721_SELECTORS).filter((s) => hex.includes(s.toLowerCase())).length;
+      const erc1155Matches = Object.values(ERC1155_SELECTORS).filter((s) => hex.includes(s.toLowerCase())).length;
+      return {
+        hasERC20: erc20Matches >= 6,
+        hasERC721: erc721Matches >= 5,
+        hasERC1155: erc1155Matches >= 4,
+        selectors
+      };
+    } catch {
+      return {
+        hasERC20: false,
+        hasERC721: false,
+        hasERC1155: false,
+        selectors: []
+      };
+    }
+  }
+}
+function createRPCClient(chainId = 1, rpcUrl, timeout = 30000) {
+  const url = rpcUrl || RPC_ENDPOINTS[chainId];
+  if (!url) {
+    throw new Error(`Unsupported chain ID: ${chainId}`);
+  }
+  return new RPCClient({
+    rpcUrl: url,
+    chainId,
+    timeout
+  });
+}
+var ETHERSCAN_ENDPOINTS = {
+  1: "https://api.etherscan.io/api",
+  5: "https://api-goerli.etherscan.io/api",
+  11155111: "https://api-sepolia.etherscan.io/api",
+  56: "https://api.bscscan.com/api",
+  97: "https://api-testnet.bscscan.com/api",
+  137: "https://api.polygonscan.com/api",
+  80001: "https://api-mumbai.polygonscan.com/api",
+  42161: "https://api.arbiscan.io/api",
+  421613: "https://api-goerli.arbiscan.io/api",
+  10: "https://api-optimistic.etherscan.io/api",
+  420: "https://api-goerli-optimistic.etherscan.io/api",
+  8453: "https://api.basescan.org/api",
+  84532: "https://api-sepolia.basescan.org/api"
+};
+
+class EtherscanAPIClient {
+  apiKey;
+  chainId;
+  baseUrl;
+  timeout;
+  constructor(config) {
+    this.apiKey = config.apiKey;
+    this.chainId = config.chainId;
+    this.timeout = config.timeout || 30000;
+    const url = ETHERSCAN_ENDPOINTS[config.chainId];
+    if (!url) {
+      throw new Error(`Unsupported chain ID: ${config.chainId}`);
+    }
+    this.baseUrl = url;
+  }
+  async request(params) {
+    try {
+      const queryParams = new URLSearchParams({
+        ...params,
+        apikey: this.apiKey
+      });
+      const url = `${this.baseUrl}?${queryParams.toString()}`;
+      const controller = new AbortController;
+      const timeoutId = setTimeout(() => controller.abort(), this.timeout);
+      const response = await fetch(url, { signal: controller.signal });
+      clearTimeout(timeoutId);
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+      const data = await response.json();
+      if (data.status !== "1") {
+        throw new Error(data.message || "API error");
+      }
+      return data.result;
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      throw new Error(`Etherscan API error: ${message}`);
+    }
+  }
+  async getContractSourceCode(address) {
+    try {
+      const results = await this.request({
+        module: "contract",
+        action: "getsourcecode",
+        address: address.toLowerCase()
+      });
+      if (!results || results.length === 0) {
+        return null;
+      }
+      return results[0];
+    } catch (error) {
+      throw new Error(`Failed to get contract source: ${error}`);
+    }
+  }
+  async isContractVerified(address) {
+    try {
+      const sourceCode = await this.getContractSourceCode(address);
+      return sourceCode !== null && sourceCode.SourceCode !== "";
+    } catch {
+      return false;
+    }
+  }
+  async getContractABI(address) {
+    try {
+      const response = await this.request({
+        module: "contract",
+        action: "getabi",
+        address: address.toLowerCase()
+      });
+      return response || null;
+    } catch {
+      return null;
+    }
+  }
+  async getTokenHolders(tokenAddress, pageSize = 100) {
+    try {
+      const holders = await this.request({
+        module: "token",
+        action: "tokenholderlist",
+        contractaddress: tokenAddress.toLowerCase(),
+        page: "1",
+        offset: pageSize.toString()
+      });
+      return holders || [];
+    } catch (error) {
+      throw new Error(`Failed to get token holders: ${error}`);
+    }
+  }
+  async getTokenInfo(tokenAddress) {
+    try {
+      const info = await this.request({
+        module: "token",
+        action: "tokeninfo",
+        contractaddress: tokenAddress.toLowerCase()
+      });
+      return info || null;
+    } catch {
+      return null;
+    }
+  }
+  async getGasPrices() {
+    try {
+      return await this.request({
+        module: "gastracker",
+        action: "gasoracle"
+      });
+    } catch (error) {
+      throw new Error(`Failed to get gas prices: ${error}`);
+    }
+  }
+  async getContractCreation(address) {
+    try {
+      const results = await this.request({
+        module: "contract",
+        action: "getcontractcreation",
+        contractaddresses: address.toLowerCase()
+      });
+      return results?.[0] || null;
+    } catch {
+      return null;
+    }
+  }
+  async getAddressLabel(address) {
+    try {
+      const results = await this.request({
+        module: "account",
+        action: "addresslabellookup",
+        address: address.toLowerCase()
+      });
+      return results?.[0] || null;
+    } catch {
+      return null;
+    }
+  }
+  async getLogs(address, topic0, fromBlock = 0, toBlock = 99999999) {
+    try {
+      const params = {
+        module: "logs",
+        action: "getLogs",
+        address: address.toLowerCase(),
+        fromBlock: fromBlock.toString(),
+        toBlock: toBlock.toString(),
+        page: "1",
+        offset: "1000"
+      };
+      if (topic0) {
+        params.topic0 = topic0;
+      }
+      return await this.request(params);
+    } catch (error) {
+      throw new Error(`Failed to get logs: ${error}`);
+    }
+  }
+  async getBalance(address) {
+    try {
+      return await this.request({
+        module: "account",
+        action: "balance",
+        address: address.toLowerCase(),
+        tag: "latest"
+      });
+    } catch (error) {
+      throw new Error(`Failed to get balance: ${error}`);
+    }
+  }
+  async getTransactionCount(address) {
+    try {
+      return await this.request({
+        module: "account",
+        action: "txlistinternal",
+        address: address.toLowerCase(),
+        startblock: "0",
+        endblock: "99999999",
+        sort: "desc",
+        page: "1",
+        offset: "1"
+      });
+    } catch (error) {
+      throw new Error(`Failed to get transaction count: ${error}`);
+    }
+  }
+}
+function createEtherscanClient(apiKey, chainId = 1, timeout = 30000) {
+  return new EtherscanAPIClient({
+    apiKey,
+    chainId,
+    timeout,
+    baseUrl: ETHERSCAN_ENDPOINTS[chainId] || ""
+  });
+}
+async function analyzeTokenStandard(tokenAddress, config) {
+  try {
+    const rpcClient = createRPCClient(config.chainId, config.rpcUrl, config.timeout);
+    const detection = await rpcClient.detectTokenStandard(tokenAddress);
+    let detectedType = "Unknown";
+    if (detection.hasERC20)
+      detectedType = "ERC20";
+    else if (detection.hasERC721)
+      detectedType = "ERC721";
+    else if (detection.hasERC1155)
+      detectedType = "ERC1155";
+    return {
+      isERC20: detection.hasERC20,
+      isERC721: detection.hasERC721,
+      isERC1155: detection.hasERC1155,
+      detectedType,
+      functionSelectors: detection.selectors
+    };
+  } catch (error) {
+    return {
+      isERC20: false,
+      isERC721: false,
+      isERC1155: false,
+      detectedType: "Error",
+      functionSelectors: []
+    };
+  }
+}
+async function analyzeOwnership(tokenAddress, config) {
+  try {
+    const etherscanClient = createEtherscanClient(config.etherscanApiKey, config.chainId, config.timeout);
+    const creationInfo = await etherscanClient.getContractCreation(tokenAddress);
+    if (!creationInfo) {
+      return {
+        owner: null,
+        ownerLabel: null,
+        isMultisig: false,
+        isProxy: false,
+        proxyImplementation: null,
+        ownershipRisks: ["Unable to get contract creation info"]
+      };
+    }
+    const ownerLabel = await etherscanClient.getAddressLabel(creationInfo.ContractCreator);
+    const ownershipRisks = [];
+    let isMultisig = false;
+    let isProxy = false;
+    let proxyImplementation = null;
+    if (ownerLabel?.Label && (ownerLabel.Label.includes("Multisig") || ownerLabel.Label.includes("Safe"))) {
+      isMultisig = true;
+    }
+    const rpcClient = createRPCClient(config.chainId, config.rpcUrl, config.timeout);
+    const bytecode = await rpcClient.getBytecode(tokenAddress);
+    if (bytecode.bytecode.includes("3d82803d3d3d3d363d3d37")) {
+      isProxy = true;
+      ownershipRisks.push("Uses proxy pattern (upgradeable)");
+    }
+    if (!isMultisig) {
+      ownershipRisks.push("Single owner address (high centralization risk)");
+    }
+    if (!creationInfo.ContractCreator || creationInfo.ContractCreator === "0x0000000000000000000000000000000000000000") {
+      ownershipRisks.push("Unknown or null owner");
+    }
+    return {
+      owner: creationInfo.ContractCreator,
+      ownerLabel: ownerLabel?.Label || null,
+      isMultisig,
+      isProxy,
+      proxyImplementation,
+      ownershipRisks
+    };
+  } catch (error) {
+    return {
+      owner: null,
+      ownerLabel: null,
+      isMultisig: false,
+      isProxy: false,
+      proxyImplementation: null,
+      ownershipRisks: ["Failed to analyze ownership"]
+    };
+  }
+}
+async function analyzeHolderDistribution(tokenAddress, config) {
+  try {
+    const etherscanClient = createEtherscanClient(config.etherscanApiKey, config.chainId, config.timeout);
+    const holders = await etherscanClient.getTokenHolders(tokenAddress, 10);
+    if (!holders || holders.length === 0) {
+      return {
+        totalHolders: 0,
+        topHolder: null,
+        top5HoldersCombined: 0,
+        top10HoldersCombined: 0,
+        concentrationRisks: ["Cannot analyze holder distribution"],
+        isHighlyConcentrated: false
+      };
+    }
+    const topHolder = holders[0];
+    const top5Percentage = holders.slice(0, 5).reduce((sum, h) => sum + parseFloat(h.TokenHolderPercentage), 0);
+    const top10Percentage = holders.reduce((sum, h) => sum + parseFloat(h.TokenHolderPercentage), 0);
+    const concentrationRisks = [];
+    let isHighlyConcentrated = false;
+    if (parseFloat(topHolder.TokenHolderPercentage) > 50) {
+      concentrationRisks.push(`Top holder owns ${parseFloat(topHolder.TokenHolderPercentage).toFixed(2)}% - extreme concentration`);
+      isHighlyConcentrated = true;
+    } else if (parseFloat(topHolder.TokenHolderPercentage) > 30) {
+      concentrationRisks.push(`Top holder owns ${parseFloat(topHolder.TokenHolderPercentage).toFixed(2)}% - high concentration`);
+      isHighlyConcentrated = true;
+    }
+    if (top5Percentage > 80) {
+      concentrationRisks.push(`Top 5 holders own ${top5Percentage.toFixed(2)}% - highly concentrated`);
+      isHighlyConcentrated = true;
+    }
+    if (top10Percentage > 95) {
+      concentrationRisks.push(`Top 10 holders own ${top10Percentage.toFixed(2)}% - effectively centralized`);
+      isHighlyConcentrated = true;
+    }
+    return {
+      totalHolders: holders.length,
+      topHolder: {
+        address: topHolder.TokenHolderAddress,
+        percentage: parseFloat(topHolder.TokenHolderPercentage)
+      },
+      top5HoldersCombined: top5Percentage,
+      top10HoldersCombined: top10Percentage,
+      concentrationRisks,
+      isHighlyConcentrated
+    };
+  } catch (error) {
+    return {
+      totalHolders: 0,
+      topHolder: null,
+      top5HoldersCombined: 0,
+      top10HoldersCombined: 0,
+      concentrationRisks: ["Failed to analyze holder distribution"],
+      isHighlyConcentrated: false
+    };
+  }
+}
+async function detectSecurityRisks(tokenAddress, config) {
+  try {
+    const etherscanClient = createEtherscanClient(config.etherscanApiKey, config.chainId, config.timeout);
+    const rpcClient = createRPCClient(config.chainId, config.rpcUrl, config.timeout);
+    const risks = [];
+    let hasSelfdestruct = false;
+    let hasMinting = false;
+    let isPausable = false;
+    let hasBlacklist = false;
+    const proxyPatterns = [];
+    const sourceCode = await etherscanClient.getContractSourceCode(tokenAddress);
+    const unverifiedCode = !sourceCode || sourceCode.SourceCode === "";
+    if (unverifiedCode) {
+      risks.push("Contract source code not verified");
+    } else {
+      const lowerSource = sourceCode.SourceCode.toLowerCase();
+      if (lowerSource.includes("selfdestruct") || lowerSource.includes("suicide")) {
+        hasSelfdestruct = true;
+        risks.push("Contract has selfdestruct function - can be destroyed");
+      }
+      if (lowerSource.includes("mint(") || lowerSource.includes("_mint")) {
+        hasMinting = true;
+        risks.push("Contract has minting capabilities - can create new tokens");
+      }
+      if (lowerSource.includes("pause") || lowerSource.includes("_pause")) {
+        isPausable = true;
+        risks.push("Contract has pausable functions - transfers can be frozen");
+      }
+      if (lowerSource.includes("blacklist") || lowerSource.includes("_blacklist")) {
+        hasBlacklist = true;
+        risks.push("Contract has blacklist functionality - can block addresses");
+      }
+      if (lowerSource.includes("proxy") || lowerSource.includes("delegatecall")) {
+        proxyPatterns.push("Uses delegate call pattern");
+        risks.push("Uses proxy pattern - can be upgraded by owner");
+      }
+      if (lowerSource.includes("upgradeable") || lowerSource.includes("uups")) {
+        proxyPatterns.push("UUPS proxy detected");
+        risks.push("UUPS proxy pattern - upgradeable contract");
+      }
+    }
+    const bytecode = await rpcClient.getBytecode(tokenAddress);
+    if (bytecode.bytecode.includes("fe")) {}
+    return {
+      hasSelfdestruct,
+      hasMinting,
+      isPausable,
+      hasBlacklist,
+      proxyPatterns,
+      unverifiedCode,
+      risks,
+      riskCount: risks.length
+    };
+  } catch (error) {
+    return {
+      hasSelfdestruct: false,
+      hasMinting: false,
+      isPausable: false,
+      hasBlacklist: false,
+      proxyPatterns: [],
+      unverifiedCode: true,
+      risks: ["Failed to detect security risks"],
+      riskCount: 1
+    };
+  }
+}
+function scoreTokenRisk(analysis) {
+  let score = 100;
+  score -= analysis.ownershipAnalysis.ownershipRisks.length * 5;
+  if (analysis.ownershipAnalysis.isMultisig)
+    score += 10;
+  if (analysis.ownershipAnalysis.isProxy)
+    score -= 15;
+  if (analysis.holderAnalysis.isHighlyConcentrated) {
+    score -= 20;
+  }
+  if (analysis.holderAnalysis.concentrationRisks.length > 2) {
+    score -= 10;
+  }
+  if (analysis.riskAnalysis.unverifiedCode)
+    score -= 20;
+  if (analysis.riskAnalysis.hasSelfdestruct)
+    score -= 15;
+  if (analysis.riskAnalysis.hasMinting)
+    score -= 10;
+  if (analysis.riskAnalysis.isPausable)
+    score -= 10;
+  if (analysis.riskAnalysis.hasBlacklist)
+    score -= 10;
+  if (analysis.riskAnalysis.proxyPatterns.length > 0)
+    score -= 5;
+  score -= Math.min(analysis.riskAnalysis.riskCount * 2, 30);
+  if (analysis.standardAnalysis.isERC20)
+    score += 5;
+  return Math.max(0, Math.min(100, score));
+}
+function getRiskLevel(score) {
+  if (score >= 80)
+    return "LOW";
+  if (score >= 60)
+    return "MEDIUM";
+  if (score >= 40)
+    return "HIGH";
+  return "CRITICAL";
+}
+function generateRecommendations(analysis) {
+  const recommendations = [];
+  if (analysis.riskAnalysis.unverifiedCode) {
+    recommendations.push("❌ Do not interact - contract source is not verified");
+  }
+  if (analysis.riskAnalysis.hasSelfdestruct) {
+    recommendations.push("⚠️ High risk - contract can be destroyed by owner");
+  }
+  if (analysis.riskAnalysis.hasBlacklist) {
+    recommendations.push("⚠️ Medium risk - your address can be blacklisted");
+  }
+  if (analysis.riskAnalysis.hasMinting) {
+    recommendations.push("⚠️ Inflation risk - owner can mint unlimited tokens");
+  }
+  if (analysis.holderAnalysis.isHighlyConcentrated) {
+    recommendations.push("⚠️ Liquidity risk - token is highly concentrated among few holders");
+  }
+  if (analysis.ownershipAnalysis.isProxy && !analysis.ownershipAnalysis.isMultisig) {
+    recommendations.push("⚠️ Single owner can upgrade contract at any time");
+  }
+  if (analysis.riskLevel === "LOW") {
+    recommendations.push("✅ This token appears to be safe for interaction");
+  }
+  if (analysis.riskLevel === "MEDIUM") {
+    recommendations.push("⚠️ Proceed with caution - manual review recommended");
+  }
+  if (analysis.riskLevel === "HIGH") {
+    recommendations.push("❌ Not recommended for automated transactions - manual approval required");
+  }
+  if (analysis.riskLevel === "CRITICAL") {
+    recommendations.push("\uD83D\uDEAB Do not interact - this token has critical security issues");
+  }
+  return recommendations.length > 0 ? recommendations : ["No specific recommendations"];
+}
+async function analyzeToken(tokenAddress, config) {
+  try {
+    const normalizedAddress = tokenAddress.toLowerCase();
+    const [standard, ownership, holders, risks] = await Promise.all([
+      analyzeTokenStandard(normalizedAddress, config),
+      analyzeOwnership(normalizedAddress, config),
+      analyzeHolderDistribution(normalizedAddress, config),
+      detectSecurityRisks(normalizedAddress, config)
+    ]);
+    const result = {
+      tokenAddress: normalizedAddress,
+      chainId: config.chainId,
+      analysisTimestamp: new Date().toISOString(),
+      standardAnalysis: standard,
+      ownershipAnalysis: ownership,
+      holderAnalysis: holders,
+      riskAnalysis: risks,
+      overallScore: 0,
+      riskLevel: "LOW",
+      recommendations: []
+    };
+    result.overallScore = scoreTokenRisk(result);
+    result.riskLevel = getRiskLevel(result.overallScore);
+    result.recommendations = generateRecommendations(result);
+    return result;
+  } catch (error) {
+    const errorMsg = error instanceof Error ? error.message : String(error);
+    return {
+      tokenAddress: tokenAddress.toLowerCase(),
+      chainId: config.chainId,
+      analysisTimestamp: new Date().toISOString(),
+      standardAnalysis: {
+        isERC20: false,
+        isERC721: false,
+        isERC1155: false,
+        detectedType: "Error",
+        functionSelectors: []
+      },
+      ownershipAnalysis: {
+        owner: null,
+        ownerLabel: null,
+        isMultisig: false,
+        isProxy: false,
+        proxyImplementation: null,
+        ownershipRisks: ["Analysis failed"]
+      },
+      holderAnalysis: {
+        totalHolders: 0,
+        topHolder: null,
+        top5HoldersCombined: 0,
+        top10HoldersCombined: 0,
+        concentrationRisks: ["Analysis failed"],
+        isHighlyConcentrated: false
+      },
+      riskAnalysis: {
+        hasSelfdestruct: false,
+        hasMinting: false,
+        isPausable: false,
+        hasBlacklist: false,
+        proxyPatterns: [],
+        unverifiedCode: true,
+        risks: [errorMsg],
+        riskCount: 1
+      },
+      overallScore: 0,
+      riskLevel: "CRITICAL",
+      recommendations: ["Analysis failed - cannot determine if token is safe"],
+      error: errorMsg
+    };
+  }
+}
+function formatAnalysisResult(analysis) {
+  const lines = [
+    "=== Token Analysis Report ===",
+    `Token Address: ${analysis.tokenAddress}`,
+    `Chain ID: ${analysis.chainId}`,
+    `Timestamp: ${analysis.analysisTimestamp}`,
+    "",
+    "--- Token Standard ---",
+    `Type: ${analysis.standardAnalysis.detectedType}`,
+    `ERC20: ${analysis.standardAnalysis.isERC20}`,
+    `ERC721: ${analysis.standardAnalysis.isERC721}`,
+    `ERC1155: ${analysis.standardAnalysis.isERC1155}`,
+    "",
+    "--- Ownership ---",
+    `Owner: ${analysis.ownershipAnalysis.owner || "Unknown"}`,
+    `Multisig: ${analysis.ownershipAnalysis.isMultisig}`,
+    `Proxy: ${analysis.ownershipAnalysis.isProxy}`,
+    `Risks: ${analysis.ownershipAnalysis.ownershipRisks.length}`,
+    "",
+    "--- Holder Distribution ---",
+    `Total Holders: ${analysis.holderAnalysis.totalHolders}`,
+    `Top Holder %: ${analysis.holderAnalysis.topHolder?.percentage.toFixed(2) || "N/A"}%`,
+    `Top 5 Combined: ${analysis.holderAnalysis.top5HoldersCombined.toFixed(2)}%`,
+    `Concentration Risk: ${analysis.holderAnalysis.isHighlyConcentrated ? "YES" : "NO"}`,
+    "",
+    "--- Security Risks ---",
+    `Verified: ${analysis.riskAnalysis.unverifiedCode ? "NO" : "YES"}`,
+    `Selfdestruct: ${analysis.riskAnalysis.hasSelfdestruct}`,
+    `Minting: ${analysis.riskAnalysis.hasMinting}`,
+    `Pausable: ${analysis.riskAnalysis.isPausable}`,
+    `Blacklist: ${analysis.riskAnalysis.hasBlacklist}`,
+    `Total Risks: ${analysis.riskAnalysis.riskCount}`,
+    "",
+    "--- Overall Assessment ---",
+    `Security Score: ${analysis.overallScore}/100`,
+    `Risk Level: ${analysis.riskLevel}`,
+    "",
+    "--- Recommendations ---",
+    ...analysis.recommendations
+  ];
+  return lines.join(`
+`);
+}
+var SUPPORTED_CHAINS = {
+  1: {
+    id: 1,
+    name: "Ethereum Mainnet",
+    explorerUrl: "https://etherscan.io"
+  },
+  56: {
+    id: 56,
+    name: "BSC Mainnet",
+    explorerUrl: "https://bscscan.com"
+  },
+  137: {
+    id: 137,
+    name: "Polygon Mainnet",
+    explorerUrl: "https://polygonscan.com"
+  },
+  8453: {
+    id: 8453,
+    name: "Base Mainnet",
+    explorerUrl: "https://basescan.org"
+  },
+  10: {
+    id: 10,
+    name: "Optimism",
+    explorerUrl: "https://optimistic.etherscan.io"
+  },
+  42161: {
+    id: 42161,
+    name: "Arbitrum One",
+    explorerUrl: "https://arbiscan.io"
+  },
+  43114: {
+    id: 43114,
+    name: "Avalanche C-Chain",
+    explorerUrl: "https://snowtrace.io"
+  },
+  250: {
+    id: 250,
+    name: "Fantom",
+    explorerUrl: "https://ftmscan.com"
+  }
+};
+var WRAPPED_TOKEN_PATTERNS = {
+  W: { name: "Wrapped", indicator: "bridge" },
+  wst: { name: "Wrapped Staked", indicator: "liquid_staking" },
+  x: { name: "Cross-chain", indicator: "bridge" },
+  anyCall: { name: "Multichain (AnyCall)", indicator: "bridge" },
+  ark: { name: "Ark Bridge", indicator: "bridge" },
+  stargate: { name: "Stargate", indicator: "bridge" }
+};
+function detectWrappedTokenPattern(tokenName) {
+  const lowerName = tokenName.toLowerCase();
+  for (const [pattern, info] of Object.entries(WRAPPED_TOKEN_PATTERNS)) {
+    if (lowerName.includes(pattern)) {
+      return {
+        chain: 0,
+        wrappedAddress: "",
+        bridgeAddress: null,
+        wrapperName: info.name
+      };
+    }
+  }
+  return null;
+}
+async function analyzeTokenOnMultipleChains(tokenAddress, chainIds, etherscanApiKey, timeout) {
+  const normalizedAddress = tokenAddress.toLowerCase();
+  const results = [];
+  const analyses = await Promise.all(chainIds.map(async (chainId) => {
+    try {
+      const chainConfig = SUPPORTED_CHAINS[chainId];
+      if (!chainConfig) {
+        return {
+          chainId,
+          chainName: `Chain ${chainId}`,
+          tokenAddress: normalizedAddress,
+          exists: false,
+          error: "Unsupported chain"
+        };
+      }
+      try {
+        const analysis = await analyzeToken(normalizedAddress, {
+          chainId,
+          etherscanApiKey,
+          timeout: timeout || 30000
+        });
+        return {
+          chainId,
+          chainName: chainConfig.name,
+          tokenAddress: normalizedAddress,
+          exists: true,
+          analysis
+        };
+      } catch {
+        return {
+          chainId,
+          chainName: chainConfig.name,
+          tokenAddress: normalizedAddress,
+          exists: false
+        };
+      }
+    } catch (error) {
+      return {
+        chainId,
+        chainName: `Chain ${chainId}`,
+        tokenAddress: normalizedAddress,
+        exists: false,
+        error: error instanceof Error ? error.message : "Analysis error"
+      };
+    }
+  }));
+  return analyses;
+}
+function detectBridgePatterns(results) {
+  const patterns = [];
+  const existingChains = results.filter((r) => r.exists).length;
+  if (existingChains > 1) {
+    patterns.push(`Token deployed on ${existingChains} chains`);
+  }
+  const riskLevels = results.filter((r) => r.analysis).map((r) => r.analysis.riskLevel);
+  const highRiskCount = riskLevels.filter((l) => l === "HIGH").length;
+  const criticalCount = riskLevels.filter((l) => l === "CRITICAL").length;
+  if (highRiskCount > 0 || criticalCount > 0) {
+    patterns.push(`High risk on ${highRiskCount + criticalCount} chains`);
+  }
+  const verifiedCount = results.filter((r) => r.analysis && !r.analysis.riskAnalysis.unverifiedCode).length;
+  if (verifiedCount < existingChains && verifiedCount > 0) {
+    patterns.push("Verification status varies across chains");
+  }
+  const owners = results.filter((r) => r.analysis).map((r) => r.analysis.ownershipAnalysis.owner).filter((o) => o !== null);
+  const uniqueOwners = new Set(owners).size;
+  if (uniqueOwners > 1) {
+    patterns.push(`Multiple owner addresses across chains (${uniqueOwners})`);
+  }
+  const concentrations = results.filter((r) => r.analysis?.holderAnalysis.isHighlyConcentrated).length;
+  if (concentrations > existingChains / 2) {
+    patterns.push("High holder concentration across most chains");
+  }
+  return patterns;
+}
+function generateCrossChainRecommendations(analysis) {
+  const recommendations = [];
+  if (analysis.highRiskOnChains > 0) {
+    recommendations.push(`⚠️ Token rated HIGH or CRITICAL risk on ${analysis.highRiskOnChains} chain(s)`);
+  }
+  if (analysis.tokensFound > 4) {
+    recommendations.push("⚠️ Token deployed on many chains - verify legitimacy of all versions");
+  }
+  if (analysis.wrappedVersions.length > 0) {
+    recommendations.push(`ℹ️ Token has ${analysis.wrappedVersions.length} wrapped version(s) detected`);
+  }
+  if (analysis.verifiedOnChains < analysis.tokensFound) {
+    const unverified = analysis.tokensFound - analysis.verifiedOnChains;
+    recommendations.push(`❌ ${unverified} version(s) not verified - increased risk`);
+  }
+  if (analysis.verifiedOnChains === 0) {
+    recommendations.push("\uD83D\uDEAB No verified versions found - do not interact");
+  }
+  if (analysis.bridgeIndicators.length > 0) {
+    recommendations.push("ℹ️ Potential cross-chain bridge token detected");
+  }
+  if (analysis.tokensFound === 0) {
+    recommendations.push("ℹ️ Token not found on any network");
+  } else if (analysis.tokensFound === 1) {
+    recommendations.push("ℹ️ Token exists on single chain only");
+  } else if (analysis.highRiskOnChains === 0 && analysis.mediumRiskOnChains <= 1) {
+    recommendations.push("✅ Token appears safe on all verified chains");
+  }
+  return recommendations;
+}
+async function verifyTokenCrossChain(tokenAddress, etherscanApiKey, chainIds) {
+  try {
+    const normalizedAddress = tokenAddress.toLowerCase();
+    const targetChains = chainIds || Object.keys(SUPPORTED_CHAINS).map(Number);
+    const chainResults = await analyzeTokenOnMultipleChains(normalizedAddress, targetChains.filter((c) => SUPPORTED_CHAINS[c]), etherscanApiKey);
+    const tokensFound = chainResults.filter((r) => r.exists).length;
+    const verifiedOnChains = chainResults.filter((r) => r.analysis && !r.analysis.riskAnalysis.unverifiedCode).length;
+    const highRiskOnChains = chainResults.filter((r) => r.analysis && (r.analysis.riskLevel === "HIGH" || r.analysis.riskLevel === "CRITICAL")).length;
+    const mediumRiskOnChains = chainResults.filter((r) => r.analysis && r.analysis.riskLevel === "MEDIUM").length;
+    const bridgeIndicators = detectBridgePatterns(chainResults);
+    const wrappedVersions = [];
+    chainResults.forEach((result) => {
+      if (result.analysis?.standardAnalysis.detectedType !== "Unknown") {
+        const wrapped = detectWrappedTokenPattern(result.analysis?.standardAnalysis.detectedType || "");
+        if (wrapped) {
+          wrappedVersions.push({
+            ...wrapped,
+            chain: result.chainId,
+            wrappedAddress: result.tokenAddress
+          });
+        }
+      }
+    });
+    const baseAnalysis = {
+      baseTokenAddress: normalizedAddress,
+      baseChainId: 1,
+      chainVerifications: chainResults,
+      tokensFound,
+      verifiedOnChains,
+      highRiskOnChains,
+      mediumRiskOnChains,
+      bridgeIndicators,
+      wrappedVersions,
+      recommendations: [],
+      analysisTimestamp: new Date().toISOString()
+    };
+    baseAnalysis.recommendations = generateCrossChainRecommendations(baseAnalysis);
+    return baseAnalysis;
+  } catch (error) {
+    const errorMsg = error instanceof Error ? error.message : String(error);
+    return {
+      baseTokenAddress: tokenAddress.toLowerCase(),
+      baseChainId: 1,
+      chainVerifications: [],
+      tokensFound: 0,
+      verifiedOnChains: 0,
+      highRiskOnChains: 0,
+      mediumRiskOnChains: 0,
+      bridgeIndicators: [errorMsg],
+      wrappedVersions: [],
+      recommendations: ["Cross-chain verification failed"],
+      analysisTimestamp: new Date().toISOString()
+    };
+  }
+}
+function formatCrossChainResult(analysis) {
+  const lines = [
+    "=== Cross-Chain Token Analysis ===",
+    `Base Token Address: ${analysis.baseTokenAddress}`,
+    `Analysis Timestamp: ${analysis.analysisTimestamp}`,
+    "",
+    "--- Chain Summary ---",
+    `Total Chains Checked: ${analysis.chainVerifications.length}`,
+    `Tokens Found: ${analysis.tokensFound}`,
+    `Verified on Chains: ${analysis.verifiedOnChains}`,
+    `High/Critical Risk on Chains: ${analysis.highRiskOnChains}`,
+    `Medium Risk on Chains: ${analysis.mediumRiskOnChains}`,
+    ""
+  ];
+  if (analysis.chainVerifications.length > 0) {
+    lines.push("--- Per-Chain Status ---");
+    analysis.chainVerifications.forEach((result) => {
+      const status = result.analysis ? `${result.analysis.riskLevel} (${result.analysis.overallScore}/100)` : result.exists ? "UNKNOWN" : "NOT FOUND";
+      lines.push(`${result.chainName}: ${status}`);
+    });
+    lines.push("");
+  }
+  if (analysis.bridgeIndicators.length > 0) {
+    lines.push("--- Bridge Indicators ---");
+    analysis.bridgeIndicators.forEach((indicator) => {
+      lines.push(`• ${indicator}`);
+    });
+    lines.push("");
+  }
+  if (analysis.wrappedVersions.length > 0) {
+    lines.push("--- Wrapped Versions ---");
+    analysis.wrappedVersions.forEach((wrapped) => {
+      lines.push(`${wrapped.wrapperName} on Chain ${wrapped.chain}`);
+    });
+    lines.push("");
+  }
+  lines.push("--- Recommendations ---");
+  analysis.recommendations.forEach((rec) => {
+    lines.push(`• ${rec}`);
+  });
+  return lines.join(`
+`);
+}
+function makeVerificationDecision(analysis, crossChainAnalysis) {
+  const risks = [];
+  let isSafe = false;
+  let canAutomate = false;
+  let requiresApproval = false;
+  if (analysis.error) {
+    risks.push(`Verification Error: ${analysis.error}`);
+    return {
+      isSafe: false,
+      canAutomate: false,
+      requiresApproval: false,
+      risks,
+      reason: `Cannot verify token: ${analysis.error}`
+    };
+  }
+  if (analysis.riskLevel === "CRITICAL") {
+    risks.push("Token rated CRITICAL risk");
+    isSafe = false;
+  } else if (analysis.riskLevel === "HIGH") {
+    risks.push("Token rated HIGH risk");
+    isSafe = false;
+    requiresApproval = true;
+  } else if (analysis.riskLevel === "MEDIUM") {
+    risks.push("Token rated MEDIUM risk");
+    isSafe = false;
+    requiresApproval = true;
+  } else if (analysis.riskLevel === "LOW") {
+    isSafe = true;
+    canAutomate = true;
+  } else {
+    risks.push(`Unknown risk level: ${analysis.riskLevel}`);
+    isSafe = false;
+  }
+  risks.push(...analysis.riskAnalysis.risks);
+  if (crossChainAnalysis) {
+    if (crossChainAnalysis.highRiskOnChains > 0) {
+      risks.push(`High risk on ${crossChainAnalysis.highRiskOnChains} chain(s)`);
+      isSafe = false;
+    }
+    if (crossChainAnalysis.tokensFound === 0) {
+      risks.push("Token not found on any network");
+      isSafe = false;
+    } else if (crossChainAnalysis.verifiedOnChains === 0) {
+      risks.push("Not verified on any chain");
+      isSafe = false;
+    }
+  }
+  if (analysis.riskAnalysis.unverifiedCode) {
+    canAutomate = false;
+    if (isSafe) {
+      isSafe = false;
+      risks.push("Unverified contract source code");
+    }
+  }
+  if (analysis.holderAnalysis.isHighlyConcentrated) {
+    requiresApproval = true;
+    if (isSafe) {
+      isSafe = false;
+      risks.push("Highly concentrated token holdings");
+    }
+  }
+  if (!isSafe && !risks.includes("Token rated CRITICAL risk") && !risks.includes("Token rated HIGH risk") && !risks.includes("Token rated MEDIUM risk")) {
+    risks.push("Unable to verify token safety with confidence");
+  }
+  const reason = isSafe ? canAutomate ? "Token appears safe for automated transactions" : "Token is safe but requires user interaction" : requiresApproval ? "Token has risks and requires approval" : "Token is not safe to interact with";
+  return {
+    isSafe,
+    canAutomate,
+    requiresApproval,
+    risks: [...new Set(risks)],
+    reason
+  };
+}
+
+class VerificationEngine {
+  config;
+  cache = new Map;
+  requestCounter = 0;
+  constructor(config) {
+    this.config = {
+      enableCaching: true,
+      cacheExpiration: 3600000,
+      timeout: 30000,
+      chainId: 1,
+      ...config
+    };
+  }
+  generateRequestId() {
+    this.requestCounter++;
+    return `req_${Date.now()}_${this.requestCounter}`;
+  }
+  getCacheKey(request) {
+    return `${request.tokenAddress}:${request.chainId || this.config.chainId}:${request.crossChainVerification || false}`;
+  }
+  getCachedResult(request) {
+    if (!this.config.enableCaching)
+      return null;
+    const cacheKey = this.getCacheKey(request);
+    const cached = this.cache.get(cacheKey);
+    if (!cached)
+      return null;
+    const now = Date.now();
+    const age = now - cached.timestamp;
+    if (age > (this.config.cacheExpiration || 3600000)) {
+      this.cache.delete(cacheKey);
+      return null;
+    }
+    return cached.result;
+  }
+  cacheResult(request, result) {
+    if (!this.config.enableCaching)
+      return;
+    const cacheKey = this.getCacheKey(request);
+    this.cache.set(cacheKey, {
+      result,
+      timestamp: Date.now()
+    });
+  }
+  clearCache() {
+    this.cache.clear();
+  }
+  getCacheStats() {
+    return {
+      size: this.cache.size,
+      entries: Array.from(this.cache.keys())
+    };
+  }
+  async verify(request) {
+    try {
+      const cached = this.getCachedResult(request);
+      if (cached) {
+        return { ...cached, requestId: this.generateRequestId() };
+      }
+      const requestId = this.generateRequestId();
+      const timestamp = new Date().toISOString();
+      const chainId = request.chainId || this.config.chainId || 1;
+      let chainAnalysis;
+      try {
+        chainAnalysis = await analyzeToken(request.tokenAddress, {
+          chainId,
+          etherscanApiKey: this.config.etherscanApiKey,
+          timeout: this.config.timeout
+        });
+      } catch (error) {
+        if (!request.crossChainVerification)
+          throw error;
+      }
+      let crossChainAnalysis;
+      if (request.crossChainVerification) {
+        try {
+          crossChainAnalysis = await verifyTokenCrossChain(request.tokenAddress, this.config.etherscanApiKey, request.chainIds);
+        } catch (error) {}
+      }
+      const decision = makeVerificationDecision(chainAnalysis || {
+        tokenAddress: request.tokenAddress,
+        chainId,
+        analysisTimestamp: timestamp,
+        standardAnalysis: {
+          isERC20: false,
+          isERC721: false,
+          isERC1155: false,
+          detectedType: "Unknown",
+          functionSelectors: []
+        },
+        ownershipAnalysis: {
+          owner: null,
+          ownerLabel: null,
+          isMultisig: false,
+          isProxy: false,
+          proxyImplementation: null,
+          ownershipRisks: ["Analysis failed"]
+        },
+        holderAnalysis: {
+          totalHolders: 0,
+          topHolder: null,
+          top5HoldersCombined: 0,
+          top10HoldersCombined: 0,
+          concentrationRisks: ["Analysis failed"],
+          isHighlyConcentrated: false
+        },
+        riskAnalysis: {
+          hasSelfdestruct: false,
+          hasMinting: false,
+          isPausable: false,
+          hasBlacklist: false,
+          proxyPatterns: [],
+          unverifiedCode: true,
+          risks: ["Analysis failed"],
+          riskCount: 1
+        },
+        overallScore: 0,
+        riskLevel: "CRITICAL",
+        recommendations: ["Analysis failed"]
+      }, crossChainAnalysis);
+      let formattedReport = "";
+      if (chainAnalysis) {
+        formattedReport = formatAnalysisResult(chainAnalysis);
+      }
+      if (crossChainAnalysis && request.crossChainVerification) {
+        formattedReport += `
+
+` + formatCrossChainResult(crossChainAnalysis);
+      }
+      const result = {
+        requestId,
+        timestamp,
+        request,
+        chainAnalysis,
+        crossChainAnalysis,
+        decision,
+        formattedReport: formattedReport || "No analysis available"
+      };
+      this.cacheResult(request, result);
+      return result;
+    } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
+      return {
+        requestId: this.generateRequestId(),
+        timestamp: new Date().toISOString(),
+        request,
+        decision: {
+          isSafe: false,
+          canAutomate: false,
+          requiresApproval: false,
+          risks: [errorMsg],
+          reason: `Verification failed: ${errorMsg}`
+        },
+        formattedReport: `Error during verification: ${errorMsg}`
+      };
+    }
+  }
+  async quickVerify(tokenAddress, chainId) {
+    return this.verify({
+      tokenAddress,
+      chainId: chainId || this.config.chainId,
+      crossChainVerification: false
+    });
+  }
+  async deepVerify(tokenAddress, chainIds) {
+    return this.verify({
+      tokenAddress,
+      chainId: this.config.chainId,
+      crossChainVerification: true,
+      chainIds
+    });
+  }
+  async verifyBatch(requests) {
+    const results = await Promise.all(requests.map((request) => this.verify(request)));
+    return results;
+  }
+}
+function createVerificationEngine(config) {
+  return new VerificationEngine(config);
+}
+function generateVerificationReport(result) {
+  const lines = [
+    "═════════════════════════════════════════",
+    "TOKEN VERIFICATION REPORT",
+    "═════════════════════════════════════════",
+    `Request ID: ${result.requestId}`,
+    `Timestamp: ${result.timestamp}`,
+    "",
+    "--- Verification Decision ---",
+    `Safe to Interact: ${result.decision.isSafe ? "✅ YES" : "❌ NO"}`,
+    `Can Automate: ${result.decision.canAutomate ? "✅ YES" : "⚠️ NO"}`,
+    `Requires Approval: ${result.decision.requiresApproval ? "⚠️ YES" : "❌ NO"}`,
+    `Reason: ${result.decision.reason}`,
+    ""
+  ];
+  if (result.decision.risks.length > 0) {
+    lines.push("--- Detected Risks ---");
+    result.decision.risks.forEach((risk) => {
+      lines.push(`• ${risk}`);
+    });
+    lines.push("");
+  }
+  lines.push("--- Detailed Analysis ---");
+  lines.push(result.formattedReport);
+  lines.push("");
+  lines.push("═════════════════════════════════════════");
+  return lines.join(`
+`);
+}
+function generateRequestId() {
+  return `req_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+}
+function formatVerificationForUser(analysis, format = "summary") {
+  if (format === "json") {
+    return JSON.stringify(analysis, null, 2);
+  }
+  if (format === "report") {
+    return generateVerificationReport(analysis);
+  }
+  const decision = analysis.decision;
+  const status = decision.isSafe ? "✅ SAFE" : "❌ UNSAFE";
+  const automation = decision.canAutomate ? "✅ YES" : "❌ NO";
+  const lines = [
+    "═══════════════════════════════════════",
+    "TOKEN VERIFICATION RESULT",
+    "═══════════════════════════════════════",
+    "",
+    `Token Address: ${analysis.request.tokenAddress}`,
+    `Status: ${status}`,
+    `Risk Level: ${analysis.chainAnalysis?.riskLevel || "UNKNOWN"}`,
+    `Security Score: ${analysis.chainAnalysis?.overallScore || 0}/100`,
+    `Can Automate: ${automation}`,
+    `Reason: ${decision.reason}`,
+    ""
+  ];
+  if (decision.risks.length > 0) {
+    lines.push("⚠️  DETECTED RISKS:");
+    decision.risks.forEach((risk) => {
+      lines.push(`  • ${risk}`);
+    });
+    lines.push("");
+  }
+  if (analysis.chainAnalysis?.recommendations) {
+    lines.push("\uD83D\uDCA1 RECOMMENDATIONS:");
+    analysis.chainAnalysis.recommendations.forEach((rec) => {
+      lines.push(`  ${rec}`);
+    });
+    lines.push("");
+  }
+  lines.push("═══════════════════════════════════════");
+  return lines.join(`
+`);
+}
+var onHttpVerifyToken = async (runtime2, payload) => {
+  const requestId = generateRequestId();
+  const timestamp = new Date().toISOString();
+  try {
+    if (!payload.input || payload.input.length === 0) {
+      runtime2.log(`[${requestId}] ❌ Empty request payload`);
+      return JSON.stringify({
+        success: false,
+        requestId,
+        timestamp,
+        error: "Empty request body"
+      });
+    }
+    let request;
+    try {
+      request = decodeJson(payload.input);
+    } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
+      runtime2.log(`[${requestId}] ❌ Failed to parse JSON: ${errorMsg}`);
+      return JSON.stringify({
+        success: false,
+        requestId,
+        timestamp,
+        error: `Invalid JSON: ${errorMsg}`
+      });
+    }
+    const config = runtime2.config;
+    if (!config.etherscanApiKey) {
+      runtime2.log(`[${requestId}] ❌ Error: ETHERSCAN_API_KEY not configured`);
+      return JSON.stringify({
+        success: false,
+        requestId,
+        timestamp,
+        error: "Etherscan API key not configured. Please set ETHERSCAN_API_KEY environment variable."
+      });
+    }
+    if (!request.tokenAddress) {
+      runtime2.log(`[${requestId}] ❌ Error: Token address not provided`);
+      return JSON.stringify({
+        success: false,
+        requestId,
+        timestamp,
+        error: "Token address is required. Please provide a valid Ethereum address (0x format)"
+      });
+    }
+    const tokenAddress = request.tokenAddress.toLowerCase();
+    if (!/^0x[a-f0-9]{40}$/.test(tokenAddress)) {
+      runtime2.log(`[${requestId}] ❌ Error: Invalid token address format`);
+      return JSON.stringify({
+        success: false,
+        requestId,
+        timestamp,
+        error: `Invalid token address format. Expected: 0x followed by 40 hex characters. Got: ${request.tokenAddress}`
+      });
+    }
+    const chainId = request.chainId || config.defaultChainId || 1;
+    const crossChain = request.crossChain || false;
+    const format = request.format || "summary";
+    runtime2.log(`[${requestId}] \uD83D\uDD0D Starting verification for ${tokenAddress} on chain ${chainId}`);
+    const engine = createVerificationEngine({
+      etherscanApiKey: config.etherscanApiKey,
+      enableCaching: true,
+      cacheExpiration: 3600000,
+      timeout: 30000,
+      chainId
+    });
+    let verificationResult;
+    if (crossChain && config.chainIds) {
+      runtime2.log(`[${requestId}] \uD83C\uDF0D Performing cross-chain verification`);
+      verificationResult = await engine.deepVerify(tokenAddress, config.chainIds);
+    } else {
+      runtime2.log(`[${requestId}] ⚙️  Performing single-chain verification`);
+      verificationResult = await engine.quickVerify(tokenAddress, chainId);
+    }
+    const formattedResult = formatVerificationForUser(verificationResult, format);
+    if (verificationResult.decision.isSafe) {
+      runtime2.log(`[${requestId}] ✅ Token verified as SAFE`);
+    } else {
+      runtime2.log(`[${requestId}] ❌ Token verified as UNSAFE - Risks: ${verificationResult.decision.risks.length}`);
+    }
+    runtime2.log(formattedResult);
+    let responseData;
+    if (format === "json") {
+      responseData = verificationResult;
+    } else if (format === "report") {
+      responseData = {
+        formatted: formattedResult,
+        raw: verificationResult
+      };
+    } else {
+      responseData = {
+        tokenAddress,
+        chainId,
+        isSafe: verificationResult.decision.isSafe,
+        canAutomate: verificationResult.decision.canAutomate,
+        riskLevel: verificationResult.chainAnalysis?.riskLevel,
+        score: verificationResult.chainAnalysis?.overallScore,
+        risks: verificationResult.decision.risks,
+        reason: verificationResult.decision.reason,
+        formatted: formattedResult
+      };
+    }
+    return JSON.stringify({
+      success: true,
+      requestId,
+      timestamp,
+      data: responseData
+    });
+  } catch (error) {
+    const errorMsg = error instanceof Error ? error.message : String(error);
+    runtime2.log(`[${requestId}] ❌ Verification failed: ${errorMsg}`);
+    return JSON.stringify({
+      success: false,
+      requestId,
+      timestamp,
+      error: `Verification failed: ${errorMsg}`
+    });
+  }
+};
 var onCronTrigger = async (runtime2) => {
   try {
     const config = runtime2.config;
+    runtime2.log(`[DEBUG_CRON] enableTokenVerification: ${config.enableTokenVerification}`);
+    runtime2.log(`[DEBUG_CRON] etherscanApiKey: ${config.etherscanApiKey ? "***" : "undefined"}`);
+    runtime2.log("\uD83D\uDCCA Fetching gas prices from Etherscan...");
     const httpClient = new cre.capabilities.HTTPClient;
     const aggregationConfig = ConsensusAggregationByFields({
       safeGasPrice: () => median(),
@@ -14255,31 +15799,57 @@ var onCronTrigger = async (runtime2) => {
     const requestFn = httpClient.sendRequest(runtime2, fetchGasPrices, aggregationConfig);
     const response = requestFn(config);
     const gasPrices = response.result();
-    runtime2.log("=== Gas Prices Report ===");
-    runtime2.log(`Safe Gas Price: ${gasPrices.safeGasPrice}`);
-    runtime2.log(`Propose Gas Price: ${gasPrices.proposeGasPrice}`);
-    runtime2.log(`Fast Gas Price: ${gasPrices.fastGasPrice}`);
-    runtime2.log(`Base Fee: ${gasPrices.baseFee}`);
+    runtime2.log("═══════════════════════════════════════");
+    runtime2.log("⛽ GAS PRICES REPORT");
+    runtime2.log("═══════════════════════════════════════");
+    runtime2.log(`Safe Gas Price: ${gasPrices.safeGasPrice} gwei`);
+    runtime2.log(`Propose Gas Price: ${gasPrices.proposeGasPrice} gwei`);
+    runtime2.log(`Fast Gas Price: ${gasPrices.fastGasPrice} gwei`);
+    runtime2.log(`Base Fee: ${gasPrices.baseFee} gwei`);
     runtime2.log(`Last Block: ${gasPrices.lastBlock}`);
+    runtime2.log("═══════════════════════════════════════");
     return JSON.stringify(gasPrices);
   } catch (error) {
     const errorMsg = error instanceof Error ? error.message : String(error);
-    runtime2.log(`Error: ${errorMsg}`);
+    runtime2.log(`❌ Gas price fetch error: ${errorMsg}`);
     return JSON.stringify({ error: errorMsg });
   }
 };
 var initWorkflow = (config) => {
+  const handlers = [];
+  console.log("⚙️  Initializing workflow handlers...");
+  console.log(`[DEBUG] enableTokenVerification: ${config.enableTokenVerification}`);
+  console.log(`[DEBUG] etherscanApiKey: ${config.etherscanApiKey ? "***" : "undefined"}`);
   const cron = new cre.capabilities.CronCapability;
-  return [
-    cre.handler(cron.trigger({ schedule: config.schedule }), onCronTrigger)
-  ];
+  const cronHandler = cre.handler(cron.trigger({ schedule: config.schedule }), onCronTrigger);
+  handlers.push(cronHandler);
+  console.log("✅ Gas price Cron trigger registered");
+  if (config.enableTokenVerification) {
+    try {
+      const httpCapability = new cre.capabilities.HTTPCapability;
+      const httpTrigger = httpCapability.trigger({});
+      const httpHandler = cre.handler(httpTrigger, onHttpVerifyToken);
+      if (httpHandler) {
+        handlers.push(httpHandler);
+        console.log("✅ Token verification HTTP trigger registered");
+      }
+    } catch (error) {
+      console.log(`ℹ️  HTTP trigger registration note: ${error instanceof Error ? error.message : error}`);
+      console.log("   Gas price fetching (Cron trigger) is still active");
+    }
+  } else {
+    console.log("⚠️  Token verification HTTP trigger disabled");
+  }
+  console.log(`✅ Workflow initialization complete
+`);
+  return handlers;
 };
 async function main() {
   const runner = await Runner.newRunner();
   await runner.run(initWorkflow);
 }
 main().catch((error) => {
-  console.log("Workflow failed:", error);
+  console.log("❌ Workflow failed:", error);
   process.exit(1);
 });
 export {
