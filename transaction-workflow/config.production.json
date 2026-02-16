@@ -1,10 +1,14 @@
 {
   "schedule": "*/1 * * * *",
   "rpcUrl": "",
+  "etherscanApiKey": "",
+  "enableTokenVerification": true,
+  "defaultChainId": 1,
+  "enableCrossChain": false,
+  "chainIds": [1, 56, 137, 42161, 10],
   "enableTokenSecurityCheck": true,
   "requiredRiskLevel": "MEDIUM",
   "minSecurityScore": 80,
-  "etherscanApiKey": "",
   "trustedTokens": [],
   "blockedTokens": []
 }
