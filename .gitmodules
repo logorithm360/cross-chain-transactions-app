@@ -1,3 +1,9 @@
 [submodule "contracts"]
 	path = contracts
 	url = git@github.com:logorithm360/contracts.git
+[submodule "lib/chainlink-ccip"]
+	path = lib/chainlink-ccip
+	url = https://github.com/smartcontractkit/chainlink-ccip
+[submodule "lib/chainlink-evm"]
+	path = lib/chainlink-evm
+	url = https://github.com/smartcontractkit/chainlink-evm
