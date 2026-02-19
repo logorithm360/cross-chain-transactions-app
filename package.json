@@ -1,5 +1,8 @@
 {
   "devDependencies": {
     "@types/node": "^25.2.3"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^5.4.0"
   }
 }

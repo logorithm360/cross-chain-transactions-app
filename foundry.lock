@@ -1,0 +1,11 @@
+{
+  "contracts": {
+    "rev": "565ae12dece17dd31b9707dc97012f2c8ffa42ae"
+  },
+  "lib/chainlink-local": {
+    "tag": {
+      "name": "v0.2.7",
+      "rev": "a3ace4e17336e84c4d1261f2da45d5e8963af714"
+    }
+  }
+}
