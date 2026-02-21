@@ -1,11 +1,20 @@
 {
   "contracts": {
-    "rev": "565ae12dece17dd31b9707dc97012f2c8ffa42ae"
+    "rev": "b649cb068def522934879aa488ddfe6ab84d4eae"
   },
   "lib/chainlink-local": {
     "tag": {
       "name": "v0.2.7",
       "rev": "a3ace4e17336e84c4d1261f2da45d5e8963af714"
+    }
+  },
+  "lib/chainlink-ccip": {
+    "rev": "3743298b48a426182eceaa63d1ed7a16d842cc76"
+  },
+  "lib/chainlink-evm": {
+    "tag": {
+      "name": "v0.3.3",
+      "rev": "793106cd598da8b2762958880300787b0b361fa1"
     }
   }
 }
