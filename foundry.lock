@@ -1,6 +1,12 @@
 {
   "contracts": {
-    "rev": "2471596c93500324c1ec1ffb694ae5544982506f"
+    "rev": "b649cb068def522934879aa488ddfe6ab84d4eae"
+  },
+  "lib/chainlink-local": {
+    "tag": {
+      "name": "v0.2.7",
+      "rev": "a3ace4e17336e84c4d1261f2da45d5e8963af714"
+    }
   },
   "lib/chainlink-ccip": {
     "rev": "3743298b48a426182eceaa63d1ed7a16d842cc76"
