@@ -1,5 +1,6 @@
 *.env
 node_modules/
+resources/
 GIT-SUB-MODULES.MD
 TODO.md
 GEMINI.md
