@@ -1,0 +1,24 @@
+{
+  "serviceName": "ChainShield Transfer",
+  "authorizedEVMAddresses": [
+    "0x0000000000000000000000000000000000000000"
+  ],
+  "feature5Enabled": true,
+  "feature6Enabled": true,
+  "securityEnforcementMode": "ENFORCE",
+  "maxTransferAmountWei": "20000000000000000000",
+  "tokenAllowlist": [],
+  "tokenBlocklist": [],
+  "enabledLaneKeys": [
+    "11155111->80002"
+  ],
+  "sourceSenderByChainId": {
+    "11155111": "0x0000000000000000000000000000000000000000"
+  },
+  "destinationReceiverByChainId": {
+    "80002": "0x0000000000000000000000000000000000000000"
+  },
+  "securityManagerContract": "0x0000000000000000000000000000000000000000",
+  "tokenVerifierContract": "0x0000000000000000000000000000000000000000",
+  "userRecordRegistryContract": "0x0000000000000000000000000000000000000000"
+}
