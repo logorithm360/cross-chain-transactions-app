@@ -22,7 +22,6 @@ staging-settings:
     workflow-path: "./main.ts"
     config-path: "./config.staging.json"
     secrets-path: ""
-    
 
 # ==========================================================================
 production-settings:
@@ -31,4 +30,22 @@ production-settings:
   workflow-artifacts:
     workflow-path: "./main.ts"
     config-path: "./config.production.json"
+    secrets-path: ""
+
+# ==========================================================================
+chainshield-staging-settings:
+  user-workflow:
+    workflow-name: "chainshield-transfer-staging"
+  workflow-artifacts:
+    workflow-path: "./chainshield.ts"
+    config-path: "./config.chainshield.staging.json"
+    secrets-path: ""
+
+# ==========================================================================
+chainshield-production-settings:
+  user-workflow:
+    workflow-name: "chainshield-transfer-production"
+  workflow-artifacts:
+    workflow-path: "./chainshield.ts"
+    config-path: "./config.chainshield.production.json"
     secrets-path: ""
