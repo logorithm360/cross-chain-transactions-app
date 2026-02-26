@@ -1,0 +1,50 @@
+{
+  "serviceName": "AutoPilot DCA",
+  "schedule": "*/5 * * * *",
+  "authorizedEVMAddresses": [],
+  "feature5Enabled": true,
+  "feature6Enabled": true,
+  "securityEnforcementMode": "MONITOR",
+  "decisionMode": "GEMINI",
+  "geminiFailurePolicy": "EXECUTE_SAFE",
+  "executeSafeMaxAmountWei": "100000000000000000",
+  "allowCreateOrderFromWorkflow": false,
+  "allowPerformUpkeepFromWorkflow": false,
+  "emitStructuredLogs": true,
+  "requiredCreCliVersion": "1.1.0",
+  "notificationsEnabled": true,
+  "geminiApiUrl": "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent",
+  "geminiApiKey": "",
+  "lowFundsWarningThreshold": 3,
+  "maxTransferAmountWei": "1000000000000000000000",
+  "tokenAllowlist": [
+    "0xFd57b4ddBf88a4e07fF4e34C487b99af2Fe82a05"
+  ],
+  "tokenBlocklist": [],
+  "enabledLaneKeys": [
+    "11155111->80002"
+  ],
+  "automatedTraderByChainId": {
+    "11155111": "0x91a936a3a3e4361e7F5b05270631c5e1d113f0d4"
+  },
+  "securityManagerContract": "0xe8A2A5Ca7f163762517C0Ed0E063b0A733386B5f",
+  "tokenVerifierContract": "0x6d8eAbeda50a43EE7b960DfFB8aA44f5F6B6BE6D",
+  "userRecordRegistryContract": "0x5c80ec9703c4eb9491100239793a719cbf4a0bfe",
+  "sourceChainWriteGasLimit": "1000000",
+  "cronRequest": {
+    "walletChainId": 11155111,
+    "destinationChainId": 80002,
+    "serviceType": "DCA",
+    "executionMode": "RUN_UPKEEP",
+    "user": "0xe2a5d3EE095de5039D42B00ddc2991BD61E48D55",
+    "token": "0xFd57b4ddBf88a4e07fF4e34C487b99af2Fe82a05",
+    "amount": "100000000000000000",
+    "recipient": "0xb3CcDfCC821fC7693e0CbF4b352f7Ca51b33c89B",
+    "receiverContract": "0x7541cEB8A6db4E8C8a58092e186f9d8ABEDC7Ef2",
+    "action": "transfer",
+    "cadenceSeconds": 60,
+    "recurring": true,
+    "maxExecutions": 0,
+    "deadline": 0
+  }
+}
