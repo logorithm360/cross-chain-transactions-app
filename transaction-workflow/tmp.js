@@ -9,6 +9,1999 @@ var __export = (target, all) => {
       set: (newValue) => all[name] = () => newValue
     });
 };
+var __esm = (fn, res) => () => (fn && (res = fn(fn = 0)), res);
+function execTyped(regex, string) {
+  const match = regex.exec(string);
+  return match?.groups;
+}
+var init_regex = () => {};
+function formatAbiParameter(abiParameter) {
+  let type = abiParameter.type;
+  if (tupleRegex.test(abiParameter.type) && "components" in abiParameter) {
+    type = "(";
+    const length = abiParameter.components.length;
+    for (let i2 = 0;i2 < length; i2++) {
+      const component = abiParameter.components[i2];
+      type += formatAbiParameter(component);
+      if (i2 < length - 1)
+        type += ", ";
+    }
+    const result = execTyped(tupleRegex, abiParameter.type);
+    type += `)${result?.array ?? ""}`;
+    return formatAbiParameter({
+      ...abiParameter,
+      type
+    });
+  }
+  if ("indexed" in abiParameter && abiParameter.indexed)
+    type = `${type} indexed`;
+  if (abiParameter.name)
+    return `${type} ${abiParameter.name}`;
+  return type;
+}
+var tupleRegex;
+var init_formatAbiParameter = __esm(() => {
+  init_regex();
+  tupleRegex = /^tuple(?<array>(\[(\d*)\])*)$/;
+});
+function formatAbiParameters(abiParameters) {
+  let params = "";
+  const length = abiParameters.length;
+  for (let i2 = 0;i2 < length; i2++) {
+    const abiParameter = abiParameters[i2];
+    params += formatAbiParameter(abiParameter);
+    if (i2 !== length - 1)
+      params += ", ";
+  }
+  return params;
+}
+var init_formatAbiParameters = __esm(() => {
+  init_formatAbiParameter();
+});
+function formatAbiItem(abiItem) {
+  if (abiItem.type === "function")
+    return `function ${abiItem.name}(${formatAbiParameters(abiItem.inputs)})${abiItem.stateMutability && abiItem.stateMutability !== "nonpayable" ? ` ${abiItem.stateMutability}` : ""}${abiItem.outputs?.length ? ` returns (${formatAbiParameters(abiItem.outputs)})` : ""}`;
+  if (abiItem.type === "event")
+    return `event ${abiItem.name}(${formatAbiParameters(abiItem.inputs)})`;
+  if (abiItem.type === "error")
+    return `error ${abiItem.name}(${formatAbiParameters(abiItem.inputs)})`;
+  if (abiItem.type === "constructor")
+    return `constructor(${formatAbiParameters(abiItem.inputs)})${abiItem.stateMutability === "payable" ? " payable" : ""}`;
+  if (abiItem.type === "fallback")
+    return `fallback() external${abiItem.stateMutability === "payable" ? " payable" : ""}`;
+  return "receive() external payable";
+}
+var init_formatAbiItem = __esm(() => {
+  init_formatAbiParameters();
+});
+var init_exports = __esm(() => {
+  init_formatAbiItem();
+});
+function formatAbiItem2(abiItem, { includeName = false } = {}) {
+  if (abiItem.type !== "function" && abiItem.type !== "event" && abiItem.type !== "error")
+    throw new InvalidDefinitionTypeError(abiItem.type);
+  return `${abiItem.name}(${formatAbiParams(abiItem.inputs, { includeName })})`;
+}
+function formatAbiParams(params, { includeName = false } = {}) {
+  if (!params)
+    return "";
+  return params.map((param) => formatAbiParam(param, { includeName })).join(includeName ? ", " : ",");
+}
+function formatAbiParam(param, { includeName }) {
+  if (param.type.startsWith("tuple")) {
+    return `(${formatAbiParams(param.components, { includeName })})${param.type.slice("tuple".length)}`;
+  }
+  return param.type + (includeName && param.name ? ` ${param.name}` : "");
+}
+var init_formatAbiItem2 = __esm(() => {
+  init_abi();
+});
+function isHex(value2, { strict = true } = {}) {
+  if (!value2)
+    return false;
+  if (typeof value2 !== "string")
+    return false;
+  return strict ? /^0x[0-9a-fA-F]*$/.test(value2) : value2.startsWith("0x");
+}
+function size(value2) {
+  if (isHex(value2, { strict: false }))
+    return Math.ceil((value2.length - 2) / 2);
+  return value2.length;
+}
+var init_size = () => {};
+var version = "2.34.0";
+function walk(err, fn) {
+  if (fn?.(err))
+    return err;
+  if (err && typeof err === "object" && "cause" in err && err.cause !== undefined)
+    return walk(err.cause, fn);
+  return fn ? null : err;
+}
+var errorConfig;
+var BaseError;
+var init_base = __esm(() => {
+  errorConfig = {
+    getDocsUrl: ({ docsBaseUrl, docsPath = "", docsSlug }) => docsPath ? `${docsBaseUrl ?? "https://viem.sh"}${docsPath}${docsSlug ? `#${docsSlug}` : ""}` : undefined,
+    version: `viem@${version}`
+  };
+  BaseError = class BaseError2 extends Error {
+    constructor(shortMessage, args = {}) {
+      const details = (() => {
+        if (args.cause instanceof BaseError2)
+          return args.cause.details;
+        if (args.cause?.message)
+          return args.cause.message;
+        return args.details;
+      })();
+      const docsPath = (() => {
+        if (args.cause instanceof BaseError2)
+          return args.cause.docsPath || args.docsPath;
+        return args.docsPath;
+      })();
+      const docsUrl = errorConfig.getDocsUrl?.({ ...args, docsPath });
+      const message = [
+        shortMessage || "An error occurred.",
+        "",
+        ...args.metaMessages ? [...args.metaMessages, ""] : [],
+        ...docsUrl ? [`Docs: ${docsUrl}`] : [],
+        ...details ? [`Details: ${details}`] : [],
+        ...errorConfig.version ? [`Version: ${errorConfig.version}`] : []
+      ].join(`
+`);
+      super(message, args.cause ? { cause: args.cause } : undefined);
+      Object.defineProperty(this, "details", {
+        enumerable: true,
+        configurable: true,
+        writable: true,
+        value: undefined
+      });
+      Object.defineProperty(this, "docsPath", {
+        enumerable: true,
+        configurable: true,
+        writable: true,
+        value: undefined
+      });
+      Object.defineProperty(this, "metaMessages", {
+        enumerable: true,
+        configurable: true,
+        writable: true,
+        value: undefined
+      });
+      Object.defineProperty(this, "shortMessage", {
+        enumerable: true,
+        configurable: true,
+        writable: true,
+        value: undefined
+      });
+      Object.defineProperty(this, "version", {
+        enumerable: true,
+        configurable: true,
+        writable: true,
+        value: undefined
+      });
+      Object.defineProperty(this, "name", {
+        enumerable: true,
+        configurable: true,
+        writable: true,
+        value: "BaseError"
+      });
+      this.details = details;
+      this.docsPath = docsPath;
+      this.metaMessages = args.metaMessages;
+      this.name = args.name ?? this.name;
+      this.shortMessage = shortMessage;
+      this.version = version;
+    }
+    walk(fn) {
+      return walk(this, fn);
+    }
+  };
+});
+var AbiDecodingDataSizeTooSmallError;
+var AbiDecodingZeroDataError;
+var AbiEncodingArrayLengthMismatchError;
+var AbiEncodingBytesSizeMismatchError;
+var AbiEncodingLengthMismatchError;
+var AbiFunctionNotFoundError;
+var AbiFunctionOutputsNotFoundError;
+var AbiItemAmbiguityError;
+var InvalidAbiEncodingTypeError;
+var InvalidAbiDecodingTypeError;
+var InvalidArrayError;
+var InvalidDefinitionTypeError;
+var init_abi = __esm(() => {
+  init_formatAbiItem2();
+  init_size();
+  init_base();
+  AbiDecodingDataSizeTooSmallError = class AbiDecodingDataSizeTooSmallError2 extends BaseError {
+    constructor({ data, params, size: size2 }) {
+      super([`Data size of ${size2} bytes is too small for given parameters.`].join(`
+`), {
+        metaMessages: [
+          `Params: (${formatAbiParams(params, { includeName: true })})`,
+          `Data:   ${data} (${size2} bytes)`
+        ],
+        name: "AbiDecodingDataSizeTooSmallError"
+      });
+      Object.defineProperty(this, "data", {
+        enumerable: true,
+        configurable: true,
+        writable: true,
+        value: undefined
+      });
+      Object.defineProperty(this, "params", {
+        enumerable: true,
+        configurable: true,
+        writable: true,
+        value: undefined
+      });
+      Object.defineProperty(this, "size", {
+        enumerable: true,
+        configurable: true,
+        writable: true,
+        value: undefined
+      });
+      this.data = data;
+      this.params = params;
+      this.size = size2;
+    }
+  };
+  AbiDecodingZeroDataError = class AbiDecodingZeroDataError2 extends BaseError {
+    constructor() {
+      super('Cannot decode zero data ("0x") with ABI parameters.', {
+        name: "AbiDecodingZeroDataError"
+      });
+    }
+  };
+  AbiEncodingArrayLengthMismatchError = class AbiEncodingArrayLengthMismatchError2 extends BaseError {
+    constructor({ expectedLength, givenLength, type }) {
+      super([
+        `ABI encoding array length mismatch for type ${type}.`,
+        `Expected length: ${expectedLength}`,
+        `Given length: ${givenLength}`
+      ].join(`
+`), { name: "AbiEncodingArrayLengthMismatchError" });
+    }
+  };
+  AbiEncodingBytesSizeMismatchError = class AbiEncodingBytesSizeMismatchError2 extends BaseError {
+    constructor({ expectedSize, value: value2 }) {
+      super(`Size of bytes "${value2}" (bytes${size(value2)}) does not match expected size (bytes${expectedSize}).`, { name: "AbiEncodingBytesSizeMismatchError" });
+    }
+  };
+  AbiEncodingLengthMismatchError = class AbiEncodingLengthMismatchError2 extends BaseError {
+    constructor({ expectedLength, givenLength }) {
+      super([
+        "ABI encoding params/values length mismatch.",
+        `Expected length (params): ${expectedLength}`,
+        `Given length (values): ${givenLength}`
+      ].join(`
+`), { name: "AbiEncodingLengthMismatchError" });
+    }
+  };
+  AbiFunctionNotFoundError = class AbiFunctionNotFoundError2 extends BaseError {
+    constructor(functionName, { docsPath } = {}) {
+      super([
+        `Function ${functionName ? `"${functionName}" ` : ""}not found on ABI.`,
+        "Make sure you are using the correct ABI and that the function exists on it."
+      ].join(`
+`), {
+        docsPath,
+        name: "AbiFunctionNotFoundError"
+      });
+    }
+  };
+  AbiFunctionOutputsNotFoundError = class AbiFunctionOutputsNotFoundError2 extends BaseError {
+    constructor(functionName, { docsPath }) {
+      super([
+        `Function "${functionName}" does not contain any \`outputs\` on ABI.`,
+        "Cannot decode function result without knowing what the parameter types are.",
+        "Make sure you are using the correct ABI and that the function exists on it."
+      ].join(`
+`), {
+        docsPath,
+        name: "AbiFunctionOutputsNotFoundError"
+      });
+    }
+  };
+  AbiItemAmbiguityError = class AbiItemAmbiguityError2 extends BaseError {
+    constructor(x, y) {
+      super("Found ambiguous types in overloaded ABI items.", {
+        metaMessages: [
+          `\`${x.type}\` in \`${formatAbiItem2(x.abiItem)}\`, and`,
+          `\`${y.type}\` in \`${formatAbiItem2(y.abiItem)}\``,
+          "",
+          "These types encode differently and cannot be distinguished at runtime.",
+          "Remove one of the ambiguous items in the ABI."
+        ],
+        name: "AbiItemAmbiguityError"
+      });
+    }
+  };
+  InvalidAbiEncodingTypeError = class InvalidAbiEncodingTypeError2 extends BaseError {
+    constructor(type, { docsPath }) {
+      super([
+        `Type "${type}" is not a valid encoding type.`,
+        "Please provide a valid ABI type."
+      ].join(`
+`), { docsPath, name: "InvalidAbiEncodingType" });
+    }
+  };
+  InvalidAbiDecodingTypeError = class InvalidAbiDecodingTypeError2 extends BaseError {
+    constructor(type, { docsPath }) {
+      super([
+        `Type "${type}" is not a valid decoding type.`,
+        "Please provide a valid ABI type."
+      ].join(`
+`), { docsPath, name: "InvalidAbiDecodingType" });
+    }
+  };
+  InvalidArrayError = class InvalidArrayError2 extends BaseError {
+    constructor(value2) {
+      super([`Value "${value2}" is not a valid array.`].join(`
+`), {
+        name: "InvalidArrayError"
+      });
+    }
+  };
+  InvalidDefinitionTypeError = class InvalidDefinitionTypeError2 extends BaseError {
+    constructor(type) {
+      super([
+        `"${type}" is not a valid definition type.`,
+        'Valid types: "function", "event", "error"'
+      ].join(`
+`), { name: "InvalidDefinitionTypeError" });
+    }
+  };
+});
+var SliceOffsetOutOfBoundsError;
+var SizeExceedsPaddingSizeError;
+var init_data = __esm(() => {
+  init_base();
+  SliceOffsetOutOfBoundsError = class SliceOffsetOutOfBoundsError2 extends BaseError {
+    constructor({ offset, position, size: size2 }) {
+      super(`Slice ${position === "start" ? "starting" : "ending"} at offset "${offset}" is out-of-bounds (size: ${size2}).`, { name: "SliceOffsetOutOfBoundsError" });
+    }
+  };
+  SizeExceedsPaddingSizeError = class SizeExceedsPaddingSizeError2 extends BaseError {
+    constructor({ size: size2, targetSize, type }) {
+      super(`${type.charAt(0).toUpperCase()}${type.slice(1).toLowerCase()} size (${size2}) exceeds padding size (${targetSize}).`, { name: "SizeExceedsPaddingSizeError" });
+    }
+  };
+});
+function pad(hexOrBytes, { dir, size: size2 = 32 } = {}) {
+  if (typeof hexOrBytes === "string")
+    return padHex(hexOrBytes, { dir, size: size2 });
+  return padBytes(hexOrBytes, { dir, size: size2 });
+}
+function padHex(hex_, { dir, size: size2 = 32 } = {}) {
+  if (size2 === null)
+    return hex_;
+  const hex = hex_.replace("0x", "");
+  if (hex.length > size2 * 2)
+    throw new SizeExceedsPaddingSizeError({
+      size: Math.ceil(hex.length / 2),
+      targetSize: size2,
+      type: "hex"
+    });
+  return `0x${hex[dir === "right" ? "padEnd" : "padStart"](size2 * 2, "0")}`;
+}
+function padBytes(bytes, { dir, size: size2 = 32 } = {}) {
+  if (size2 === null)
+    return bytes;
+  if (bytes.length > size2)
+    throw new SizeExceedsPaddingSizeError({
+      size: bytes.length,
+      targetSize: size2,
+      type: "bytes"
+    });
+  const paddedBytes = new Uint8Array(size2);
+  for (let i2 = 0;i2 < size2; i2++) {
+    const padEnd = dir === "right";
+    paddedBytes[padEnd ? i2 : size2 - i2 - 1] = bytes[padEnd ? i2 : bytes.length - i2 - 1];
+  }
+  return paddedBytes;
+}
+var init_pad = __esm(() => {
+  init_data();
+});
+var IntegerOutOfRangeError;
+var InvalidBytesBooleanError;
+var SizeOverflowError;
+var init_encoding = __esm(() => {
+  init_base();
+  IntegerOutOfRangeError = class IntegerOutOfRangeError2 extends BaseError {
+    constructor({ max, min, signed, size: size2, value: value2 }) {
+      super(`Number "${value2}" is not in safe ${size2 ? `${size2 * 8}-bit ${signed ? "signed" : "unsigned"} ` : ""}integer range ${max ? `(${min} to ${max})` : `(above ${min})`}`, { name: "IntegerOutOfRangeError" });
+    }
+  };
+  InvalidBytesBooleanError = class InvalidBytesBooleanError2 extends BaseError {
+    constructor(bytes) {
+      super(`Bytes value "${bytes}" is not a valid boolean. The bytes array must contain a single byte of either a 0 or 1 value.`, {
+        name: "InvalidBytesBooleanError"
+      });
+    }
+  };
+  SizeOverflowError = class SizeOverflowError2 extends BaseError {
+    constructor({ givenSize, maxSize }) {
+      super(`Size cannot exceed ${maxSize} bytes. Given size: ${givenSize} bytes.`, { name: "SizeOverflowError" });
+    }
+  };
+});
+function trim(hexOrBytes, { dir = "left" } = {}) {
+  let data = typeof hexOrBytes === "string" ? hexOrBytes.replace("0x", "") : hexOrBytes;
+  let sliceLength = 0;
+  for (let i2 = 0;i2 < data.length - 1; i2++) {
+    if (data[dir === "left" ? i2 : data.length - i2 - 1].toString() === "0")
+      sliceLength++;
+    else
+      break;
+  }
+  data = dir === "left" ? data.slice(sliceLength) : data.slice(0, data.length - sliceLength);
+  if (typeof hexOrBytes === "string") {
+    if (data.length === 1 && dir === "right")
+      data = `${data}0`;
+    return `0x${data.length % 2 === 1 ? `0${data}` : data}`;
+  }
+  return data;
+}
+function assertSize2(hexOrBytes, { size: size2 }) {
+  if (size(hexOrBytes) > size2)
+    throw new SizeOverflowError({
+      givenSize: size(hexOrBytes),
+      maxSize: size2
+    });
+}
+function hexToBigInt(hex, opts = {}) {
+  const { signed } = opts;
+  if (opts.size)
+    assertSize2(hex, { size: opts.size });
+  const value2 = BigInt(hex);
+  if (!signed)
+    return value2;
+  const size2 = (hex.length - 2) / 2;
+  const max = (1n << BigInt(size2) * 8n - 1n) - 1n;
+  if (value2 <= max)
+    return value2;
+  return value2 - BigInt(`0x${"f".padStart(size2 * 2, "f")}`) - 1n;
+}
+function hexToNumber(hex, opts = {}) {
+  return Number(hexToBigInt(hex, opts));
+}
+var init_fromHex = __esm(() => {
+  init_encoding();
+  init_size();
+});
+function toHex(value2, opts = {}) {
+  if (typeof value2 === "number" || typeof value2 === "bigint")
+    return numberToHex(value2, opts);
+  if (typeof value2 === "string") {
+    return stringToHex(value2, opts);
+  }
+  if (typeof value2 === "boolean")
+    return boolToHex(value2, opts);
+  return bytesToHex2(value2, opts);
+}
+function boolToHex(value2, opts = {}) {
+  const hex = `0x${Number(value2)}`;
+  if (typeof opts.size === "number") {
+    assertSize2(hex, { size: opts.size });
+    return pad(hex, { size: opts.size });
+  }
+  return hex;
+}
+function bytesToHex2(value2, opts = {}) {
+  let string = "";
+  for (let i2 = 0;i2 < value2.length; i2++) {
+    string += hexes[value2[i2]];
+  }
+  const hex = `0x${string}`;
+  if (typeof opts.size === "number") {
+    assertSize2(hex, { size: opts.size });
+    return pad(hex, { dir: "right", size: opts.size });
+  }
+  return hex;
+}
+function numberToHex(value_, opts = {}) {
+  const { signed, size: size2 } = opts;
+  const value2 = BigInt(value_);
+  let maxValue;
+  if (size2) {
+    if (signed)
+      maxValue = (1n << BigInt(size2) * 8n - 1n) - 1n;
+    else
+      maxValue = 2n ** (BigInt(size2) * 8n) - 1n;
+  } else if (typeof value_ === "number") {
+    maxValue = BigInt(Number.MAX_SAFE_INTEGER);
+  }
+  const minValue = typeof maxValue === "bigint" && signed ? -maxValue - 1n : 0;
+  if (maxValue && value2 > maxValue || value2 < minValue) {
+    const suffix = typeof value_ === "bigint" ? "n" : "";
+    throw new IntegerOutOfRangeError({
+      max: maxValue ? `${maxValue}${suffix}` : undefined,
+      min: `${minValue}${suffix}`,
+      signed,
+      size: size2,
+      value: `${value_}${suffix}`
+    });
+  }
+  const hex = `0x${(signed && value2 < 0 ? (1n << BigInt(size2 * 8)) + BigInt(value2) : value2).toString(16)}`;
+  if (size2)
+    return pad(hex, { size: size2 });
+  return hex;
+}
+function stringToHex(value_, opts = {}) {
+  const value2 = encoder.encode(value_);
+  return bytesToHex2(value2, opts);
+}
+var hexes;
+var encoder;
+var init_toHex = __esm(() => {
+  init_encoding();
+  init_pad();
+  init_fromHex();
+  hexes = /* @__PURE__ */ Array.from({ length: 256 }, (_v, i2) => i2.toString(16).padStart(2, "0"));
+  encoder = /* @__PURE__ */ new TextEncoder;
+});
+function toBytes(value2, opts = {}) {
+  if (typeof value2 === "number" || typeof value2 === "bigint")
+    return numberToBytes(value2, opts);
+  if (typeof value2 === "boolean")
+    return boolToBytes(value2, opts);
+  if (isHex(value2))
+    return hexToBytes2(value2, opts);
+  return stringToBytes(value2, opts);
+}
+function boolToBytes(value2, opts = {}) {
+  const bytes = new Uint8Array(1);
+  bytes[0] = Number(value2);
+  if (typeof opts.size === "number") {
+    assertSize2(bytes, { size: opts.size });
+    return pad(bytes, { size: opts.size });
+  }
+  return bytes;
+}
+function charCodeToBase16(char) {
+  if (char >= charCodeMap.zero && char <= charCodeMap.nine)
+    return char - charCodeMap.zero;
+  if (char >= charCodeMap.A && char <= charCodeMap.F)
+    return char - (charCodeMap.A - 10);
+  if (char >= charCodeMap.a && char <= charCodeMap.f)
+    return char - (charCodeMap.a - 10);
+  return;
+}
+function hexToBytes2(hex_, opts = {}) {
+  let hex = hex_;
+  if (opts.size) {
+    assertSize2(hex, { size: opts.size });
+    hex = pad(hex, { dir: "right", size: opts.size });
+  }
+  let hexString = hex.slice(2);
+  if (hexString.length % 2)
+    hexString = `0${hexString}`;
+  const length = hexString.length / 2;
+  const bytes = new Uint8Array(length);
+  for (let index = 0, j = 0;index < length; index++) {
+    const nibbleLeft = charCodeToBase16(hexString.charCodeAt(j++));
+    const nibbleRight = charCodeToBase16(hexString.charCodeAt(j++));
+    if (nibbleLeft === undefined || nibbleRight === undefined) {
+      throw new BaseError(`Invalid byte sequence ("${hexString[j - 2]}${hexString[j - 1]}" in "${hexString}").`);
+    }
+    bytes[index] = nibbleLeft * 16 + nibbleRight;
+  }
+  return bytes;
+}
+function numberToBytes(value2, opts) {
+  const hex = numberToHex(value2, opts);
+  return hexToBytes2(hex);
+}
+function stringToBytes(value2, opts = {}) {
+  const bytes = encoder2.encode(value2);
+  if (typeof opts.size === "number") {
+    assertSize2(bytes, { size: opts.size });
+    return pad(bytes, { dir: "right", size: opts.size });
+  }
+  return bytes;
+}
+var encoder2;
+var charCodeMap;
+var init_toBytes = __esm(() => {
+  init_base();
+  init_pad();
+  init_fromHex();
+  init_toHex();
+  encoder2 = /* @__PURE__ */ new TextEncoder;
+  charCodeMap = {
+    zero: 48,
+    nine: 57,
+    A: 65,
+    F: 70,
+    a: 97,
+    f: 102
+  };
+});
+function fromBig(n, le = false) {
+  if (le)
+    return { h: Number(n & U32_MASK64), l: Number(n >> _32n & U32_MASK64) };
+  return { h: Number(n >> _32n & U32_MASK64) | 0, l: Number(n & U32_MASK64) | 0 };
+}
+function split(lst, le = false) {
+  const len2 = lst.length;
+  let Ah = new Uint32Array(len2);
+  let Al = new Uint32Array(len2);
+  for (let i2 = 0;i2 < len2; i2++) {
+    const { h, l } = fromBig(lst[i2], le);
+    [Ah[i2], Al[i2]] = [h, l];
+  }
+  return [Ah, Al];
+}
+var U32_MASK64;
+var _32n;
+var rotlSH = (h, l, s) => h << s | l >>> 32 - s;
+var rotlSL = (h, l, s) => l << s | h >>> 32 - s;
+var rotlBH = (h, l, s) => l << s - 32 | h >>> 64 - s;
+var rotlBL = (h, l, s) => h << s - 32 | l >>> 64 - s;
+var init__u64 = __esm(() => {
+  U32_MASK64 = /* @__PURE__ */ BigInt(2 ** 32 - 1);
+  _32n = /* @__PURE__ */ BigInt(32);
+});
+function isBytes(a) {
+  return a instanceof Uint8Array || ArrayBuffer.isView(a) && a.constructor.name === "Uint8Array";
+}
+function anumber(n) {
+  if (!Number.isSafeInteger(n) || n < 0)
+    throw new Error("positive integer expected, got " + n);
+}
+function abytes(b, ...lengths) {
+  if (!isBytes(b))
+    throw new Error("Uint8Array expected");
+  if (lengths.length > 0 && !lengths.includes(b.length))
+    throw new Error("Uint8Array expected of length " + lengths + ", got length=" + b.length);
+}
+function aexists(instance, checkFinished = true) {
+  if (instance.destroyed)
+    throw new Error("Hash instance has been destroyed");
+  if (checkFinished && instance.finished)
+    throw new Error("Hash#digest() has already been called");
+}
+function aoutput(out, instance) {
+  abytes(out);
+  const min = instance.outputLen;
+  if (out.length < min) {
+    throw new Error("digestInto() expects output buffer of length at least " + min);
+  }
+}
+function u32(arr) {
+  return new Uint32Array(arr.buffer, arr.byteOffset, Math.floor(arr.byteLength / 4));
+}
+function clean(...arrays) {
+  for (let i2 = 0;i2 < arrays.length; i2++) {
+    arrays[i2].fill(0);
+  }
+}
+function byteSwap(word) {
+  return word << 24 & 4278190080 | word << 8 & 16711680 | word >>> 8 & 65280 | word >>> 24 & 255;
+}
+function byteSwap32(arr) {
+  for (let i2 = 0;i2 < arr.length; i2++) {
+    arr[i2] = byteSwap(arr[i2]);
+  }
+  return arr;
+}
+function utf8ToBytes2(str) {
+  if (typeof str !== "string")
+    throw new Error("string expected");
+  return new Uint8Array(new TextEncoder().encode(str));
+}
+function toBytes2(data) {
+  if (typeof data === "string")
+    data = utf8ToBytes2(data);
+  abytes(data);
+  return data;
+}
+
+class Hash {
+}
+function createHasher(hashCons) {
+  const hashC = (msg) => hashCons().update(toBytes2(msg)).digest();
+  const tmp = hashCons();
+  hashC.outputLen = tmp.outputLen;
+  hashC.blockLen = tmp.blockLen;
+  hashC.create = () => hashCons();
+  return hashC;
+}
+var isLE;
+var swap32IfBE;
+var init_utils = __esm(() => {
+  /*! noble-hashes - MIT License (c) 2022 Paul Miller (paulmillr.com) */
+  isLE = /* @__PURE__ */ (() => new Uint8Array(new Uint32Array([287454020]).buffer)[0] === 68)();
+  swap32IfBE = isLE ? (u) => u : byteSwap32;
+});
+function keccakP(s, rounds = 24) {
+  const B = new Uint32Array(5 * 2);
+  for (let round = 24 - rounds;round < 24; round++) {
+    for (let x = 0;x < 10; x++)
+      B[x] = s[x] ^ s[x + 10] ^ s[x + 20] ^ s[x + 30] ^ s[x + 40];
+    for (let x = 0;x < 10; x += 2) {
+      const idx1 = (x + 8) % 10;
+      const idx0 = (x + 2) % 10;
+      const B0 = B[idx0];
+      const B1 = B[idx0 + 1];
+      const Th = rotlH(B0, B1, 1) ^ B[idx1];
+      const Tl = rotlL(B0, B1, 1) ^ B[idx1 + 1];
+      for (let y = 0;y < 50; y += 10) {
+        s[x + y] ^= Th;
+        s[x + y + 1] ^= Tl;
+      }
+    }
+    let curH = s[2];
+    let curL = s[3];
+    for (let t = 0;t < 24; t++) {
+      const shift = SHA3_ROTL[t];
+      const Th = rotlH(curH, curL, shift);
+      const Tl = rotlL(curH, curL, shift);
+      const PI = SHA3_PI[t];
+      curH = s[PI];
+      curL = s[PI + 1];
+      s[PI] = Th;
+      s[PI + 1] = Tl;
+    }
+    for (let y = 0;y < 50; y += 10) {
+      for (let x = 0;x < 10; x++)
+        B[x] = s[y + x];
+      for (let x = 0;x < 10; x++)
+        s[y + x] ^= ~B[(x + 2) % 10] & B[(x + 4) % 10];
+    }
+    s[0] ^= SHA3_IOTA_H[round];
+    s[1] ^= SHA3_IOTA_L[round];
+  }
+  clean(B);
+}
+var _0n;
+var _1n;
+var _2n;
+var _7n;
+var _256n;
+var _0x71n;
+var SHA3_PI;
+var SHA3_ROTL;
+var _SHA3_IOTA;
+var IOTAS;
+var SHA3_IOTA_H;
+var SHA3_IOTA_L;
+var rotlH = (h, l, s) => s > 32 ? rotlBH(h, l, s) : rotlSH(h, l, s);
+var rotlL = (h, l, s) => s > 32 ? rotlBL(h, l, s) : rotlSL(h, l, s);
+var Keccak;
+var gen = (suffix, blockLen, outputLen) => createHasher(() => new Keccak(blockLen, suffix, outputLen));
+var keccak_256;
+var init_sha3 = __esm(() => {
+  init__u64();
+  init_utils();
+  _0n = BigInt(0);
+  _1n = BigInt(1);
+  _2n = BigInt(2);
+  _7n = BigInt(7);
+  _256n = BigInt(256);
+  _0x71n = BigInt(113);
+  SHA3_PI = [];
+  SHA3_ROTL = [];
+  _SHA3_IOTA = [];
+  for (let round = 0, R = _1n, x = 1, y = 0;round < 24; round++) {
+    [x, y] = [y, (2 * x + 3 * y) % 5];
+    SHA3_PI.push(2 * (5 * y + x));
+    SHA3_ROTL.push((round + 1) * (round + 2) / 2 % 64);
+    let t = _0n;
+    for (let j = 0;j < 7; j++) {
+      R = (R << _1n ^ (R >> _7n) * _0x71n) % _256n;
+      if (R & _2n)
+        t ^= _1n << (_1n << /* @__PURE__ */ BigInt(j)) - _1n;
+    }
+    _SHA3_IOTA.push(t);
+  }
+  IOTAS = split(_SHA3_IOTA, true);
+  SHA3_IOTA_H = IOTAS[0];
+  SHA3_IOTA_L = IOTAS[1];
+  Keccak = class Keccak2 extends Hash {
+    constructor(blockLen, suffix, outputLen, enableXOF = false, rounds = 24) {
+      super();
+      this.pos = 0;
+      this.posOut = 0;
+      this.finished = false;
+      this.destroyed = false;
+      this.enableXOF = false;
+      this.blockLen = blockLen;
+      this.suffix = suffix;
+      this.outputLen = outputLen;
+      this.enableXOF = enableXOF;
+      this.rounds = rounds;
+      anumber(outputLen);
+      if (!(0 < blockLen && blockLen < 200))
+        throw new Error("only keccak-f1600 function is supported");
+      this.state = new Uint8Array(200);
+      this.state32 = u32(this.state);
+    }
+    clone() {
+      return this._cloneInto();
+    }
+    keccak() {
+      swap32IfBE(this.state32);
+      keccakP(this.state32, this.rounds);
+      swap32IfBE(this.state32);
+      this.posOut = 0;
+      this.pos = 0;
+    }
+    update(data) {
+      aexists(this);
+      data = toBytes2(data);
+      abytes(data);
+      const { blockLen, state } = this;
+      const len2 = data.length;
+      for (let pos = 0;pos < len2; ) {
+        const take = Math.min(blockLen - this.pos, len2 - pos);
+        for (let i2 = 0;i2 < take; i2++)
+          state[this.pos++] ^= data[pos++];
+        if (this.pos === blockLen)
+          this.keccak();
+      }
+      return this;
+    }
+    finish() {
+      if (this.finished)
+        return;
+      this.finished = true;
+      const { state, suffix, pos, blockLen } = this;
+      state[pos] ^= suffix;
+      if ((suffix & 128) !== 0 && pos === blockLen - 1)
+        this.keccak();
+      state[blockLen - 1] ^= 128;
+      this.keccak();
+    }
+    writeInto(out) {
+      aexists(this, false);
+      abytes(out);
+      this.finish();
+      const bufferOut = this.state;
+      const { blockLen } = this;
+      for (let pos = 0, len2 = out.length;pos < len2; ) {
+        if (this.posOut >= blockLen)
+          this.keccak();
+        const take = Math.min(blockLen - this.posOut, len2 - pos);
+        out.set(bufferOut.subarray(this.posOut, this.posOut + take), pos);
+        this.posOut += take;
+        pos += take;
+      }
+      return out;
+    }
+    xofInto(out) {
+      if (!this.enableXOF)
+        throw new Error("XOF is not possible for this instance");
+      return this.writeInto(out);
+    }
+    xof(bytes) {
+      anumber(bytes);
+      return this.xofInto(new Uint8Array(bytes));
+    }
+    digestInto(out) {
+      aoutput(out, this);
+      if (this.finished)
+        throw new Error("digest() was already called");
+      this.writeInto(out);
+      this.destroy();
+      return out;
+    }
+    digest() {
+      return this.digestInto(new Uint8Array(this.outputLen));
+    }
+    destroy() {
+      this.destroyed = true;
+      clean(this.state);
+    }
+    _cloneInto(to) {
+      const { blockLen, suffix, outputLen, rounds, enableXOF } = this;
+      to || (to = new Keccak2(blockLen, suffix, outputLen, enableXOF, rounds));
+      to.state32.set(this.state32);
+      to.pos = this.pos;
+      to.posOut = this.posOut;
+      to.finished = this.finished;
+      to.rounds = rounds;
+      to.suffix = suffix;
+      to.outputLen = outputLen;
+      to.enableXOF = enableXOF;
+      to.destroyed = this.destroyed;
+      return to;
+    }
+  };
+  keccak_256 = /* @__PURE__ */ (() => gen(1, 136, 256 / 8))();
+});
+function keccak256(value2, to_) {
+  const to = to_ || "hex";
+  const bytes = keccak_256(isHex(value2, { strict: false }) ? toBytes(value2) : value2);
+  if (to === "bytes")
+    return bytes;
+  return toHex(bytes);
+}
+var init_keccak256 = __esm(() => {
+  init_sha3();
+  init_toBytes();
+  init_toHex();
+});
+function hashSignature(sig) {
+  return hash(sig);
+}
+var hash = (value2) => keccak256(toBytes(value2));
+var init_hashSignature = __esm(() => {
+  init_toBytes();
+  init_keccak256();
+});
+function normalizeSignature(signature) {
+  let active = true;
+  let current = "";
+  let level = 0;
+  let result = "";
+  let valid = false;
+  for (let i2 = 0;i2 < signature.length; i2++) {
+    const char = signature[i2];
+    if (["(", ")", ","].includes(char))
+      active = true;
+    if (char === "(")
+      level++;
+    if (char === ")")
+      level--;
+    if (!active)
+      continue;
+    if (level === 0) {
+      if (char === " " && ["event", "function", ""].includes(result))
+        result = "";
+      else {
+        result += char;
+        if (char === ")") {
+          valid = true;
+          break;
+        }
+      }
+      continue;
+    }
+    if (char === " ") {
+      if (signature[i2 - 1] !== "," && current !== "," && current !== ",(") {
+        current = "";
+        active = false;
+      }
+      continue;
+    }
+    result += char;
+    current += char;
+  }
+  if (!valid)
+    throw new BaseError("Unable to normalize signature.");
+  return result;
+}
+var init_normalizeSignature = __esm(() => {
+  init_base();
+});
+var toSignature = (def) => {
+  const def_ = (() => {
+    if (typeof def === "string")
+      return def;
+    return formatAbiItem(def);
+  })();
+  return normalizeSignature(def_);
+};
+var init_toSignature = __esm(() => {
+  init_exports();
+  init_normalizeSignature();
+});
+function toSignatureHash(fn) {
+  return hashSignature(toSignature(fn));
+}
+var init_toSignatureHash = __esm(() => {
+  init_hashSignature();
+  init_toSignature();
+});
+var toEventSelector;
+var init_toEventSelector = __esm(() => {
+  init_toSignatureHash();
+  toEventSelector = toSignatureHash;
+});
+var InvalidAddressError;
+var init_address = __esm(() => {
+  init_base();
+  InvalidAddressError = class InvalidAddressError2 extends BaseError {
+    constructor({ address }) {
+      super(`Address "${address}" is invalid.`, {
+        metaMessages: [
+          "- Address must be a hex value of 20 bytes (40 hex characters).",
+          "- Address must match its checksum counterpart."
+        ],
+        name: "InvalidAddressError"
+      });
+    }
+  };
+});
+var LruMap;
+var init_lru = __esm(() => {
+  LruMap = class LruMap2 extends Map {
+    constructor(size2) {
+      super();
+      Object.defineProperty(this, "maxSize", {
+        enumerable: true,
+        configurable: true,
+        writable: true,
+        value: undefined
+      });
+      this.maxSize = size2;
+    }
+    get(key) {
+      const value2 = super.get(key);
+      if (super.has(key) && value2 !== undefined) {
+        this.delete(key);
+        super.set(key, value2);
+      }
+      return value2;
+    }
+    set(key, value2) {
+      super.set(key, value2);
+      if (this.maxSize && this.size > this.maxSize) {
+        const firstKey = this.keys().next().value;
+        if (firstKey)
+          this.delete(firstKey);
+      }
+      return this;
+    }
+  };
+});
+function checksumAddress(address_, chainId) {
+  if (checksumAddressCache.has(`${address_}.${chainId}`))
+    return checksumAddressCache.get(`${address_}.${chainId}`);
+  const hexAddress = chainId ? `${chainId}${address_.toLowerCase()}` : address_.substring(2).toLowerCase();
+  const hash2 = keccak256(stringToBytes(hexAddress), "bytes");
+  const address = (chainId ? hexAddress.substring(`${chainId}0x`.length) : hexAddress).split("");
+  for (let i2 = 0;i2 < 40; i2 += 2) {
+    if (hash2[i2 >> 1] >> 4 >= 8 && address[i2]) {
+      address[i2] = address[i2].toUpperCase();
+    }
+    if ((hash2[i2 >> 1] & 15) >= 8 && address[i2 + 1]) {
+      address[i2 + 1] = address[i2 + 1].toUpperCase();
+    }
+  }
+  const result = `0x${address.join("")}`;
+  checksumAddressCache.set(`${address_}.${chainId}`, result);
+  return result;
+}
+var checksumAddressCache;
+var init_getAddress = __esm(() => {
+  init_toBytes();
+  init_keccak256();
+  init_lru();
+  checksumAddressCache = /* @__PURE__ */ new LruMap(8192);
+});
+function isAddress(address, options) {
+  const { strict = true } = options ?? {};
+  const cacheKey = `${address}.${strict}`;
+  if (isAddressCache.has(cacheKey))
+    return isAddressCache.get(cacheKey);
+  const result = (() => {
+    if (!addressRegex.test(address))
+      return false;
+    if (address.toLowerCase() === address)
+      return true;
+    if (strict)
+      return checksumAddress(address) === address;
+    return true;
+  })();
+  isAddressCache.set(cacheKey, result);
+  return result;
+}
+var addressRegex;
+var isAddressCache;
+var init_isAddress = __esm(() => {
+  init_lru();
+  init_getAddress();
+  addressRegex = /^0x[a-fA-F0-9]{40}$/;
+  isAddressCache = /* @__PURE__ */ new LruMap(8192);
+});
+function concat(values) {
+  if (typeof values[0] === "string")
+    return concatHex(values);
+  return concatBytes(values);
+}
+function concatBytes(values) {
+  let length = 0;
+  for (const arr of values) {
+    length += arr.length;
+  }
+  const result = new Uint8Array(length);
+  let offset = 0;
+  for (const arr of values) {
+    result.set(arr, offset);
+    offset += arr.length;
+  }
+  return result;
+}
+function concatHex(values) {
+  return `0x${values.reduce((acc, x) => acc + x.replace("0x", ""), "")}`;
+}
+function slice(value2, start, end, { strict } = {}) {
+  if (isHex(value2, { strict: false }))
+    return sliceHex(value2, start, end, {
+      strict
+    });
+  return sliceBytes(value2, start, end, {
+    strict
+  });
+}
+function assertStartOffset(value2, start) {
+  if (typeof start === "number" && start > 0 && start > size(value2) - 1)
+    throw new SliceOffsetOutOfBoundsError({
+      offset: start,
+      position: "start",
+      size: size(value2)
+    });
+}
+function assertEndOffset(value2, start, end) {
+  if (typeof start === "number" && typeof end === "number" && size(value2) !== end - start) {
+    throw new SliceOffsetOutOfBoundsError({
+      offset: end,
+      position: "end",
+      size: size(value2)
+    });
+  }
+}
+function sliceBytes(value_, start, end, { strict } = {}) {
+  assertStartOffset(value_, start);
+  const value2 = value_.slice(start, end);
+  if (strict)
+    assertEndOffset(value2, start, end);
+  return value2;
+}
+function sliceHex(value_, start, end, { strict } = {}) {
+  assertStartOffset(value_, start);
+  const value2 = `0x${value_.replace("0x", "").slice((start ?? 0) * 2, (end ?? value_.length) * 2)}`;
+  if (strict)
+    assertEndOffset(value2, start, end);
+  return value2;
+}
+var init_slice = __esm(() => {
+  init_data();
+  init_size();
+});
+var integerRegex;
+var init_regex2 = __esm(() => {
+  integerRegex = /^(u?int)(8|16|24|32|40|48|56|64|72|80|88|96|104|112|120|128|136|144|152|160|168|176|184|192|200|208|216|224|232|240|248|256)?$/;
+});
+function encodeAbiParameters(params, values) {
+  if (params.length !== values.length)
+    throw new AbiEncodingLengthMismatchError({
+      expectedLength: params.length,
+      givenLength: values.length
+    });
+  const preparedParams = prepareParams({
+    params,
+    values
+  });
+  const data = encodeParams(preparedParams);
+  if (data.length === 0)
+    return "0x";
+  return data;
+}
+function prepareParams({ params, values }) {
+  const preparedParams = [];
+  for (let i2 = 0;i2 < params.length; i2++) {
+    preparedParams.push(prepareParam({ param: params[i2], value: values[i2] }));
+  }
+  return preparedParams;
+}
+function prepareParam({ param, value: value2 }) {
+  const arrayComponents = getArrayComponents(param.type);
+  if (arrayComponents) {
+    const [length, type] = arrayComponents;
+    return encodeArray(value2, { length, param: { ...param, type } });
+  }
+  if (param.type === "tuple") {
+    return encodeTuple(value2, {
+      param
+    });
+  }
+  if (param.type === "address") {
+    return encodeAddress(value2);
+  }
+  if (param.type === "bool") {
+    return encodeBool(value2);
+  }
+  if (param.type.startsWith("uint") || param.type.startsWith("int")) {
+    const signed = param.type.startsWith("int");
+    const [, , size2 = "256"] = integerRegex.exec(param.type) ?? [];
+    return encodeNumber(value2, {
+      signed,
+      size: Number(size2)
+    });
+  }
+  if (param.type.startsWith("bytes")) {
+    return encodeBytes(value2, { param });
+  }
+  if (param.type === "string") {
+    return encodeString(value2);
+  }
+  throw new InvalidAbiEncodingTypeError(param.type, {
+    docsPath: "/docs/contract/encodeAbiParameters"
+  });
+}
+function encodeParams(preparedParams) {
+  let staticSize = 0;
+  for (let i2 = 0;i2 < preparedParams.length; i2++) {
+    const { dynamic, encoded } = preparedParams[i2];
+    if (dynamic)
+      staticSize += 32;
+    else
+      staticSize += size(encoded);
+  }
+  const staticParams = [];
+  const dynamicParams = [];
+  let dynamicSize = 0;
+  for (let i2 = 0;i2 < preparedParams.length; i2++) {
+    const { dynamic, encoded } = preparedParams[i2];
+    if (dynamic) {
+      staticParams.push(numberToHex(staticSize + dynamicSize, { size: 32 }));
+      dynamicParams.push(encoded);
+      dynamicSize += size(encoded);
+    } else {
+      staticParams.push(encoded);
+    }
+  }
+  return concat([...staticParams, ...dynamicParams]);
+}
+function encodeAddress(value2) {
+  if (!isAddress(value2))
+    throw new InvalidAddressError({ address: value2 });
+  return { dynamic: false, encoded: padHex(value2.toLowerCase()) };
+}
+function encodeArray(value2, { length, param }) {
+  const dynamic = length === null;
+  if (!Array.isArray(value2))
+    throw new InvalidArrayError(value2);
+  if (!dynamic && value2.length !== length)
+    throw new AbiEncodingArrayLengthMismatchError({
+      expectedLength: length,
+      givenLength: value2.length,
+      type: `${param.type}[${length}]`
+    });
+  let dynamicChild = false;
+  const preparedParams = [];
+  for (let i2 = 0;i2 < value2.length; i2++) {
+    const preparedParam = prepareParam({ param, value: value2[i2] });
+    if (preparedParam.dynamic)
+      dynamicChild = true;
+    preparedParams.push(preparedParam);
+  }
+  if (dynamic || dynamicChild) {
+    const data = encodeParams(preparedParams);
+    if (dynamic) {
+      const length2 = numberToHex(preparedParams.length, { size: 32 });
+      return {
+        dynamic: true,
+        encoded: preparedParams.length > 0 ? concat([length2, data]) : length2
+      };
+    }
+    if (dynamicChild)
+      return { dynamic: true, encoded: data };
+  }
+  return {
+    dynamic: false,
+    encoded: concat(preparedParams.map(({ encoded }) => encoded))
+  };
+}
+function encodeBytes(value2, { param }) {
+  const [, paramSize] = param.type.split("bytes");
+  const bytesSize = size(value2);
+  if (!paramSize) {
+    let value_ = value2;
+    if (bytesSize % 32 !== 0)
+      value_ = padHex(value_, {
+        dir: "right",
+        size: Math.ceil((value2.length - 2) / 2 / 32) * 32
+      });
+    return {
+      dynamic: true,
+      encoded: concat([padHex(numberToHex(bytesSize, { size: 32 })), value_])
+    };
+  }
+  if (bytesSize !== Number.parseInt(paramSize))
+    throw new AbiEncodingBytesSizeMismatchError({
+      expectedSize: Number.parseInt(paramSize),
+      value: value2
+    });
+  return { dynamic: false, encoded: padHex(value2, { dir: "right" }) };
+}
+function encodeBool(value2) {
+  if (typeof value2 !== "boolean")
+    throw new BaseError(`Invalid boolean value: "${value2}" (type: ${typeof value2}). Expected: \`true\` or \`false\`.`);
+  return { dynamic: false, encoded: padHex(boolToHex(value2)) };
+}
+function encodeNumber(value2, { signed, size: size2 = 256 }) {
+  if (typeof size2 === "number") {
+    const max = 2n ** (BigInt(size2) - (signed ? 1n : 0n)) - 1n;
+    const min = signed ? -max - 1n : 0n;
+    if (value2 > max || value2 < min)
+      throw new IntegerOutOfRangeError({
+        max: max.toString(),
+        min: min.toString(),
+        signed,
+        size: size2 / 8,
+        value: value2.toString()
+      });
+  }
+  return {
+    dynamic: false,
+    encoded: numberToHex(value2, {
+      size: 32,
+      signed
+    })
+  };
+}
+function encodeString(value2) {
+  const hexValue = stringToHex(value2);
+  const partsLength = Math.ceil(size(hexValue) / 32);
+  const parts = [];
+  for (let i2 = 0;i2 < partsLength; i2++) {
+    parts.push(padHex(slice(hexValue, i2 * 32, (i2 + 1) * 32), {
+      dir: "right"
+    }));
+  }
+  return {
+    dynamic: true,
+    encoded: concat([
+      padHex(numberToHex(size(hexValue), { size: 32 })),
+      ...parts
+    ])
+  };
+}
+function encodeTuple(value2, { param }) {
+  let dynamic = false;
+  const preparedParams = [];
+  for (let i2 = 0;i2 < param.components.length; i2++) {
+    const param_ = param.components[i2];
+    const index = Array.isArray(value2) ? i2 : param_.name;
+    const preparedParam = prepareParam({
+      param: param_,
+      value: value2[index]
+    });
+    preparedParams.push(preparedParam);
+    if (preparedParam.dynamic)
+      dynamic = true;
+  }
+  return {
+    dynamic,
+    encoded: dynamic ? encodeParams(preparedParams) : concat(preparedParams.map(({ encoded }) => encoded))
+  };
+}
+function getArrayComponents(type) {
+  const matches = type.match(/^(.*)\[(\d+)?\]$/);
+  return matches ? [matches[2] ? Number(matches[2]) : null, matches[1]] : undefined;
+}
+var init_encodeAbiParameters = __esm(() => {
+  init_abi();
+  init_address();
+  init_base();
+  init_encoding();
+  init_isAddress();
+  init_pad();
+  init_size();
+  init_slice();
+  init_toHex();
+  init_regex2();
+});
+var toFunctionSelector = (fn) => slice(toSignatureHash(fn), 0, 4);
+var init_toFunctionSelector = __esm(() => {
+  init_slice();
+  init_toSignatureHash();
+});
+function getAbiItem(parameters) {
+  const { abi, args = [], name } = parameters;
+  const isSelector = isHex(name, { strict: false });
+  const abiItems = abi.filter((abiItem) => {
+    if (isSelector) {
+      if (abiItem.type === "function")
+        return toFunctionSelector(abiItem) === name;
+      if (abiItem.type === "event")
+        return toEventSelector(abiItem) === name;
+      return false;
+    }
+    return "name" in abiItem && abiItem.name === name;
+  });
+  if (abiItems.length === 0)
+    return;
+  if (abiItems.length === 1)
+    return abiItems[0];
+  let matchedAbiItem = undefined;
+  for (const abiItem of abiItems) {
+    if (!("inputs" in abiItem))
+      continue;
+    if (!args || args.length === 0) {
+      if (!abiItem.inputs || abiItem.inputs.length === 0)
+        return abiItem;
+      continue;
+    }
+    if (!abiItem.inputs)
+      continue;
+    if (abiItem.inputs.length === 0)
+      continue;
+    if (abiItem.inputs.length !== args.length)
+      continue;
+    const matched = args.every((arg, index) => {
+      const abiParameter = "inputs" in abiItem && abiItem.inputs[index];
+      if (!abiParameter)
+        return false;
+      return isArgOfType(arg, abiParameter);
+    });
+    if (matched) {
+      if (matchedAbiItem && "inputs" in matchedAbiItem && matchedAbiItem.inputs) {
+        const ambiguousTypes = getAmbiguousTypes(abiItem.inputs, matchedAbiItem.inputs, args);
+        if (ambiguousTypes)
+          throw new AbiItemAmbiguityError({
+            abiItem,
+            type: ambiguousTypes[0]
+          }, {
+            abiItem: matchedAbiItem,
+            type: ambiguousTypes[1]
+          });
+      }
+      matchedAbiItem = abiItem;
+    }
+  }
+  if (matchedAbiItem)
+    return matchedAbiItem;
+  return abiItems[0];
+}
+function isArgOfType(arg, abiParameter) {
+  const argType = typeof arg;
+  const abiParameterType = abiParameter.type;
+  switch (abiParameterType) {
+    case "address":
+      return isAddress(arg, { strict: false });
+    case "bool":
+      return argType === "boolean";
+    case "function":
+      return argType === "string";
+    case "string":
+      return argType === "string";
+    default: {
+      if (abiParameterType === "tuple" && "components" in abiParameter)
+        return Object.values(abiParameter.components).every((component, index) => {
+          return isArgOfType(Object.values(arg)[index], component);
+        });
+      if (/^u?int(8|16|24|32|40|48|56|64|72|80|88|96|104|112|120|128|136|144|152|160|168|176|184|192|200|208|216|224|232|240|248|256)?$/.test(abiParameterType))
+        return argType === "number" || argType === "bigint";
+      if (/^bytes([1-9]|1[0-9]|2[0-9]|3[0-2])?$/.test(abiParameterType))
+        return argType === "string" || arg instanceof Uint8Array;
+      if (/[a-z]+[1-9]{0,3}(\[[0-9]{0,}\])+$/.test(abiParameterType)) {
+        return Array.isArray(arg) && arg.every((x) => isArgOfType(x, {
+          ...abiParameter,
+          type: abiParameterType.replace(/(\[[0-9]{0,}\])$/, "")
+        }));
+      }
+      return false;
+    }
+  }
+}
+function getAmbiguousTypes(sourceParameters, targetParameters, args) {
+  for (const parameterIndex in sourceParameters) {
+    const sourceParameter = sourceParameters[parameterIndex];
+    const targetParameter = targetParameters[parameterIndex];
+    if (sourceParameter.type === "tuple" && targetParameter.type === "tuple" && "components" in sourceParameter && "components" in targetParameter)
+      return getAmbiguousTypes(sourceParameter.components, targetParameter.components, args[parameterIndex]);
+    const types4 = [sourceParameter.type, targetParameter.type];
+    const ambiguous = (() => {
+      if (types4.includes("address") && types4.includes("bytes20"))
+        return true;
+      if (types4.includes("address") && types4.includes("string"))
+        return isAddress(args[parameterIndex], { strict: false });
+      if (types4.includes("address") && types4.includes("bytes"))
+        return isAddress(args[parameterIndex], { strict: false });
+      return false;
+    })();
+    if (ambiguous)
+      return types4;
+  }
+  return;
+}
+var init_getAbiItem = __esm(() => {
+  init_abi();
+  init_isAddress();
+  init_toEventSelector();
+  init_toFunctionSelector();
+});
+function prepareEncodeFunctionData(parameters) {
+  const { abi, args, functionName } = parameters;
+  let abiItem = abi[0];
+  if (functionName) {
+    const item = getAbiItem({
+      abi,
+      args,
+      name: functionName
+    });
+    if (!item)
+      throw new AbiFunctionNotFoundError(functionName, { docsPath });
+    abiItem = item;
+  }
+  if (abiItem.type !== "function")
+    throw new AbiFunctionNotFoundError(undefined, { docsPath });
+  return {
+    abi: [abiItem],
+    functionName: toFunctionSelector(formatAbiItem2(abiItem))
+  };
+}
+var docsPath = "/docs/contract/encodeFunctionData";
+var init_prepareEncodeFunctionData = __esm(() => {
+  init_abi();
+  init_toFunctionSelector();
+  init_formatAbiItem2();
+  init_getAbiItem();
+});
+function encodeFunctionData(parameters) {
+  const { args } = parameters;
+  const { abi, functionName } = (() => {
+    if (parameters.abi.length === 1 && parameters.functionName?.startsWith("0x"))
+      return parameters;
+    return prepareEncodeFunctionData(parameters);
+  })();
+  const abiItem = abi[0];
+  const signature = functionName;
+  const data = "inputs" in abiItem && abiItem.inputs ? encodeAbiParameters(abiItem.inputs, args ?? []) : undefined;
+  return concatHex([signature, data ?? "0x"]);
+}
+var init_encodeFunctionData = __esm(() => {
+  init_encodeAbiParameters();
+  init_prepareEncodeFunctionData();
+});
+var NegativeOffsetError;
+var PositionOutOfBoundsError;
+var RecursiveReadLimitExceededError;
+var init_cursor = __esm(() => {
+  init_base();
+  NegativeOffsetError = class NegativeOffsetError2 extends BaseError {
+    constructor({ offset }) {
+      super(`Offset \`${offset}\` cannot be negative.`, {
+        name: "NegativeOffsetError"
+      });
+    }
+  };
+  PositionOutOfBoundsError = class PositionOutOfBoundsError2 extends BaseError {
+    constructor({ length, position }) {
+      super(`Position \`${position}\` is out of bounds (\`0 < position < ${length}\`).`, { name: "PositionOutOfBoundsError" });
+    }
+  };
+  RecursiveReadLimitExceededError = class RecursiveReadLimitExceededError2 extends BaseError {
+    constructor({ count, limit }) {
+      super(`Recursive read limit of \`${limit}\` exceeded (recursive read count: \`${count}\`).`, { name: "RecursiveReadLimitExceededError" });
+    }
+  };
+});
+function createCursor(bytes, { recursiveReadLimit = 8192 } = {}) {
+  const cursor = Object.create(staticCursor);
+  cursor.bytes = bytes;
+  cursor.dataView = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+  cursor.positionReadCount = new Map;
+  cursor.recursiveReadLimit = recursiveReadLimit;
+  return cursor;
+}
+var staticCursor;
+var init_cursor2 = __esm(() => {
+  init_cursor();
+  staticCursor = {
+    bytes: new Uint8Array,
+    dataView: new DataView(new ArrayBuffer(0)),
+    position: 0,
+    positionReadCount: new Map,
+    recursiveReadCount: 0,
+    recursiveReadLimit: Number.POSITIVE_INFINITY,
+    assertReadLimit() {
+      if (this.recursiveReadCount >= this.recursiveReadLimit)
+        throw new RecursiveReadLimitExceededError({
+          count: this.recursiveReadCount + 1,
+          limit: this.recursiveReadLimit
+        });
+    },
+    assertPosition(position) {
+      if (position < 0 || position > this.bytes.length - 1)
+        throw new PositionOutOfBoundsError({
+          length: this.bytes.length,
+          position
+        });
+    },
+    decrementPosition(offset) {
+      if (offset < 0)
+        throw new NegativeOffsetError({ offset });
+      const position = this.position - offset;
+      this.assertPosition(position);
+      this.position = position;
+    },
+    getReadCount(position) {
+      return this.positionReadCount.get(position || this.position) || 0;
+    },
+    incrementPosition(offset) {
+      if (offset < 0)
+        throw new NegativeOffsetError({ offset });
+      const position = this.position + offset;
+      this.assertPosition(position);
+      this.position = position;
+    },
+    inspectByte(position_) {
+      const position = position_ ?? this.position;
+      this.assertPosition(position);
+      return this.bytes[position];
+    },
+    inspectBytes(length, position_) {
+      const position = position_ ?? this.position;
+      this.assertPosition(position + length - 1);
+      return this.bytes.subarray(position, position + length);
+    },
+    inspectUint8(position_) {
+      const position = position_ ?? this.position;
+      this.assertPosition(position);
+      return this.bytes[position];
+    },
+    inspectUint16(position_) {
+      const position = position_ ?? this.position;
+      this.assertPosition(position + 1);
+      return this.dataView.getUint16(position);
+    },
+    inspectUint24(position_) {
+      const position = position_ ?? this.position;
+      this.assertPosition(position + 2);
+      return (this.dataView.getUint16(position) << 8) + this.dataView.getUint8(position + 2);
+    },
+    inspectUint32(position_) {
+      const position = position_ ?? this.position;
+      this.assertPosition(position + 3);
+      return this.dataView.getUint32(position);
+    },
+    pushByte(byte) {
+      this.assertPosition(this.position);
+      this.bytes[this.position] = byte;
+      this.position++;
+    },
+    pushBytes(bytes) {
+      this.assertPosition(this.position + bytes.length - 1);
+      this.bytes.set(bytes, this.position);
+      this.position += bytes.length;
+    },
+    pushUint8(value2) {
+      this.assertPosition(this.position);
+      this.bytes[this.position] = value2;
+      this.position++;
+    },
+    pushUint16(value2) {
+      this.assertPosition(this.position + 1);
+      this.dataView.setUint16(this.position, value2);
+      this.position += 2;
+    },
+    pushUint24(value2) {
+      this.assertPosition(this.position + 2);
+      this.dataView.setUint16(this.position, value2 >> 8);
+      this.dataView.setUint8(this.position + 2, value2 & ~4294967040);
+      this.position += 3;
+    },
+    pushUint32(value2) {
+      this.assertPosition(this.position + 3);
+      this.dataView.setUint32(this.position, value2);
+      this.position += 4;
+    },
+    readByte() {
+      this.assertReadLimit();
+      this._touch();
+      const value2 = this.inspectByte();
+      this.position++;
+      return value2;
+    },
+    readBytes(length, size2) {
+      this.assertReadLimit();
+      this._touch();
+      const value2 = this.inspectBytes(length);
+      this.position += size2 ?? length;
+      return value2;
+    },
+    readUint8() {
+      this.assertReadLimit();
+      this._touch();
+      const value2 = this.inspectUint8();
+      this.position += 1;
+      return value2;
+    },
+    readUint16() {
+      this.assertReadLimit();
+      this._touch();
+      const value2 = this.inspectUint16();
+      this.position += 2;
+      return value2;
+    },
+    readUint24() {
+      this.assertReadLimit();
+      this._touch();
+      const value2 = this.inspectUint24();
+      this.position += 3;
+      return value2;
+    },
+    readUint32() {
+      this.assertReadLimit();
+      this._touch();
+      const value2 = this.inspectUint32();
+      this.position += 4;
+      return value2;
+    },
+    get remaining() {
+      return this.bytes.length - this.position;
+    },
+    setPosition(position) {
+      const oldPosition = this.position;
+      this.assertPosition(position);
+      this.position = position;
+      return () => this.position = oldPosition;
+    },
+    _touch() {
+      if (this.recursiveReadLimit === Number.POSITIVE_INFINITY)
+        return;
+      const count = this.getReadCount();
+      this.positionReadCount.set(this.position, count + 1);
+      if (count > 0)
+        this.recursiveReadCount++;
+    }
+  };
+});
+function bytesToBigInt(bytes, opts = {}) {
+  if (typeof opts.size !== "undefined")
+    assertSize2(bytes, { size: opts.size });
+  const hex = bytesToHex2(bytes, opts);
+  return hexToBigInt(hex, opts);
+}
+function bytesToBool(bytes_, opts = {}) {
+  let bytes = bytes_;
+  if (typeof opts.size !== "undefined") {
+    assertSize2(bytes, { size: opts.size });
+    bytes = trim(bytes);
+  }
+  if (bytes.length > 1 || bytes[0] > 1)
+    throw new InvalidBytesBooleanError(bytes);
+  return Boolean(bytes[0]);
+}
+function bytesToNumber(bytes, opts = {}) {
+  if (typeof opts.size !== "undefined")
+    assertSize2(bytes, { size: opts.size });
+  const hex = bytesToHex2(bytes, opts);
+  return hexToNumber(hex, opts);
+}
+function bytesToString(bytes_, opts = {}) {
+  let bytes = bytes_;
+  if (typeof opts.size !== "undefined") {
+    assertSize2(bytes, { size: opts.size });
+    bytes = trim(bytes, { dir: "right" });
+  }
+  return new TextDecoder().decode(bytes);
+}
+var init_fromBytes = __esm(() => {
+  init_encoding();
+  init_fromHex();
+  init_toHex();
+});
+function decodeAbiParameters(params, data) {
+  const bytes = typeof data === "string" ? hexToBytes2(data) : data;
+  const cursor = createCursor(bytes);
+  if (size(bytes) === 0 && params.length > 0)
+    throw new AbiDecodingZeroDataError;
+  if (size(data) && size(data) < 32)
+    throw new AbiDecodingDataSizeTooSmallError({
+      data: typeof data === "string" ? data : bytesToHex2(data),
+      params,
+      size: size(data)
+    });
+  let consumed = 0;
+  const values = [];
+  for (let i2 = 0;i2 < params.length; ++i2) {
+    const param = params[i2];
+    cursor.setPosition(consumed);
+    const [data2, consumed_] = decodeParameter(cursor, param, {
+      staticPosition: 0
+    });
+    consumed += consumed_;
+    values.push(data2);
+  }
+  return values;
+}
+function decodeParameter(cursor, param, { staticPosition }) {
+  const arrayComponents = getArrayComponents(param.type);
+  if (arrayComponents) {
+    const [length, type] = arrayComponents;
+    return decodeArray(cursor, { ...param, type }, { length, staticPosition });
+  }
+  if (param.type === "tuple")
+    return decodeTuple(cursor, param, { staticPosition });
+  if (param.type === "address")
+    return decodeAddress(cursor);
+  if (param.type === "bool")
+    return decodeBool(cursor);
+  if (param.type.startsWith("bytes"))
+    return decodeBytes(cursor, param, { staticPosition });
+  if (param.type.startsWith("uint") || param.type.startsWith("int"))
+    return decodeNumber(cursor, param);
+  if (param.type === "string")
+    return decodeString(cursor, { staticPosition });
+  throw new InvalidAbiDecodingTypeError(param.type, {
+    docsPath: "/docs/contract/decodeAbiParameters"
+  });
+}
+function decodeAddress(cursor) {
+  const value2 = cursor.readBytes(32);
+  return [checksumAddress(bytesToHex2(sliceBytes(value2, -20))), 32];
+}
+function decodeArray(cursor, param, { length, staticPosition }) {
+  if (!length) {
+    const offset = bytesToNumber(cursor.readBytes(sizeOfOffset));
+    const start = staticPosition + offset;
+    const startOfData = start + sizeOfLength;
+    cursor.setPosition(start);
+    const length2 = bytesToNumber(cursor.readBytes(sizeOfLength));
+    const dynamicChild = hasDynamicChild(param);
+    let consumed2 = 0;
+    const value3 = [];
+    for (let i2 = 0;i2 < length2; ++i2) {
+      cursor.setPosition(startOfData + (dynamicChild ? i2 * 32 : consumed2));
+      const [data, consumed_] = decodeParameter(cursor, param, {
+        staticPosition: startOfData
+      });
+      consumed2 += consumed_;
+      value3.push(data);
+    }
+    cursor.setPosition(staticPosition + 32);
+    return [value3, 32];
+  }
+  if (hasDynamicChild(param)) {
+    const offset = bytesToNumber(cursor.readBytes(sizeOfOffset));
+    const start = staticPosition + offset;
+    const value3 = [];
+    for (let i2 = 0;i2 < length; ++i2) {
+      cursor.setPosition(start + i2 * 32);
+      const [data] = decodeParameter(cursor, param, {
+        staticPosition: start
+      });
+      value3.push(data);
+    }
+    cursor.setPosition(staticPosition + 32);
+    return [value3, 32];
+  }
+  let consumed = 0;
+  const value2 = [];
+  for (let i2 = 0;i2 < length; ++i2) {
+    const [data, consumed_] = decodeParameter(cursor, param, {
+      staticPosition: staticPosition + consumed
+    });
+    consumed += consumed_;
+    value2.push(data);
+  }
+  return [value2, consumed];
+}
+function decodeBool(cursor) {
+  return [bytesToBool(cursor.readBytes(32), { size: 32 }), 32];
+}
+function decodeBytes(cursor, param, { staticPosition }) {
+  const [_, size2] = param.type.split("bytes");
+  if (!size2) {
+    const offset = bytesToNumber(cursor.readBytes(32));
+    cursor.setPosition(staticPosition + offset);
+    const length = bytesToNumber(cursor.readBytes(32));
+    if (length === 0) {
+      cursor.setPosition(staticPosition + 32);
+      return ["0x", 32];
+    }
+    const data = cursor.readBytes(length);
+    cursor.setPosition(staticPosition + 32);
+    return [bytesToHex2(data), 32];
+  }
+  const value2 = bytesToHex2(cursor.readBytes(Number.parseInt(size2), 32));
+  return [value2, 32];
+}
+function decodeNumber(cursor, param) {
+  const signed = param.type.startsWith("int");
+  const size2 = Number.parseInt(param.type.split("int")[1] || "256");
+  const value2 = cursor.readBytes(32);
+  return [
+    size2 > 48 ? bytesToBigInt(value2, { signed }) : bytesToNumber(value2, { signed }),
+    32
+  ];
+}
+function decodeTuple(cursor, param, { staticPosition }) {
+  const hasUnnamedChild = param.components.length === 0 || param.components.some(({ name }) => !name);
+  const value2 = hasUnnamedChild ? [] : {};
+  let consumed = 0;
+  if (hasDynamicChild(param)) {
+    const offset = bytesToNumber(cursor.readBytes(sizeOfOffset));
+    const start = staticPosition + offset;
+    for (let i2 = 0;i2 < param.components.length; ++i2) {
+      const component = param.components[i2];
+      cursor.setPosition(start + consumed);
+      const [data, consumed_] = decodeParameter(cursor, component, {
+        staticPosition: start
+      });
+      consumed += consumed_;
+      value2[hasUnnamedChild ? i2 : component?.name] = data;
+    }
+    cursor.setPosition(staticPosition + 32);
+    return [value2, 32];
+  }
+  for (let i2 = 0;i2 < param.components.length; ++i2) {
+    const component = param.components[i2];
+    const [data, consumed_] = decodeParameter(cursor, component, {
+      staticPosition
+    });
+    value2[hasUnnamedChild ? i2 : component?.name] = data;
+    consumed += consumed_;
+  }
+  return [value2, consumed];
+}
+function decodeString(cursor, { staticPosition }) {
+  const offset = bytesToNumber(cursor.readBytes(32));
+  const start = staticPosition + offset;
+  cursor.setPosition(start);
+  const length = bytesToNumber(cursor.readBytes(32));
+  if (length === 0) {
+    cursor.setPosition(staticPosition + 32);
+    return ["", 32];
+  }
+  const data = cursor.readBytes(length, 32);
+  const value2 = bytesToString(trim(data));
+  cursor.setPosition(staticPosition + 32);
+  return [value2, 32];
+}
+function hasDynamicChild(param) {
+  const { type } = param;
+  if (type === "string")
+    return true;
+  if (type === "bytes")
+    return true;
+  if (type.endsWith("[]"))
+    return true;
+  if (type === "tuple")
+    return param.components?.some(hasDynamicChild);
+  const arrayComponents = getArrayComponents(param.type);
+  if (arrayComponents && hasDynamicChild({ ...param, type: arrayComponents[1] }))
+    return true;
+  return false;
+}
+var sizeOfLength = 32;
+var sizeOfOffset = 32;
+var init_decodeAbiParameters = __esm(() => {
+  init_abi();
+  init_getAddress();
+  init_cursor2();
+  init_size();
+  init_slice();
+  init_fromBytes();
+  init_toBytes();
+  init_toHex();
+  init_encodeAbiParameters();
+});
+function decodeFunctionResult(parameters) {
+  const { abi, args, functionName, data } = parameters;
+  let abiItem = abi[0];
+  if (functionName) {
+    const item = getAbiItem({ abi, args, name: functionName });
+    if (!item)
+      throw new AbiFunctionNotFoundError(functionName, { docsPath: docsPath2 });
+    abiItem = item;
+  }
+  if (abiItem.type !== "function")
+    throw new AbiFunctionNotFoundError(undefined, { docsPath: docsPath2 });
+  if (!abiItem.outputs)
+    throw new AbiFunctionOutputsNotFoundError(abiItem.name, { docsPath: docsPath2 });
+  const values = decodeAbiParameters(abiItem.outputs, data);
+  if (values && values.length > 1)
+    return values;
+  if (values && values.length === 1)
+    return values[0];
+  return;
+}
+var docsPath2 = "/docs/contract/decodeFunctionResult";
+var init_decodeFunctionResult = __esm(() => {
+  init_abi();
+  init_decodeAbiParameters();
+  init_getAbiItem();
+});
 function isMessage(arg, schema) {
   const isMessage2 = arg !== null && typeof arg == "object" && "$typeName" in arg && typeof arg.$typeName == "string";
   if (!isMessage2) {
@@ -3782,7 +5775,6 @@ var ListSchema = /* @__PURE__ */ messageDesc(file_values_v1_values, 3);
 var DecimalSchema = /* @__PURE__ */ messageDesc(file_values_v1_values, 4);
 var file_sdk_v1alpha_sdk = /* @__PURE__ */ fileDesc("ChVzZGsvdjFhbHBoYS9zZGsucHJvdG8SC3Nkay52MWFscGhhIrQBChVTaW1wbGVDb25zZW5zdXNJbnB1dHMSIQoFdmFsdWUYASABKAsyEC52YWx1ZXMudjEuVmFsdWVIABIPCgVlcnJvchgCIAEoCUgAEjUKC2Rlc2NyaXB0b3JzGAMgASgLMiAuc2RrLnYxYWxwaGEuQ29uc2Vuc3VzRGVzY3JpcHRvchIhCgdkZWZhdWx0GAQgASgLMhAudmFsdWVzLnYxLlZhbHVlQg0KC29ic2VydmF0aW9uIpABCglGaWVsZHNNYXASMgoGZmllbGRzGAEgAygLMiIuc2RrLnYxYWxwaGEuRmllbGRzTWFwLkZpZWxkc0VudHJ5Gk8KC0ZpZWxkc0VudHJ5EgsKA2tleRgBIAEoCRIvCgV2YWx1ZRgCIAEoCzIgLnNkay52MWFscGhhLkNvbnNlbnN1c0Rlc2NyaXB0b3I6AjgBIoYBChNDb25zZW5zdXNEZXNjcmlwdG9yEjMKC2FnZ3JlZ2F0aW9uGAEgASgOMhwuc2RrLnYxYWxwaGEuQWdncmVnYXRpb25UeXBlSAASLAoKZmllbGRzX21hcBgCIAEoCzIWLnNkay52MWFscGhhLkZpZWxkc01hcEgAQgwKCmRlc2NyaXB0b3IiagoNUmVwb3J0UmVxdWVzdBIXCg9lbmNvZGVkX3BheWxvYWQYASABKAwSFAoMZW5jb2Rlcl9uYW1lGAIgASgJEhQKDHNpZ25pbmdfYWxnbxgDIAEoCRIUCgxoYXNoaW5nX2FsZ28YBCABKAkilwEKDlJlcG9ydFJlc3BvbnNlEhUKDWNvbmZpZ19kaWdlc3QYASABKAwSEgoGc2VxX25yGAIgASgEQgIwABIWCg5yZXBvcnRfY29udGV4dBgDIAEoDBISCgpyYXdfcmVwb3J0GAQgASgMEi4KBHNpZ3MYBSADKAsyIC5zZGsudjFhbHBoYS5BdHRyaWJ1dGVkU2lnbmF0dXJlIjsKE0F0dHJpYnV0ZWRTaWduYXR1cmUSEQoJc2lnbmF0dXJlGAEgASgMEhEKCXNpZ25lcl9pZBgCIAEoDSJrChFDYXBhYmlsaXR5UmVxdWVzdBIKCgJpZBgBIAEoCRIlCgdwYXlsb2FkGAIgASgLMhQuZ29vZ2xlLnByb3RvYnVmLkFueRIOCgZtZXRob2QYAyABKAkSEwoLY2FsbGJhY2tfaWQYBCABKAUiWgoSQ2FwYWJpbGl0eVJlc3BvbnNlEicKB3BheWxvYWQYASABKAsyFC5nb29nbGUucHJvdG9idWYuQW55SAASDwoFZXJyb3IYAiABKAlIAEIKCghyZXNwb25zZSJYChNUcmlnZ2VyU3Vic2NyaXB0aW9uEgoKAmlkGAEgASgJEiUKB3BheWxvYWQYAiABKAsyFC5nb29nbGUucHJvdG9idWYuQW55Eg4KBm1ldGhvZBgDIAEoCSJVChpUcmlnZ2VyU3Vic2NyaXB0aW9uUmVxdWVzdBI3Cg1zdWJzY3JpcHRpb25zGAEgAygLMiAuc2RrLnYxYWxwaGEuVHJpZ2dlclN1YnNjcmlwdGlvbiJACgdUcmlnZ2VyEg4KAmlkGAEgASgEQgIwABIlCgdwYXlsb2FkGAIgASgLMhQuZ29vZ2xlLnByb3RvYnVmLkFueSInChhBd2FpdENhcGFiaWxpdGllc1JlcXVlc3QSCwoDaWRzGAEgAygFIrgBChlBd2FpdENhcGFiaWxpdGllc1Jlc3BvbnNlEkgKCXJlc3BvbnNlcxgBIAMoCzI1LnNkay52MWFscGhhLkF3YWl0Q2FwYWJpbGl0aWVzUmVzcG9uc2UuUmVzcG9uc2VzRW50cnkaUQoOUmVzcG9uc2VzRW50cnkSCwoDa2V5GAEgASgFEi4KBXZhbHVlGAIgASgLMh8uc2RrLnYxYWxwaGEuQ2FwYWJpbGl0eVJlc3BvbnNlOgI4ASKgAQoORXhlY3V0ZVJlcXVlc3QSDgoGY29uZmlnGAEgASgMEisKCXN1YnNjcmliZRgCIAEoCzIWLmdvb2dsZS5wcm90b2J1Zi5FbXB0eUgAEicKB3RyaWdnZXIYAyABKAsyFC5zZGsudjFhbHBoYS5UcmlnZ2VySAASHQoRbWF4X3Jlc3BvbnNlX3NpemUYBCABKARCAjAAQgkKB3JlcXVlc3QimQEKD0V4ZWN1dGlvblJlc3VsdBIhCgV2YWx1ZRgBIAEoCzIQLnZhbHVlcy52MS5WYWx1ZUgAEg8KBWVycm9yGAIgASgJSAASSAoVdHJpZ2dlcl9zdWJzY3JpcHRpb25zGAMgASgLMicuc2RrLnYxYWxwaGEuVHJpZ2dlclN1YnNjcmlwdGlvblJlcXVlc3RIAEIICgZyZXN1bHQiVgoRR2V0U2VjcmV0c1JlcXVlc3QSLAoIcmVxdWVzdHMYASADKAsyGi5zZGsudjFhbHBoYS5TZWNyZXRSZXF1ZXN0EhMKC2NhbGxiYWNrX2lkGAIgASgFIiIKE0F3YWl0U2VjcmV0c1JlcXVlc3QSCwoDaWRzGAEgAygFIqsBChRBd2FpdFNlY3JldHNSZXNwb25zZRJDCglyZXNwb25zZXMYASADKAsyMC5zZGsudjFhbHBoYS5Bd2FpdFNlY3JldHNSZXNwb25zZS5SZXNwb25zZXNFbnRyeRpOCg5SZXNwb25zZXNFbnRyeRILCgNrZXkYASABKAUSKwoFdmFsdWUYAiABKAsyHC5zZGsudjFhbHBoYS5TZWNyZXRSZXNwb25zZXM6AjgBIi4KDVNlY3JldFJlcXVlc3QSCgoCaWQYASABKAkSEQoJbmFtZXNwYWNlGAIgASgJIkUKBlNlY3JldBIKCgJpZBgBIAEoCRIRCgluYW1lc3BhY2UYAiABKAkSDQoFb3duZXIYAyABKAkSDQoFdmFsdWUYBCABKAkiSgoLU2VjcmV0RXJyb3ISCgoCaWQYASABKAkSEQoJbmFtZXNwYWNlGAIgASgJEg0KBW93bmVyGAMgASgJEg0KBWVycm9yGAQgASgJIm4KDlNlY3JldFJlc3BvbnNlEiUKBnNlY3JldBgBIAEoCzITLnNkay52MWFscGhhLlNlY3JldEgAEikKBWVycm9yGAIgASgLMhguc2RrLnYxYWxwaGEuU2VjcmV0RXJyb3JIAEIKCghyZXNwb25zZSJBCg9TZWNyZXRSZXNwb25zZXMSLgoJcmVzcG9uc2VzGAEgAygLMhsuc2RrLnYxYWxwaGEuU2VjcmV0UmVzcG9uc2UquAEKD0FnZ3JlZ2F0aW9uVHlwZRIgChxBR0dSRUdBVElPTl9UWVBFX1VOU1BFQ0lGSUVEEAASGwoXQUdHUkVHQVRJT05fVFlQRV9NRURJQU4QARIeChpBR0dSRUdBVElPTl9UWVBFX0lERU5USUNBTBACEiIKHkFHR1JFR0FUSU9OX1RZUEVfQ09NTU9OX1BSRUZJWBADEiIKHkFHR1JFR0FUSU9OX1RZUEVfQ09NTU9OX1NVRkZJWBAEKjkKBE1vZGUSFAoQTU9ERV9VTlNQRUNJRklFRBAAEgwKCE1PREVfRE9OEAESDQoJTU9ERV9OT0RFEAJCaAoPY29tLnNkay52MWFscGhhQghTZGtQcm90b1ABogIDU1hYqgILU2RrLlYxYWxwaGHKAgtTZGtcVjFhbHBoYeICF1Nka1xWMWFscGhhXEdQQk1ldGFkYXRh6gIMU2RrOjpWMWFscGhhYgZwcm90bzM", [file_google_protobuf_any, file_google_protobuf_empty, file_values_v1_values]);
 var SimpleConsensusInputsSchema = /* @__PURE__ */ messageDesc(file_sdk_v1alpha_sdk, 0);
-var FieldsMapSchema = /* @__PURE__ */ messageDesc(file_sdk_v1alpha_sdk, 1);
 var ConsensusDescriptorSchema = /* @__PURE__ */ messageDesc(file_sdk_v1alpha_sdk, 2);
 var ReportRequestSchema = /* @__PURE__ */ messageDesc(file_sdk_v1alpha_sdk, 3);
 var ReportResponseSchema = /* @__PURE__ */ messageDesc(file_sdk_v1alpha_sdk, 4);
@@ -3874,6 +5866,13 @@ var hexToBytes = (hexStr) => {
     bytes[i / 2] = Number.parseInt(hex.slice(i, i + 2), 16);
   }
   return bytes;
+};
+var bytesToHex = (bytes) => {
+  return `0x${Array.from(bytes).map((b) => b.toString(16).padStart(2, "0")).join("")}`;
+};
+var hexToBase64 = (hex) => {
+  const cleanHex = hex.startsWith("0x") ? hex.slice(2) : hex;
+  return Buffer.from(cleanHex, "hex").toString("base64");
 };
 function createWriteCreReportRequest(input) {
   return {
@@ -4386,8 +6385,8 @@ function fromByteArray(uint8) {
     tmp = (uint8[len2 - 2] << 8) + uint8[len2 - 1], parts.push(lookup[tmp >> 10] + lookup[tmp >> 4 & 63] + lookup[tmp << 2 & 63] + "=");
   return parts.join("");
 }
-function read(buffer, offset, isLE, mLen, nBytes) {
-  var e, m, eLen = nBytes * 8 - mLen - 1, eMax = (1 << eLen) - 1, eBias = eMax >> 1, nBits = -7, i2 = isLE ? nBytes - 1 : 0, d = isLE ? -1 : 1, s = buffer[offset + i2];
+function read(buffer, offset, isLE2, mLen, nBytes) {
+  var e, m, eLen = nBytes * 8 - mLen - 1, eMax = (1 << eLen) - 1, eBias = eMax >> 1, nBits = -7, i2 = isLE2 ? nBytes - 1 : 0, d = isLE2 ? -1 : 1, s = buffer[offset + i2];
   i2 += d, e = s & (1 << -nBits) - 1, s >>= -nBits, nBits += eLen;
   for (;nBits > 0; e = e * 256 + buffer[offset + i2], i2 += d, nBits -= 8)
     ;
@@ -4402,8 +6401,8 @@ function read(buffer, offset, isLE, mLen, nBytes) {
     m = m + Math.pow(2, mLen), e = e - eBias;
   return (s ? -1 : 1) * m * Math.pow(2, e - mLen);
 }
-function write(buffer, value, offset, isLE, mLen, nBytes) {
-  var e, m, c, eLen = nBytes * 8 - mLen - 1, eMax = (1 << eLen) - 1, eBias = eMax >> 1, rt = mLen === 23 ? Math.pow(2, -24) - Math.pow(2, -77) : 0, i2 = isLE ? 0 : nBytes - 1, d = isLE ? 1 : -1, s = value < 0 || value === 0 && 1 / value < 0 ? 1 : 0;
+function write(buffer, value, offset, isLE2, mLen, nBytes) {
+  var e, m, c, eLen = nBytes * 8 - mLen - 1, eMax = (1 << eLen) - 1, eBias = eMax >> 1, rt = mLen === 23 ? Math.pow(2, -24) - Math.pow(2, -77) : 0, i2 = isLE2 ? 0 : nBytes - 1, d = isLE2 ? 1 : -1, s = value < 0 || value === 0 && 1 / value < 0 ? 1 : 0;
   if (value = Math.abs(value), isNaN(value) || value === 1 / 0)
     m = isNaN(value) ? 1 : 0, e = eMax;
   else {
@@ -4432,7 +6431,7 @@ function write(buffer, value, offset, isLE, mLen, nBytes) {
 var customInspectSymbol = typeof Symbol === "function" && typeof Symbol.for === "function" ? Symbol.for("nodejs.util.inspect.custom") : null;
 var INSPECT_MAX_BYTES = 50;
 var kMaxLength = 2147483647;
-var btoa = globalThis.btoa;
+var btoa2 = globalThis.btoa;
 var atob2 = globalThis.atob;
 var File = globalThis.File;
 var Blob = globalThis.Blob;
@@ -4525,30 +6524,30 @@ Buffer2.from = function(value, encodingOrOffset, length) {
 };
 Object.setPrototypeOf(Buffer2.prototype, Uint8Array.prototype);
 Object.setPrototypeOf(Buffer2, Uint8Array);
-function assertSize(size) {
-  if (typeof size !== "number")
+function assertSize(size2) {
+  if (typeof size2 !== "number")
     throw TypeError('"size" argument must be of type number');
-  else if (size < 0)
-    throw RangeError('The value "' + size + '" is invalid for option "size"');
+  else if (size2 < 0)
+    throw RangeError('The value "' + size2 + '" is invalid for option "size"');
 }
-function alloc(size, fill, encoding) {
-  if (assertSize(size), size <= 0)
-    return createBuffer(size);
+function alloc(size2, fill, encoding) {
+  if (assertSize(size2), size2 <= 0)
+    return createBuffer(size2);
   if (fill !== undefined)
-    return typeof encoding === "string" ? createBuffer(size).fill(fill, encoding) : createBuffer(size).fill(fill);
-  return createBuffer(size);
+    return typeof encoding === "string" ? createBuffer(size2).fill(fill, encoding) : createBuffer(size2).fill(fill);
+  return createBuffer(size2);
 }
-Buffer2.alloc = function(size, fill, encoding) {
-  return alloc(size, fill, encoding);
+Buffer2.alloc = function(size2, fill, encoding) {
+  return alloc(size2, fill, encoding);
 };
-function allocUnsafe(size) {
-  return assertSize(size), createBuffer(size < 0 ? 0 : checked(size) | 0);
+function allocUnsafe(size2) {
+  return assertSize(size2), createBuffer(size2 < 0 ? 0 : checked(size2) | 0);
 }
-Buffer2.allocUnsafe = function(size) {
-  return allocUnsafe(size);
+Buffer2.allocUnsafe = function(size2) {
+  return allocUnsafe(size2);
 };
-Buffer2.allocUnsafeSlow = function(size) {
-  return allocUnsafe(size);
+Buffer2.allocUnsafeSlow = function(size2) {
+  return allocUnsafe(size2);
 };
 function fromString(string, encoding) {
   if (typeof encoding !== "string" || encoding === "")
@@ -5674,6 +7673,20 @@ var LATEST_BLOCK_NUMBER = {
   absVal: Buffer.from([2]).toString("base64"),
   sign: "-1"
 };
+var encodeCallMsg = (payload) => ({
+  from: hexToBase64(payload.from),
+  to: hexToBase64(payload.to),
+  data: hexToBase64(payload.data)
+});
+var EVM_DEFAULT_REPORT_ENCODER = {
+  encoderName: "evm",
+  signingAlgo: "ecdsa",
+  hashingAlgo: "keccak256"
+};
+var prepareReportRequest = (hexEncodedPayload, reportEncoder = EVM_DEFAULT_REPORT_ENCODER) => ({
+  encodedPayload: hexToBase64(hexEncodedPayload),
+  ...reportEncoder
+});
 var decodeJson = (input) => {
   const decoder = new TextDecoder("utf-8");
   const textBody = decoder.decode(input);
@@ -9307,6 +11320,9 @@ var defaultLookup = new NetworkLookup({
   testnetBySelector,
   testnetBySelectorByFamily
 });
+function consensusIdenticalAggregation() {
+  return simpleConsensus(AggregationType.IDENTICAL);
+}
 
 class ConsensusImpl {
   descriptor;
@@ -9320,6 +11336,9 @@ class ConsensusImpl {
   }
   _usesUToForceShape(_) {}
 }
+function simpleConsensus(agg) {
+  return new ConsensusImpl(simpleDescriptor(agg));
+}
 function simpleDescriptor(agg) {
   return create(ConsensusDescriptorSchema, {
     descriptor: {
@@ -9327,36 +11346,6 @@ function simpleDescriptor(agg) {
       value: agg
     }
   });
-}
-function median() {
-  return new ConsensusFieldAggregation(simpleDescriptor(AggregationType.MEDIAN));
-}
-
-class ConsensusFieldAggregation {
-  fieldDescriptor;
-  t;
-  u;
-  constructor(fieldDescriptor, t, u) {
-    this.fieldDescriptor = fieldDescriptor;
-    this.t = t;
-    this.u = u;
-  }
-}
-function ConsensusAggregationByFields(aggregation) {
-  const fieldMap = create(FieldsMapSchema);
-  Object.keys(aggregation).forEach((key) => {
-    const fieldFn = aggregation[key];
-    const fieldAggregation = fieldFn();
-    if (fieldAggregation.fieldDescriptor) {
-      fieldMap.fields[key] = fieldAggregation.fieldDescriptor;
-    }
-  });
-  return new ConsensusImpl(create(ConsensusDescriptorSchema, {
-    descriptor: {
-      case: "fieldsMap",
-      value: fieldMap
-    }
-  }));
 }
 
 class Int64 {
@@ -10674,11 +12663,11 @@ function datetimeRegex(args) {
   regex = `${regex}(${opts.join("|")})`;
   return new RegExp(`^${regex}$`);
 }
-function isValidIP(ip, version) {
-  if ((version === "v4" || !version) && ipv4Regex.test(ip)) {
+function isValidIP(ip, version2) {
+  if ((version2 === "v4" || !version2) && ipv4Regex.test(ip)) {
     return true;
   }
-  if ((version === "v6" || !version) && ipv6Regex.test(ip)) {
+  if ((version2 === "v6" || !version2) && ipv6Regex.test(ip)) {
     return true;
   }
   return false;
@@ -10705,11 +12694,11 @@ function isValidJWT(jwt, alg) {
     return false;
   }
 }
-function isValidCidr(ip, version) {
-  if ((version === "v4" || !version) && ipv4CidrRegex.test(ip)) {
+function isValidCidr(ip, version2) {
+  if ((version2 === "v4" || !version2) && ipv4CidrRegex.test(ip)) {
     return true;
   }
-  if ((version === "v6" || !version) && ipv6CidrRegex.test(ip)) {
+  if ((version2 === "v6" || !version2) && ipv6CidrRegex.test(ip)) {
     return true;
   }
   return false;
@@ -12871,8 +14860,8 @@ class ZodSet extends ZodType {
       maxSize: { value: maxSize, message: errorUtil.toString(message) }
     });
   }
-  size(size, message) {
-    return this.min(size, message).max(size, message);
+  size(size2, message) {
+    return this.min(size2, message).max(size2, message);
   }
   nonempty(message) {
     return this.min(1, message);
@@ -13676,7 +15665,6 @@ var coerce = {
   date: (arg) => ZodDate.create({ ...arg, coerce: true })
 };
 var NEVER = INVALID;
-var zod_default = exports_external;
 var globalHostBindingsSchema = exports_external.object({
   switchModes: exports_external.function().args(exports_external.nativeEnum(Mode)).returns(exports_external.void()),
   log: exports_external.function().args(exports_external.string()).returns(exports_external.void()),
@@ -14207,1641 +16195,905 @@ class Runner {
     });
   }
 }
-var gasOracleResponseSchema = zod_default.object({
-  status: zod_default.string(),
-  message: zod_default.string(),
-  result: zod_default.object({
-    LastBlock: zod_default.string(),
-    SafeGasPrice: zod_default.string(),
-    ProposeGasPrice: zod_default.string(),
-    FastGasPrice: zod_default.string(),
-    suggestBaseFee: zod_default.string(),
-    gasUsedRatio: zod_default.string()
-  })
-});
-var configSchema = zod_default.object({
-  etherScanUrl: zod_default.string().url(),
-  apiKey: zod_default.string(),
-  chainid: zod_default.number(),
-  module: zod_default.string(),
-  action: zod_default.string(),
-  schedule: zod_default.string()
-});
-var fetchGasPrices = (sendRequester, config) => {
-  const request = {
-    url: `${config.etherScanUrl}?chainid=${config.chainid}&module=${config.module}&action=${config.action}&apikey=${config.apiKey}`,
-    method: "GET"
-  };
-  const response = sendRequester.sendRequest(request).result();
-  const bodyText = new TextDecoder().decode(response.body);
-  const gasOracleData = gasOracleResponseSchema.parse(JSON.parse(bodyText));
-  if (gasOracleData.status !== "1") {
-    throw new Error(`Etherscan API error: ${gasOracleData.message}`);
+init_decodeFunctionResult();
+init_encodeFunctionData();
+init_toBytes();
+init_keccak256();
+function readSecretCompat(runtimeLike, id) {
+  try {
+    const s = runtimeLike.getSecret({ id }).result();
+    const v = String(s.value ?? "").trim();
+    if (v)
+      return v;
+  } catch {}
+  try {
+    const s = runtimeLike.getSecret(id).result();
+    const v = String(s.value ?? "").trim();
+    if (v)
+      return v;
+  } catch {}
+  const envValue = String(globalThis.process?.env?.[id] ?? "").trim();
+  if (envValue)
+    return envValue;
+  return "";
+}
+function toBase64Utf8(value2) {
+  const maybeBuffer = globalThis;
+  if (maybeBuffer.Buffer?.from) {
+    return maybeBuffer.Buffer.from(value2).toString("base64");
   }
+  if (typeof btoa === "function") {
+    const utf8 = new TextEncoder().encode(value2);
+    let binary = "";
+    for (let i2 = 0;i2 < utf8.length; i2++)
+      binary += String.fromCharCode(utf8[i2]);
+    return btoa(binary);
+  }
+  throw new Error("No base64 encoder available in this runtime");
+}
+function coerceGeminiJson(raw) {
+  const trimmed = raw.trim();
+  if (trimmed.startsWith("{"))
+    return JSON.parse(trimmed);
+  const match = trimmed.match(/\{[\s\S]*\}/);
+  if (!match)
+    throw new Error("Gemini response is not JSON");
+  return JSON.parse(match[0]);
+}
+function parseGeminiDecision(candidate) {
+  if (typeof candidate !== "object" || candidate === null) {
+    throw new Error("Gemini response payload is not an object");
+  }
+  const input = candidate;
+  const actionRaw = typeof input.action === "string" ? input.action.toUpperCase() : "";
+  const action = actionRaw === "EXECUTE" || actionRaw === "PAUSE" || actionRaw === "SKIP" ? actionRaw : "";
+  if (!action)
+    throw new Error("Gemini action must be EXECUTE | PAUSE | SKIP");
+  const confidence = Number(input.confidence);
+  if (!Number.isFinite(confidence) || confidence < 0 || confidence > 100) {
+    throw new Error("Gemini confidence must be number in [0, 100]");
+  }
+  const reason = String(input.reason ?? "").trim();
+  if (!reason)
+    throw new Error("Gemini reason is required");
+  const operatorMessage = String(input.operatorMessage ?? "").trim() || reason;
   return {
-    safeGasPrice: parseFloat(gasOracleData.result.SafeGasPrice),
-    proposeGasPrice: parseFloat(gasOracleData.result.ProposeGasPrice),
-    fastGasPrice: parseFloat(gasOracleData.result.FastGasPrice),
-    baseFee: parseFloat(gasOracleData.result.suggestBaseFee),
-    lastBlock: parseFloat(gasOracleData.result.LastBlock)
+    action,
+    confidence,
+    reason,
+    operatorMessage
   };
-};
-var RPC_ENDPOINTS = {
-  1: "https://eth-mainnet.alchemyapi.io/v2/demo",
-  5: "https://eth-goerli.alchemyapi.io/v2/demo",
-  11155111: "https://eth-sepolia.alchemyapi.io/v2/demo",
-  56: "https://bsc-dataseed.binance.org:443",
-  97: "https://data-seed-prebsc.binance.org:8545",
-  137: "https://polygon-rpc.com",
-  80001: "https://rpc-mumbai.maticvigil.com",
-  42161: "https://arb1.arbitrum.io/rpc",
-  421613: "https://goerli-rollup.arbitrum.io/rpc",
-  10: "https://mainnet.optimism.io",
-  420: "https://goerli.optimism.io",
-  8453: "https://mainnet.base.org",
-  84532: "https://sepolia.base.org"
-};
-var ERC20_SELECTORS = {
-  totalSupply: "0x18160ddd",
-  balanceOf: "0x70a08231",
-  transfer: "0xa9059cbb",
-  transferFrom: "0x23b872dd",
-  approve: "0x095ea7b3",
-  allowance: "0xdd62ed3e",
-  name: "0x06fdde03",
-  symbol: "0x95d89b41",
-  decimals: "0x313ce567"
-};
-var ERC721_SELECTORS = {
-  ownerOf: "0x6352211e",
-  balanceOf: "0x70a08231",
-  safeTransferFrom: "0x42842e0e",
-  setApprovalForAll: "0xa22cb465",
-  isApprovedForAll: "0xe985e9c5",
-  approve: "0x095ea7b3",
-  getApproved: "0x081812fc"
-};
-var ERC1155_SELECTORS = {
-  balanceOf: "0x00fdd58e",
-  balanceOfBatch: "0x4e1273f4",
-  setApprovalForAll: "0xa22cb465",
-  isApprovedForAll: "0xe985e9c5",
-  safeTransferFrom: "0xf242432a",
-  safeBatchTransferFrom: "0x2eb2c2d6"
-};
-
-class RPCClient {
-  rpcUrl;
-  chainId;
-  timeout;
-  constructor(config) {
-    this.rpcUrl = config.rpcUrl;
-    this.chainId = config.chainId;
-    this.timeout = config.timeout || 30000;
-  }
-  async call(method, params) {
-    try {
-      const controller = new AbortController;
-      const timeoutId = setTimeout(() => controller.abort(), this.timeout);
-      const response = await fetch(this.rpcUrl, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          jsonrpc: "2.0",
-          method,
-          params,
-          id: Date.now()
-        }),
-        signal: controller.signal
-      });
-      clearTimeout(timeoutId);
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
-      }
-      const data = await response.json();
-      if (data.error) {
-        throw new Error(data.error.message);
-      }
-      return data.result;
-    } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      throw new Error(`RPC call failed: ${message}`);
-    }
-  }
-  async getBytecode(address) {
-    try {
-      const bytecode = await this.call("eth_getCode", [address.toLowerCase(), "latest"]);
-      return {
-        bytecode: bytecode || "0x",
-        bytecodeLength: (bytecode?.length || 0) / 2,
-        isContract: bytecode !== "0x" && bytecode !== "",
-        hasCode: bytecode !== "0x" && bytecode !== ""
-      };
-    } catch (error) {
-      throw new Error(`Failed to get bytecode: ${error}`);
-    }
-  }
-  async callContractMethod(contractAddress, data) {
-    try {
-      return await this.call("eth_call", [
-        {
-          to: contractAddress.toLowerCase(),
-          data
-        },
-        "latest"
-      ]);
-    } catch (error) {
-      throw new Error(`Failed to call contract: ${error}`);
-    }
-  }
-  async getERC20Name(tokenAddress) {
-    try {
-      const result = await this.callContractMethod(tokenAddress, ERC20_SELECTORS.name);
-      if (result === "0x")
-        return null;
-      const hexString = result.substring(2);
-      const bytes = Buffer.from(hexString, "hex");
-      const offset = parseInt(hexString.substring(0, 64), 16) / 2;
-      const length = parseInt(hexString.substring(64, 128), 16);
-      return bytes.toString("utf8", offset, offset + length).trim() || null;
-    } catch {
-      return null;
-    }
-  }
-  async getERC20Symbol(tokenAddress) {
-    try {
-      const result = await this.callContractMethod(tokenAddress, ERC20_SELECTORS.symbol);
-      if (result === "0x")
-        return null;
-      const hexString = result.substring(2);
-      const bytes = Buffer.from(hexString, "hex");
-      const offset = parseInt(hexString.substring(0, 64), 16) / 2;
-      const length = parseInt(hexString.substring(64, 128), 16);
-      return bytes.toString("utf8", offset, offset + length).trim() || null;
-    } catch {
-      return null;
-    }
-  }
-  async getERC20Decimals(tokenAddress) {
-    try {
-      const result = await this.callContractMethod(tokenAddress, ERC20_SELECTORS.decimals);
-      if (result === "0x")
-        return null;
-      return parseInt(result, 16);
-    } catch {
-      return null;
-    }
-  }
-  async getERC20TotalSupply(tokenAddress) {
-    try {
-      const result = await this.callContractMethod(tokenAddress, ERC20_SELECTORS.totalSupply);
-      if (result === "0x")
-        return null;
-      return BigInt(result).toString();
-    } catch {
-      return null;
-    }
-  }
-  async getBalance(address) {
-    try {
-      const balance = await this.call("eth_getBalance", [address.toLowerCase(), "latest"]);
-      return BigInt(balance || "0").toString();
-    } catch (error) {
-      throw new Error(`Failed to get balance: ${error}`);
-    }
-  }
-  async getBlockNumber() {
-    try {
-      const blockNum = await this.call("eth_blockNumber", []);
-      return parseInt(blockNum || "0", 16);
-    } catch (error) {
-      throw new Error(`Failed to get block number: ${error}`);
-    }
-  }
-  async getTransaction(txHash) {
-    try {
-      return await this.call("eth_getTransactionByHash", [txHash]);
-    } catch {
-      return null;
-    }
-  }
-  async detectTokenStandard(tokenAddress) {
-    try {
-      const bytecode = await this.getBytecode(tokenAddress);
-      if (!bytecode.isContract) {
-        return {
-          hasERC20: false,
-          hasERC721: false,
-          hasERC1155: false,
-          selectors: []
-        };
-      }
-      const hex = bytecode.bytecode.toLowerCase();
-      const selectors = [];
-      for (const [key, selector] of Object.entries(ERC20_SELECTORS)) {
-        if (hex.includes(selector.toLowerCase())) {
-          selectors.push(selector);
-        }
-      }
-      const erc20Matches = Object.values(ERC20_SELECTORS).filter((s) => selectors.includes(s.toLowerCase())).length;
-      const erc721Matches = Object.values(ERC721_SELECTORS).filter((s) => hex.includes(s.toLowerCase())).length;
-      const erc1155Matches = Object.values(ERC1155_SELECTORS).filter((s) => hex.includes(s.toLowerCase())).length;
-      return {
-        hasERC20: erc20Matches >= 6,
-        hasERC721: erc721Matches >= 5,
-        hasERC1155: erc1155Matches >= 4,
-        selectors
-      };
-    } catch {
-      return {
-        hasERC20: false,
-        hasERC721: false,
-        hasERC1155: false,
-        selectors: []
-      };
-    }
-  }
 }
-function createRPCClient(chainId = 1, rpcUrl, timeout = 30000) {
-  const url = rpcUrl || RPC_ENDPOINTS[chainId];
-  if (!url) {
-    throw new Error(`Unsupported chain ID: ${chainId}`);
-  }
-  return new RPCClient({
-    rpcUrl: url,
-    chainId,
-    timeout
-  });
-}
-var ETHERSCAN_ENDPOINTS = {
-  1: "https://api.etherscan.io/api",
-  5: "https://api-goerli.etherscan.io/api",
-  11155111: "https://api-sepolia.etherscan.io/api",
-  56: "https://api.bscscan.com/api",
-  97: "https://api-testnet.bscscan.com/api",
-  137: "https://api.polygonscan.com/api",
-  80001: "https://api-mumbai.polygonscan.com/api",
-  42161: "https://api.arbiscan.io/api",
-  421613: "https://api-goerli.arbiscan.io/api",
-  10: "https://api-optimistic.etherscan.io/api",
-  420: "https://api-goerli-optimistic.etherscan.io/api",
-  8453: "https://api.basescan.org/api",
-  84532: "https://api-sepolia.basescan.org/api"
-};
-
-class EtherscanAPIClient {
-  apiKey;
-  chainId;
-  baseUrl;
-  timeout;
-  constructor(config) {
-    this.apiKey = config.apiKey;
-    this.chainId = config.chainId;
-    this.timeout = config.timeout || 30000;
-    const url = ETHERSCAN_ENDPOINTS[config.chainId];
-    if (!url) {
-      throw new Error(`Unsupported chain ID: ${config.chainId}`);
-    }
-    this.baseUrl = url;
-  }
-  async request(params) {
-    try {
-      const queryParams = new URLSearchParams({
-        ...params,
-        apikey: this.apiKey
-      });
-      const url = `${this.baseUrl}?${queryParams.toString()}`;
-      const controller = new AbortController;
-      const timeoutId = setTimeout(() => controller.abort(), this.timeout);
-      const response = await fetch(url, { signal: controller.signal });
-      clearTimeout(timeoutId);
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
-      }
-      const data = await response.json();
-      if (data.status !== "1") {
-        throw new Error(data.message || "API error");
-      }
-      return data.result;
-    } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      throw new Error(`Etherscan API error: ${message}`);
-    }
-  }
-  async getContractSourceCode(address) {
-    try {
-      const results = await this.request({
-        module: "contract",
-        action: "getsourcecode",
-        address: address.toLowerCase()
-      });
-      if (!results || results.length === 0) {
-        return null;
-      }
-      return results[0];
-    } catch (error) {
-      throw new Error(`Failed to get contract source: ${error}`);
-    }
-  }
-  async isContractVerified(address) {
-    try {
-      const sourceCode = await this.getContractSourceCode(address);
-      return sourceCode !== null && sourceCode.SourceCode !== "";
-    } catch {
-      return false;
-    }
-  }
-  async getContractABI(address) {
-    try {
-      const response = await this.request({
-        module: "contract",
-        action: "getabi",
-        address: address.toLowerCase()
-      });
-      return response || null;
-    } catch {
-      return null;
-    }
-  }
-  async getTokenHolders(tokenAddress, pageSize = 100) {
-    try {
-      const holders = await this.request({
-        module: "token",
-        action: "tokenholderlist",
-        contractaddress: tokenAddress.toLowerCase(),
-        page: "1",
-        offset: pageSize.toString()
-      });
-      return holders || [];
-    } catch (error) {
-      throw new Error(`Failed to get token holders: ${error}`);
-    }
-  }
-  async getTokenInfo(tokenAddress) {
-    try {
-      const info = await this.request({
-        module: "token",
-        action: "tokeninfo",
-        contractaddress: tokenAddress.toLowerCase()
-      });
-      return info || null;
-    } catch {
-      return null;
-    }
-  }
-  async getGasPrices() {
-    try {
-      return await this.request({
-        module: "gastracker",
-        action: "gasoracle"
-      });
-    } catch (error) {
-      throw new Error(`Failed to get gas prices: ${error}`);
-    }
-  }
-  async getContractCreation(address) {
-    try {
-      const results = await this.request({
-        module: "contract",
-        action: "getcontractcreation",
-        contractaddresses: address.toLowerCase()
-      });
-      return results?.[0] || null;
-    } catch {
-      return null;
-    }
-  }
-  async getAddressLabel(address) {
-    try {
-      const results = await this.request({
-        module: "account",
-        action: "addresslabellookup",
-        address: address.toLowerCase()
-      });
-      return results?.[0] || null;
-    } catch {
-      return null;
-    }
-  }
-  async getLogs(address, topic0, fromBlock = 0, toBlock = 99999999) {
-    try {
-      const params = {
-        module: "logs",
-        action: "getLogs",
-        address: address.toLowerCase(),
-        fromBlock: fromBlock.toString(),
-        toBlock: toBlock.toString(),
-        page: "1",
-        offset: "1000"
-      };
-      if (topic0) {
-        params.topic0 = topic0;
-      }
-      return await this.request(params);
-    } catch (error) {
-      throw new Error(`Failed to get logs: ${error}`);
-    }
-  }
-  async getBalance(address) {
-    try {
-      return await this.request({
-        module: "account",
-        action: "balance",
-        address: address.toLowerCase(),
-        tag: "latest"
-      });
-    } catch (error) {
-      throw new Error(`Failed to get balance: ${error}`);
-    }
-  }
-  async getTransactionCount(address) {
-    try {
-      return await this.request({
-        module: "account",
-        action: "txlistinternal",
-        address: address.toLowerCase(),
-        startblock: "0",
-        endblock: "99999999",
-        sort: "desc",
-        page: "1",
-        offset: "1"
-      });
-    } catch (error) {
-      throw new Error(`Failed to get transaction count: ${error}`);
-    }
-  }
-}
-function createEtherscanClient(apiKey, chainId = 1, timeout = 30000) {
-  return new EtherscanAPIClient({
-    apiKey,
-    chainId,
-    timeout,
-    baseUrl: ETHERSCAN_ENDPOINTS[chainId] || ""
-  });
-}
-async function analyzeTokenStandard(tokenAddress, config) {
-  try {
-    const rpcClient = createRPCClient(config.chainId, config.rpcUrl, config.timeout);
-    const detection = await rpcClient.detectTokenStandard(tokenAddress);
-    let detectedType = "Unknown";
-    if (detection.hasERC20)
-      detectedType = "ERC20";
-    else if (detection.hasERC721)
-      detectedType = "ERC721";
-    else if (detection.hasERC1155)
-      detectedType = "ERC1155";
-    return {
-      isERC20: detection.hasERC20,
-      isERC721: detection.hasERC721,
-      isERC1155: detection.hasERC1155,
-      detectedType,
-      functionSelectors: detection.selectors
-    };
-  } catch (error) {
-    return {
-      isERC20: false,
-      isERC721: false,
-      isERC1155: false,
-      detectedType: "Error",
-      functionSelectors: []
-    };
-  }
-}
-async function analyzeOwnership(tokenAddress, config) {
-  try {
-    const etherscanClient = createEtherscanClient(config.etherscanApiKey, config.chainId, config.timeout);
-    const creationInfo = await etherscanClient.getContractCreation(tokenAddress);
-    if (!creationInfo) {
-      return {
-        owner: null,
-        ownerLabel: null,
-        isMultisig: false,
-        isProxy: false,
-        proxyImplementation: null,
-        ownershipRisks: ["Unable to get contract creation info"]
-      };
-    }
-    const ownerLabel = await etherscanClient.getAddressLabel(creationInfo.ContractCreator);
-    const ownershipRisks = [];
-    let isMultisig = false;
-    let isProxy = false;
-    let proxyImplementation = null;
-    if (ownerLabel?.Label && (ownerLabel.Label.includes("Multisig") || ownerLabel.Label.includes("Safe"))) {
-      isMultisig = true;
-    }
-    const rpcClient = createRPCClient(config.chainId, config.rpcUrl, config.timeout);
-    const bytecode = await rpcClient.getBytecode(tokenAddress);
-    if (bytecode.bytecode.includes("3d82803d3d3d3d363d3d37")) {
-      isProxy = true;
-      ownershipRisks.push("Uses proxy pattern (upgradeable)");
-    }
-    if (!isMultisig) {
-      ownershipRisks.push("Single owner address (high centralization risk)");
-    }
-    if (!creationInfo.ContractCreator || creationInfo.ContractCreator === "0x0000000000000000000000000000000000000000") {
-      ownershipRisks.push("Unknown or null owner");
-    }
-    return {
-      owner: creationInfo.ContractCreator,
-      ownerLabel: ownerLabel?.Label || null,
-      isMultisig,
-      isProxy,
-      proxyImplementation,
-      ownershipRisks
-    };
-  } catch (error) {
-    return {
-      owner: null,
-      ownerLabel: null,
-      isMultisig: false,
-      isProxy: false,
-      proxyImplementation: null,
-      ownershipRisks: ["Failed to analyze ownership"]
-    };
-  }
-}
-async function analyzeHolderDistribution(tokenAddress, config) {
-  try {
-    const etherscanClient = createEtherscanClient(config.etherscanApiKey, config.chainId, config.timeout);
-    const holders = await etherscanClient.getTokenHolders(tokenAddress, 10);
-    if (!holders || holders.length === 0) {
-      return {
-        totalHolders: 0,
-        topHolder: null,
-        top5HoldersCombined: 0,
-        top10HoldersCombined: 0,
-        concentrationRisks: ["Cannot analyze holder distribution"],
-        isHighlyConcentrated: false
-      };
-    }
-    const topHolder = holders[0];
-    const top5Percentage = holders.slice(0, 5).reduce((sum, h) => sum + parseFloat(h.TokenHolderPercentage), 0);
-    const top10Percentage = holders.reduce((sum, h) => sum + parseFloat(h.TokenHolderPercentage), 0);
-    const concentrationRisks = [];
-    let isHighlyConcentrated = false;
-    if (parseFloat(topHolder.TokenHolderPercentage) > 50) {
-      concentrationRisks.push(`Top holder owns ${parseFloat(topHolder.TokenHolderPercentage).toFixed(2)}% - extreme concentration`);
-      isHighlyConcentrated = true;
-    } else if (parseFloat(topHolder.TokenHolderPercentage) > 30) {
-      concentrationRisks.push(`Top holder owns ${parseFloat(topHolder.TokenHolderPercentage).toFixed(2)}% - high concentration`);
-      isHighlyConcentrated = true;
-    }
-    if (top5Percentage > 80) {
-      concentrationRisks.push(`Top 5 holders own ${top5Percentage.toFixed(2)}% - highly concentrated`);
-      isHighlyConcentrated = true;
-    }
-    if (top10Percentage > 95) {
-      concentrationRisks.push(`Top 10 holders own ${top10Percentage.toFixed(2)}% - effectively centralized`);
-      isHighlyConcentrated = true;
-    }
-    return {
-      totalHolders: holders.length,
-      topHolder: {
-        address: topHolder.TokenHolderAddress,
-        percentage: parseFloat(topHolder.TokenHolderPercentage)
-      },
-      top5HoldersCombined: top5Percentage,
-      top10HoldersCombined: top10Percentage,
-      concentrationRisks,
-      isHighlyConcentrated
-    };
-  } catch (error) {
-    return {
-      totalHolders: 0,
-      topHolder: null,
-      top5HoldersCombined: 0,
-      top10HoldersCombined: 0,
-      concentrationRisks: ["Failed to analyze holder distribution"],
-      isHighlyConcentrated: false
-    };
-  }
-}
-async function detectSecurityRisks(tokenAddress, config) {
-  try {
-    const etherscanClient = createEtherscanClient(config.etherscanApiKey, config.chainId, config.timeout);
-    const rpcClient = createRPCClient(config.chainId, config.rpcUrl, config.timeout);
-    const risks = [];
-    let hasSelfdestruct = false;
-    let hasMinting = false;
-    let isPausable = false;
-    let hasBlacklist = false;
-    const proxyPatterns = [];
-    const sourceCode = await etherscanClient.getContractSourceCode(tokenAddress);
-    const unverifiedCode = !sourceCode || sourceCode.SourceCode === "";
-    if (unverifiedCode) {
-      risks.push("Contract source code not verified");
-    } else {
-      const lowerSource = sourceCode.SourceCode.toLowerCase();
-      if (lowerSource.includes("selfdestruct") || lowerSource.includes("suicide")) {
-        hasSelfdestruct = true;
-        risks.push("Contract has selfdestruct function - can be destroyed");
-      }
-      if (lowerSource.includes("mint(") || lowerSource.includes("_mint")) {
-        hasMinting = true;
-        risks.push("Contract has minting capabilities - can create new tokens");
-      }
-      if (lowerSource.includes("pause") || lowerSource.includes("_pause")) {
-        isPausable = true;
-        risks.push("Contract has pausable functions - transfers can be frozen");
-      }
-      if (lowerSource.includes("blacklist") || lowerSource.includes("_blacklist")) {
-        hasBlacklist = true;
-        risks.push("Contract has blacklist functionality - can block addresses");
-      }
-      if (lowerSource.includes("proxy") || lowerSource.includes("delegatecall")) {
-        proxyPatterns.push("Uses delegate call pattern");
-        risks.push("Uses proxy pattern - can be upgraded by owner");
-      }
-      if (lowerSource.includes("upgradeable") || lowerSource.includes("uups")) {
-        proxyPatterns.push("UUPS proxy detected");
-        risks.push("UUPS proxy pattern - upgradeable contract");
-      }
-    }
-    const bytecode = await rpcClient.getBytecode(tokenAddress);
-    if (bytecode.bytecode.includes("fe")) {}
-    return {
-      hasSelfdestruct,
-      hasMinting,
-      isPausable,
-      hasBlacklist,
-      proxyPatterns,
-      unverifiedCode,
-      risks,
-      riskCount: risks.length
-    };
-  } catch (error) {
-    return {
-      hasSelfdestruct: false,
-      hasMinting: false,
-      isPausable: false,
-      hasBlacklist: false,
-      proxyPatterns: [],
-      unverifiedCode: true,
-      risks: ["Failed to detect security risks"],
-      riskCount: 1
-    };
-  }
-}
-function scoreTokenRisk(analysis) {
-  let score = 100;
-  score -= analysis.ownershipAnalysis.ownershipRisks.length * 5;
-  if (analysis.ownershipAnalysis.isMultisig)
-    score += 10;
-  if (analysis.ownershipAnalysis.isProxy)
-    score -= 15;
-  if (analysis.holderAnalysis.isHighlyConcentrated) {
-    score -= 20;
-  }
-  if (analysis.holderAnalysis.concentrationRisks.length > 2) {
-    score -= 10;
-  }
-  if (analysis.riskAnalysis.unverifiedCode)
-    score -= 20;
-  if (analysis.riskAnalysis.hasSelfdestruct)
-    score -= 15;
-  if (analysis.riskAnalysis.hasMinting)
-    score -= 10;
-  if (analysis.riskAnalysis.isPausable)
-    score -= 10;
-  if (analysis.riskAnalysis.hasBlacklist)
-    score -= 10;
-  if (analysis.riskAnalysis.proxyPatterns.length > 0)
-    score -= 5;
-  score -= Math.min(analysis.riskAnalysis.riskCount * 2, 30);
-  if (analysis.standardAnalysis.isERC20)
-    score += 5;
-  return Math.max(0, Math.min(100, score));
-}
-function getRiskLevel(score) {
-  if (score >= 80)
-    return "LOW";
-  if (score >= 60)
-    return "MEDIUM";
-  if (score >= 40)
-    return "HIGH";
-  return "CRITICAL";
-}
-function generateRecommendations(analysis) {
-  const recommendations = [];
-  if (analysis.riskAnalysis.unverifiedCode) {
-    recommendations.push("❌ Do not interact - contract source is not verified");
-  }
-  if (analysis.riskAnalysis.hasSelfdestruct) {
-    recommendations.push("⚠️ High risk - contract can be destroyed by owner");
-  }
-  if (analysis.riskAnalysis.hasBlacklist) {
-    recommendations.push("⚠️ Medium risk - your address can be blacklisted");
-  }
-  if (analysis.riskAnalysis.hasMinting) {
-    recommendations.push("⚠️ Inflation risk - owner can mint unlimited tokens");
-  }
-  if (analysis.holderAnalysis.isHighlyConcentrated) {
-    recommendations.push("⚠️ Liquidity risk - token is highly concentrated among few holders");
-  }
-  if (analysis.ownershipAnalysis.isProxy && !analysis.ownershipAnalysis.isMultisig) {
-    recommendations.push("⚠️ Single owner can upgrade contract at any time");
-  }
-  if (analysis.riskLevel === "LOW") {
-    recommendations.push("✅ This token appears to be safe for interaction");
-  }
-  if (analysis.riskLevel === "MEDIUM") {
-    recommendations.push("⚠️ Proceed with caution - manual review recommended");
-  }
-  if (analysis.riskLevel === "HIGH") {
-    recommendations.push("❌ Not recommended for automated transactions - manual approval required");
-  }
-  if (analysis.riskLevel === "CRITICAL") {
-    recommendations.push("\uD83D\uDEAB Do not interact - this token has critical security issues");
-  }
-  return recommendations.length > 0 ? recommendations : ["No specific recommendations"];
-}
-async function analyzeToken(tokenAddress, config) {
-  try {
-    const normalizedAddress = tokenAddress.toLowerCase();
-    const [standard, ownership, holders, risks] = await Promise.all([
-      analyzeTokenStandard(normalizedAddress, config),
-      analyzeOwnership(normalizedAddress, config),
-      analyzeHolderDistribution(normalizedAddress, config),
-      detectSecurityRisks(normalizedAddress, config)
-    ]);
-    const result = {
-      tokenAddress: normalizedAddress,
-      chainId: config.chainId,
-      analysisTimestamp: new Date().toISOString(),
-      standardAnalysis: standard,
-      ownershipAnalysis: ownership,
-      holderAnalysis: holders,
-      riskAnalysis: risks,
-      overallScore: 0,
-      riskLevel: "LOW",
-      recommendations: []
-    };
-    result.overallScore = scoreTokenRisk(result);
-    result.riskLevel = getRiskLevel(result.overallScore);
-    result.recommendations = generateRecommendations(result);
-    return result;
-  } catch (error) {
-    const errorMsg = error instanceof Error ? error.message : String(error);
-    return {
-      tokenAddress: tokenAddress.toLowerCase(),
-      chainId: config.chainId,
-      analysisTimestamp: new Date().toISOString(),
-      standardAnalysis: {
-        isERC20: false,
-        isERC721: false,
-        isERC1155: false,
-        detectedType: "Error",
-        functionSelectors: []
-      },
-      ownershipAnalysis: {
-        owner: null,
-        ownerLabel: null,
-        isMultisig: false,
-        isProxy: false,
-        proxyImplementation: null,
-        ownershipRisks: ["Analysis failed"]
-      },
-      holderAnalysis: {
-        totalHolders: 0,
-        topHolder: null,
-        top5HoldersCombined: 0,
-        top10HoldersCombined: 0,
-        concentrationRisks: ["Analysis failed"],
-        isHighlyConcentrated: false
-      },
-      riskAnalysis: {
-        hasSelfdestruct: false,
-        hasMinting: false,
-        isPausable: false,
-        hasBlacklist: false,
-        proxyPatterns: [],
-        unverifiedCode: true,
-        risks: [errorMsg],
-        riskCount: 1
-      },
-      overallScore: 0,
-      riskLevel: "CRITICAL",
-      recommendations: ["Analysis failed - cannot determine if token is safe"],
-      error: errorMsg
-    };
-  }
-}
-function formatAnalysisResult(analysis) {
-  const lines = [
-    "=== Token Analysis Report ===",
-    `Token Address: ${analysis.tokenAddress}`,
-    `Chain ID: ${analysis.chainId}`,
-    `Timestamp: ${analysis.analysisTimestamp}`,
-    "",
-    "--- Token Standard ---",
-    `Type: ${analysis.standardAnalysis.detectedType}`,
-    `ERC20: ${analysis.standardAnalysis.isERC20}`,
-    `ERC721: ${analysis.standardAnalysis.isERC721}`,
-    `ERC1155: ${analysis.standardAnalysis.isERC1155}`,
-    "",
-    "--- Ownership ---",
-    `Owner: ${analysis.ownershipAnalysis.owner || "Unknown"}`,
-    `Multisig: ${analysis.ownershipAnalysis.isMultisig}`,
-    `Proxy: ${analysis.ownershipAnalysis.isProxy}`,
-    `Risks: ${analysis.ownershipAnalysis.ownershipRisks.length}`,
-    "",
-    "--- Holder Distribution ---",
-    `Total Holders: ${analysis.holderAnalysis.totalHolders}`,
-    `Top Holder %: ${analysis.holderAnalysis.topHolder?.percentage.toFixed(2) || "N/A"}%`,
-    `Top 5 Combined: ${analysis.holderAnalysis.top5HoldersCombined.toFixed(2)}%`,
-    `Concentration Risk: ${analysis.holderAnalysis.isHighlyConcentrated ? "YES" : "NO"}`,
-    "",
-    "--- Security Risks ---",
-    `Verified: ${analysis.riskAnalysis.unverifiedCode ? "NO" : "YES"}`,
-    `Selfdestruct: ${analysis.riskAnalysis.hasSelfdestruct}`,
-    `Minting: ${analysis.riskAnalysis.hasMinting}`,
-    `Pausable: ${analysis.riskAnalysis.isPausable}`,
-    `Blacklist: ${analysis.riskAnalysis.hasBlacklist}`,
-    `Total Risks: ${analysis.riskAnalysis.riskCount}`,
-    "",
-    "--- Overall Assessment ---",
-    `Security Score: ${analysis.overallScore}/100`,
-    `Risk Level: ${analysis.riskLevel}`,
-    "",
-    "--- Recommendations ---",
-    ...analysis.recommendations
-  ];
-  return lines.join(`
+function buildPrompt(request) {
+  return [
+    "You are a strict DCA policy engine.",
+    "Return ONLY compact JSON. No markdown, no prose.",
+    'Schema: {"action":"EXECUTE|PAUSE|SKIP","confidence":0-100,"reason":"...","operatorMessage":"..."}',
+    "Policy:",
+    "- EXECUTE when request is normal periodic DCA and nothing anomalous in payload.",
+    "- PAUSE when cadence or parameters suggest abnormal/high-risk behavior.",
+    "- SKIP when uncertain.",
+    "Request:",
+    JSON.stringify(request)
+  ].join(`
 `);
 }
-var SUPPORTED_CHAINS = {
-  1: {
-    id: 1,
-    name: "Ethereum Mainnet",
-    explorerUrl: "https://etherscan.io"
-  },
-  56: {
-    id: 56,
-    name: "BSC Mainnet",
-    explorerUrl: "https://bscscan.com"
-  },
-  137: {
-    id: 137,
-    name: "Polygon Mainnet",
-    explorerUrl: "https://polygonscan.com"
-  },
-  8453: {
-    id: 8453,
-    name: "Base Mainnet",
-    explorerUrl: "https://basescan.org"
-  },
-  10: {
-    id: 10,
-    name: "Optimism",
-    explorerUrl: "https://optimistic.etherscan.io"
-  },
-  42161: {
-    id: 42161,
-    name: "Arbitrum One",
-    explorerUrl: "https://arbiscan.io"
-  },
-  43114: {
-    id: 43114,
-    name: "Avalanche C-Chain",
-    explorerUrl: "https://snowtrace.io"
-  },
-  250: {
-    id: 250,
-    name: "Fantom",
-    explorerUrl: "https://ftmscan.com"
-  }
-};
-var WRAPPED_TOKEN_PATTERNS = {
-  W: { name: "Wrapped", indicator: "bridge" },
-  wst: { name: "Wrapped Staked", indicator: "liquid_staking" },
-  x: { name: "Cross-chain", indicator: "bridge" },
-  anyCall: { name: "Multichain (AnyCall)", indicator: "bridge" },
-  ark: { name: "Ark Bridge", indicator: "bridge" },
-  stargate: { name: "Stargate", indicator: "bridge" }
-};
-function detectWrappedTokenPattern(tokenName) {
-  const lowerName = tokenName.toLowerCase();
-  for (const [pattern, info] of Object.entries(WRAPPED_TOKEN_PATTERNS)) {
-    if (lowerName.includes(pattern)) {
-      return {
-        chain: 0,
-        wrappedAddress: "",
-        bridgeAddress: null,
-        wrapperName: info.name
-      };
-    }
-  }
-  return null;
+function fallbackDecision(reason) {
+  return {
+    action: "SKIP",
+    confidence: 0,
+    reason,
+    operatorMessage: `Fallback decision applied: ${reason}`
+  };
 }
-async function analyzeTokenOnMultipleChains(tokenAddress, chainIds, etherscanApiKey, timeout) {
-  const normalizedAddress = tokenAddress.toLowerCase();
-  const results = [];
-  const analyses = await Promise.all(chainIds.map(async (chainId) => {
-    try {
-      const chainConfig = SUPPORTED_CHAINS[chainId];
-      if (!chainConfig) {
-        return {
-          chainId,
-          chainName: `Chain ${chainId}`,
-          tokenAddress: normalizedAddress,
-          exists: false,
-          error: "Unsupported chain"
-        };
+function buildGeminiRequest(prompt, apiKey) {
+  return (sendRequester, config) => {
+    const body = {
+      contents: [{ parts: [{ text: prompt }] }],
+      generationConfig: {
+        temperature: 0,
+        maxOutputTokens: 256,
+        responseMimeType: "application/json"
       }
-      try {
-        const analysis = await analyzeToken(normalizedAddress, {
-          chainId,
-          etherscanApiKey,
-          timeout: timeout || 30000
-        });
-        return {
-          chainId,
-          chainName: chainConfig.name,
-          tokenAddress: normalizedAddress,
-          exists: true,
-          analysis
-        };
-      } catch {
-        return {
-          chainId,
-          chainName: chainConfig.name,
-          tokenAddress: normalizedAddress,
-          exists: false
-        };
-      }
-    } catch (error) {
+    };
+    const req = {
+      url: config.geminiApiUrl,
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-goog-api-key": apiKey
+      },
+      body: toBase64Utf8(JSON.stringify(body))
+    };
+    const response = sendRequester.sendRequest(req).result();
+    const bodyText = new TextDecoder().decode(response.body);
+    if (response.statusCode < 200 || response.statusCode >= 300) {
       return {
-        chainId,
-        chainName: `Chain ${chainId}`,
-        tokenAddress: normalizedAddress,
-        exists: false,
-        error: error instanceof Error ? error.message : "Analysis error"
+        statusCode: response.statusCode,
+        geminiResponse: "",
+        errorBody: bodyText
       };
     }
+    const payload = JSON.parse(bodyText);
+    const text = payload.candidates?.[0]?.content?.parts?.[0]?.text;
+    if (!text)
+      throw new Error("Malformed Gemini response: missing text");
+    return {
+      statusCode: response.statusCode,
+      geminiResponse: text
+    };
+  };
+}
+function decideWithGemini(runtime2, request) {
+  const prompt = buildPrompt(request);
+  const apiKey = readSecretCompat(runtime2, "GEMINI_API_KEY") || String(runtime2.config.geminiApiKey ?? "").trim();
+  if (!apiKey) {
+    return fallbackDecision("GEMINI_API_KEY is missing");
+  }
+  try {
+    const httpClient = new ClientCapability3;
+    const result = httpClient.sendRequest(runtime2, buildGeminiRequest(prompt, apiKey), consensusIdenticalAggregation())(runtime2.config).result();
+    if (result.statusCode === 429) {
+      return fallbackDecision("GEMINI_QUOTA_EXCEEDED");
+    }
+    if (result.statusCode === 401 || result.statusCode === 403) {
+      return fallbackDecision("GEMINI_AUTH_FAILED");
+    }
+    if (result.statusCode < 200 || result.statusCode >= 300) {
+      return fallbackDecision(`GEMINI_HTTP_${result.statusCode}`);
+    }
+    return parseGeminiDecision(coerceGeminiJson(result.geminiResponse));
+  } catch (error) {
+    const reason = error instanceof Error ? error.message : String(error);
+    return fallbackDecision(reason);
+  }
+}
+function buildDecisionNotification(decision, request, requestId) {
+  return [
+    `AutoPilot DCA decision`,
+    `requestId=${requestId}`,
+    `action=${decision.action}`,
+    `confidence=${decision.confidence}`,
+    `reason=${decision.reason}`,
+    `mode=${request.executionMode}`,
+    `user=${request.user}`,
+    `token=${request.token}`,
+    `amount=${request.amount}`
+  ].join(" | ");
+}
+function buildExecutionNotification(requestId, txHash) {
+  const suffix = txHash ? ` | txHash=${txHash}` : "";
+  return `AutoPilot DCA execution submitted | requestId=${requestId}${suffix}`;
+}
+function buildBlockedNotification(requestId, reasonCode) {
+  return `AutoPilot DCA blocked | requestId=${requestId} | reason=${reasonCode}`;
+}
+var CHAINS = {
+  11155111: { name: "Ethereum Sepolia", selector: "16015286601757825753" },
+  80002: { name: "Polygon Amoy", selector: "16281711391670634445" },
+  421614: { name: "Arbitrum Sepolia", selector: "3478487238524512106" },
+  84532: { name: "Base Sepolia", selector: "10344971235874465080" },
+  11155420: { name: "OP Sepolia", selector: "5224473277236331295" }
+};
+function isAddress2(value2) {
+  return /^0x[a-fA-F0-9]{40}$/.test(value2);
+}
+function normalizeAddress(input) {
+  return input.toLowerCase();
+}
+function laneKey(sourceChainId, destinationChainId) {
+  return `${sourceChainId}->${destinationChainId}`;
+}
+function deterministicRequestId(payload) {
+  const raw = new TextDecoder().decode(payload);
+  let hash2 = 0;
+  for (let i2 = 0;i2 < raw.length; i2++)
+    hash2 = hash2 * 33 + raw.charCodeAt(i2) >>> 0;
+  return `dca_${hash2.toString(16).padStart(8, "0")}`;
+}
+function toBytes32FromText(value2) {
+  let hash2 = 0;
+  for (let i2 = 0;i2 < value2.length; i2++)
+    hash2 = hash2 * 16777619 + value2.charCodeAt(i2) >>> 0;
+  return `0x${hash2.toString(16).padStart(64, "0")}`;
+}
+function mapToMetadataHash(input) {
+  const raw = `${input.user}|${input.token}|${input.amount}|${input.action}|${input.walletChainId}|${input.destinationChainId}|${input.cadenceSeconds}`;
+  let hash2 = 0;
+  for (let i2 = 0;i2 < raw.length; i2++)
+    hash2 = hash2 * 31 + raw.charCodeAt(i2) >>> 0;
+  return `0x${hash2.toString(16).padStart(64, "0")}`;
+}
+function validateRuntimeConfig(config) {
+  if (config.decisionMode !== "GEMINI") {
+    throw new Error("Invalid config: decisionMode must be GEMINI");
+  }
+  if (!config.geminiApiUrl) {
+    throw new Error("Invalid config: geminiApiUrl is required");
+  }
+  if (config.feature5Enabled && (!config.userRecordRegistryContract || !isAddress2(config.userRecordRegistryContract))) {
+    throw new Error("Invalid config: feature5Enabled requires valid userRecordRegistryContract");
+  }
+  if (config.feature6Enabled) {
+    if (!config.securityManagerContract || !isAddress2(config.securityManagerContract)) {
+      throw new Error("Invalid config: feature6Enabled requires valid securityManagerContract");
+    }
+    if (!config.tokenVerifierContract || !isAddress2(config.tokenVerifierContract)) {
+      throw new Error("Invalid config: feature6Enabled requires valid tokenVerifierContract");
+    }
+  }
+  for (const [chainId, trader] of Object.entries(config.automatedTraderByChainId)) {
+    if (!isAddress2(trader)) {
+      throw new Error(`Invalid config: automatedTraderByChainId[${chainId}] is not a valid address`);
+    }
+  }
+}
+function resolveExecutionConfig(request, config) {
+  const source = CHAINS[request.walletChainId];
+  const destination = CHAINS[request.destinationChainId];
+  const preflight = {
+    sourceChainSupported: Boolean(source),
+    destinationChainSupported: Boolean(destination),
+    laneEnabled: false,
+    contractsResolved: false,
+    tokenMapped: false,
+    amountParsed: false
+  };
+  if (!source || !destination) {
+    return {
+      resolved: {
+        state: "BLOCKED",
+        blockedReason: "CHAIN_UNSUPPORTED",
+        sourceChainId: request.walletChainId,
+        sourceChainName: source?.name ?? "Unsupported",
+        sourceChainSelector: source?.selector ?? "",
+        destinationChainId: request.destinationChainId,
+        destinationChainName: destination?.name ?? "Unsupported",
+        destinationChainSelector: destination?.selector ?? "",
+        serviceType: request.serviceType,
+        executionMode: request.executionMode,
+        token: request.token,
+        amount: request.amount,
+        action: request.action,
+        recipient: request.recipient,
+        receiverContract: request.receiverContract,
+        contracts: {}
+      },
+      preflight
+    };
+  }
+  preflight.laneEnabled = config.enabledLaneKeys.includes(laneKey(request.walletChainId, request.destinationChainId));
+  if (!preflight.laneEnabled) {
+    return {
+      resolved: {
+        state: "BLOCKED",
+        blockedReason: "LANE_DISABLED",
+        sourceChainId: request.walletChainId,
+        sourceChainName: source.name,
+        sourceChainSelector: source.selector,
+        destinationChainId: request.destinationChainId,
+        destinationChainName: destination.name,
+        destinationChainSelector: destination.selector,
+        serviceType: request.serviceType,
+        executionMode: request.executionMode,
+        token: request.token,
+        amount: request.amount,
+        action: request.action,
+        recipient: request.recipient,
+        receiverContract: request.receiverContract,
+        contracts: {}
+      },
+      preflight
+    };
+  }
+  const automatedTrader = config.automatedTraderByChainId[String(request.walletChainId)];
+  preflight.contractsResolved = Boolean(automatedTrader && isAddress2(automatedTrader));
+  preflight.tokenMapped = isAddress2(request.token);
+  try {
+    preflight.amountParsed = BigInt(request.amount) > 0n;
+  } catch {
+    preflight.amountParsed = false;
+  }
+  if (!preflight.tokenMapped) {
+    return {
+      resolved: {
+        state: "BLOCKED",
+        blockedReason: "TOKEN_MAPPING_MISSING",
+        sourceChainId: request.walletChainId,
+        sourceChainName: source.name,
+        sourceChainSelector: source.selector,
+        destinationChainId: request.destinationChainId,
+        destinationChainName: destination.name,
+        destinationChainSelector: destination.selector,
+        serviceType: request.serviceType,
+        executionMode: request.executionMode,
+        token: request.token,
+        amount: request.amount,
+        action: request.action,
+        recipient: request.recipient,
+        receiverContract: request.receiverContract,
+        contracts: { automatedTrader }
+      },
+      preflight
+    };
+  }
+  if (!preflight.amountParsed) {
+    return {
+      resolved: {
+        state: "BLOCKED",
+        blockedReason: "FEE_ESTIMATION_FAILED",
+        sourceChainId: request.walletChainId,
+        sourceChainName: source.name,
+        sourceChainSelector: source.selector,
+        destinationChainId: request.destinationChainId,
+        destinationChainName: destination.name,
+        destinationChainSelector: destination.selector,
+        serviceType: request.serviceType,
+        executionMode: request.executionMode,
+        token: request.token,
+        amount: request.amount,
+        action: request.action,
+        recipient: request.recipient,
+        receiverContract: request.receiverContract,
+        contracts: { automatedTrader }
+      },
+      preflight
+    };
+  }
+  return {
+    resolved: {
+      state: preflight.contractsResolved ? "READY" : "DEGRADED",
+      degradedReason: preflight.contractsResolved ? undefined : "AutomatedTrader not configured for source chain",
+      sourceChainId: request.walletChainId,
+      sourceChainName: source.name,
+      sourceChainSelector: source.selector,
+      destinationChainId: request.destinationChainId,
+      destinationChainName: destination.name,
+      destinationChainSelector: destination.selector,
+      serviceType: request.serviceType,
+      executionMode: request.executionMode,
+      token: normalizeAddress(request.token),
+      amount: request.amount,
+      action: request.action,
+      recipient: normalizeAddress(request.recipient),
+      receiverContract: request.receiverContract,
+      contracts: {
+        automatedTrader,
+        securityManager: config.securityManagerContract,
+        tokenVerifier: config.tokenVerifierContract,
+        userRecordRegistry: config.userRecordRegistryContract
+      }
+    },
+    preflight
+  };
+}
+function runSecurityChecks(request, config) {
+  const mode = config.securityEnforcementMode;
+  if (!config.feature6Enabled) {
+    return { allow: true, enforcementMode: mode, reasonCode: "SECURITY_DISABLED", incidentLogged: false };
+  }
+  const token = normalizeAddress(request.token);
+  if (config.tokenBlocklist.map(normalizeAddress).includes(token)) {
+    return {
+      allow: mode === "MONITOR",
+      enforcementMode: mode,
+      reasonCode: "SECURITY_BLOCKED:TOKEN_BLOCKLISTED",
+      incidentLogged: true
+    };
+  }
+  if (config.tokenAllowlist.length > 0 && !config.tokenAllowlist.map(normalizeAddress).includes(token)) {
+    return {
+      allow: mode === "MONITOR",
+      enforcementMode: mode,
+      reasonCode: "SECURITY_BLOCKED:TOKEN_NOT_ALLOWLISTED",
+      incidentLogged: true
+    };
+  }
+  let amount = 0n;
+  try {
+    amount = BigInt(request.amount);
+  } catch {
+    return {
+      allow: mode === "MONITOR",
+      enforcementMode: mode,
+      reasonCode: "SECURITY_BLOCKED:INVALID_AMOUNT",
+      incidentLogged: true
+    };
+  }
+  if (amount > BigInt(config.maxTransferAmountWei)) {
+    return {
+      allow: mode === "MONITOR",
+      enforcementMode: mode,
+      reasonCode: "SECURITY_BLOCKED:TRANSFER_LIMIT",
+      incidentLogged: true
+    };
+  }
+  return { allow: true, enforcementMode: mode, reasonCode: "SECURITY_ALLOWED", incidentLogged: false };
+}
+async function readOnchainSecurityState(runtime2, resolved) {
+  const sourceSelector = BigInt(resolved.sourceChainSelector);
+  const evmClient = new cre.capabilities.EVMClient(sourceSelector);
+  let paused = false;
+  let enforcementMode = "MONITOR";
+  let tokenStatus;
+  if (resolved.contracts.securityManager && isAddress2(resolved.contracts.securityManager)) {
+    const data = encodeFunctionData({
+      abi: [{
+        type: "function",
+        name: "getSystemHealth",
+        stateMutability: "view",
+        inputs: [],
+        outputs: [
+          { name: "healthy", type: "bool" },
+          { name: "systemPaused", type: "bool" },
+          { name: "mode", type: "uint8" },
+          { name: "totalIncidents", type: "uint256" },
+          { name: "globalLimit", type: "uint256" }
+        ]
+      }],
+      functionName: "getSystemHealth"
+    });
+    const out = evmClient.callContract(runtime2, {
+      call: encodeCallMsg({
+        from: resolved.contracts.automatedTrader ?? resolved.contracts.securityManager,
+        to: resolved.contracts.securityManager,
+        data
+      }),
+      blockNumber: LATEST_BLOCK_NUMBER
+    }).result();
+    const decoded = decodeFunctionResult({
+      abi: [{
+        type: "function",
+        name: "getSystemHealth",
+        stateMutability: "view",
+        inputs: [],
+        outputs: [
+          { name: "healthy", type: "bool" },
+          { name: "systemPaused", type: "bool" },
+          { name: "mode", type: "uint8" },
+          { name: "totalIncidents", type: "uint256" },
+          { name: "globalLimit", type: "uint256" }
+        ]
+      }],
+      functionName: "getSystemHealth",
+      data: bytesToHex(out.data)
+    });
+    paused = decoded[1];
+    enforcementMode = decoded[2] === 1 ? "ENFORCE" : "MONITOR";
+  }
+  if (resolved.contracts.tokenVerifier && isAddress2(resolved.contracts.tokenVerifier)) {
+    const data = encodeFunctionData({
+      abi: [{
+        type: "function",
+        name: "getStatus",
+        stateMutability: "view",
+        inputs: [{ name: "_token", type: "address" }],
+        outputs: [{ name: "", type: "uint8" }]
+      }],
+      functionName: "getStatus",
+      args: [resolved.token]
+    });
+    const out = evmClient.callContract(runtime2, {
+      call: encodeCallMsg({
+        from: resolved.contracts.automatedTrader ?? resolved.contracts.tokenVerifier,
+        to: resolved.contracts.tokenVerifier,
+        data
+      }),
+      blockNumber: LATEST_BLOCK_NUMBER
+    }).result();
+    tokenStatus = decodeFunctionResult({
+      abi: [{
+        type: "function",
+        name: "getStatus",
+        stateMutability: "view",
+        inputs: [{ name: "_token", type: "address" }],
+        outputs: [{ name: "", type: "uint8" }]
+      }],
+      functionName: "getStatus",
+      data: bytesToHex(out.data)
+    });
+  }
+  return { paused, enforcementMode, tokenStatus };
+}
+function mapRecordStatus(phase) {
+  if (phase === "REQUEST_RECEIVED")
+    return 0;
+  if (phase.startsWith("PREFLIGHT_"))
+    return 1;
+  if (phase === "SECURITY_ALLOWED")
+    return 1;
+  if (phase === "SECURITY_BLOCKED")
+    return 5;
+  if (phase.startsWith("DECISION_"))
+    return 1;
+  if (phase === "EXECUTION_SUBMITTED")
+    return 1;
+  return 5;
+}
+function buildWorkflowRecords(requestId, request, phases, feature5Enabled) {
+  const keyBase = `${requestId}:${request.walletChainId}:${request.destinationChainId}`;
+  const metadataHash = mapToMetadataHash(request);
+  if (!feature5Enabled) {
+    return [
+      {
+        phase: "REQUEST_RECEIVED",
+        externalEventKey: `${keyBase}:request`,
+        status: "RECORDED_LOCALLY_ONLY",
+        metadataHash
+      }
+    ];
+  }
+  return phases.map((phase) => ({
+    phase,
+    externalEventKey: `${keyBase}:${phase.toLowerCase()}`,
+    status: "PENDING_APPEND",
+    metadataHash
   }));
-  return analyses;
 }
-function detectBridgePatterns(results) {
-  const patterns = [];
-  const existingChains = results.filter((r) => r.exists).length;
-  if (existingChains > 1) {
-    patterns.push(`Token deployed on ${existingChains} chains`);
-  }
-  const riskLevels = results.filter((r) => r.analysis).map((r) => r.analysis.riskLevel);
-  const highRiskCount = riskLevels.filter((l) => l === "HIGH").length;
-  const criticalCount = riskLevels.filter((l) => l === "CRITICAL").length;
-  if (highRiskCount > 0 || criticalCount > 0) {
-    patterns.push(`High risk on ${highRiskCount + criticalCount} chains`);
-  }
-  const verifiedCount = results.filter((r) => r.analysis && !r.analysis.riskAnalysis.unverifiedCode).length;
-  if (verifiedCount < existingChains && verifiedCount > 0) {
-    patterns.push("Verification status varies across chains");
-  }
-  const owners = results.filter((r) => r.analysis).map((r) => r.analysis.ownershipAnalysis.owner).filter((o) => o !== null);
-  const uniqueOwners = new Set(owners).size;
-  if (uniqueOwners > 1) {
-    patterns.push(`Multiple owner addresses across chains (${uniqueOwners})`);
-  }
-  const concentrations = results.filter((r) => r.analysis?.holderAnalysis.isHighlyConcentrated).length;
-  if (concentrations > existingChains / 2) {
-    patterns.push("High holder concentration across most chains");
-  }
-  return patterns;
-}
-function generateCrossChainRecommendations(analysis) {
-  const recommendations = [];
-  if (analysis.highRiskOnChains > 0) {
-    recommendations.push(`⚠️ Token rated HIGH or CRITICAL risk on ${analysis.highRiskOnChains} chain(s)`);
-  }
-  if (analysis.tokensFound > 4) {
-    recommendations.push("⚠️ Token deployed on many chains - verify legitimacy of all versions");
-  }
-  if (analysis.wrappedVersions.length > 0) {
-    recommendations.push(`ℹ️ Token has ${analysis.wrappedVersions.length} wrapped version(s) detected`);
-  }
-  if (analysis.verifiedOnChains < analysis.tokensFound) {
-    const unverified = analysis.tokensFound - analysis.verifiedOnChains;
-    recommendations.push(`❌ ${unverified} version(s) not verified - increased risk`);
-  }
-  if (analysis.verifiedOnChains === 0) {
-    recommendations.push("\uD83D\uDEAB No verified versions found - do not interact");
-  }
-  if (analysis.bridgeIndicators.length > 0) {
-    recommendations.push("ℹ️ Potential cross-chain bridge token detected");
-  }
-  if (analysis.tokensFound === 0) {
-    recommendations.push("ℹ️ Token not found on any network");
-  } else if (analysis.tokensFound === 1) {
-    recommendations.push("ℹ️ Token exists on single chain only");
-  } else if (analysis.highRiskOnChains === 0 && analysis.mediumRiskOnChains <= 1) {
-    recommendations.push("✅ Token appears safe on all verified chains");
-  }
-  return recommendations;
-}
-async function verifyTokenCrossChain(tokenAddress, etherscanApiKey, chainIds) {
-  try {
-    const normalizedAddress = tokenAddress.toLowerCase();
-    const targetChains = chainIds || Object.keys(SUPPORTED_CHAINS).map(Number);
-    const chainResults = await analyzeTokenOnMultipleChains(normalizedAddress, targetChains.filter((c) => SUPPORTED_CHAINS[c]), etherscanApiKey);
-    const tokensFound = chainResults.filter((r) => r.exists).length;
-    const verifiedOnChains = chainResults.filter((r) => r.analysis && !r.analysis.riskAnalysis.unverifiedCode).length;
-    const highRiskOnChains = chainResults.filter((r) => r.analysis && (r.analysis.riskLevel === "HIGH" || r.analysis.riskLevel === "CRITICAL")).length;
-    const mediumRiskOnChains = chainResults.filter((r) => r.analysis && r.analysis.riskLevel === "MEDIUM").length;
-    const bridgeIndicators = detectBridgePatterns(chainResults);
-    const wrappedVersions = [];
-    chainResults.forEach((result) => {
-      if (result.analysis?.standardAnalysis.detectedType !== "Unknown") {
-        const wrapped = detectWrappedTokenPattern(result.analysis?.standardAnalysis.detectedType || "");
-        if (wrapped) {
-          wrappedVersions.push({
-            ...wrapped,
-            chain: result.chainId,
-            wrappedAddress: result.tokenAddress
-          });
-        }
-      }
+async function appendWorkflowRecordsOnchain(runtime2, resolved, request, requestId, phases, txHash) {
+  if (!runtime2.config.feature5Enabled)
+    return;
+  if (!resolved.contracts.userRecordRegistry || !isAddress2(resolved.contracts.userRecordRegistry))
+    return;
+  if (!resolved.contracts.automatedTrader || !isAddress2(resolved.contracts.automatedTrader))
+    return;
+  const sourceSelector = BigInt(resolved.sourceChainSelector);
+  const evmClient = new cre.capabilities.EVMClient(sourceSelector);
+  const registry2 = resolved.contracts.userRecordRegistry;
+  const sourceContract = resolved.contracts.automatedTrader;
+  const messageId = txHash && /^0x[a-fA-F0-9]{64}$/.test(txHash) ? txHash : `0x${"0".repeat(64)}`;
+  const metadataHash = mapToMetadataHash(request);
+  const actionHash = keccak256(toBytes(request.action));
+  for (const phase of phases) {
+    const data = encodeFunctionData({
+      abi: [{
+        type: "function",
+        name: "appendRecord",
+        stateMutability: "nonpayable",
+        inputs: [
+          {
+            name: "input",
+            type: "tuple",
+            components: [
+              { name: "user", type: "address" },
+              { name: "featureType", type: "uint8" },
+              { name: "chainSelector", type: "uint64" },
+              { name: "sourceContract", type: "address" },
+              { name: "counterparty", type: "address" },
+              { name: "messageId", type: "bytes32" },
+              { name: "assetToken", type: "address" },
+              { name: "amount", type: "uint256" },
+              { name: "actionHash", type: "bytes32" },
+              { name: "status", type: "uint8" },
+              { name: "metadataHash", type: "bytes32" }
+            ]
+          },
+          { name: "externalEventKey", type: "bytes32" }
+        ],
+        outputs: [{ name: "recordId", type: "uint256" }]
+      }],
+      functionName: "appendRecord",
+      args: [
+        {
+          user: request.user,
+          featureType: 3,
+          chainSelector: BigInt(resolved.sourceChainSelector),
+          sourceContract,
+          counterparty: request.recipient,
+          messageId,
+          assetToken: request.token,
+          amount: BigInt(request.amount),
+          actionHash,
+          status: mapRecordStatus(phase),
+          metadataHash
+        },
+        toBytes32FromText(`${requestId}:${phase}`)
+      ]
     });
-    const baseAnalysis = {
-      baseTokenAddress: normalizedAddress,
-      baseChainId: 1,
-      chainVerifications: chainResults,
-      tokensFound,
-      verifiedOnChains,
-      highRiskOnChains,
-      mediumRiskOnChains,
-      bridgeIndicators,
-      wrappedVersions,
-      recommendations: [],
-      analysisTimestamp: new Date().toISOString()
-    };
-    baseAnalysis.recommendations = generateCrossChainRecommendations(baseAnalysis);
-    return baseAnalysis;
-  } catch (error) {
-    const errorMsg = error instanceof Error ? error.message : String(error);
-    return {
-      baseTokenAddress: tokenAddress.toLowerCase(),
-      baseChainId: 1,
-      chainVerifications: [],
-      tokensFound: 0,
-      verifiedOnChains: 0,
-      highRiskOnChains: 0,
-      mediumRiskOnChains: 0,
-      bridgeIndicators: [errorMsg],
-      wrappedVersions: [],
-      recommendations: ["Cross-chain verification failed"],
-      analysisTimestamp: new Date().toISOString()
-    };
+    const report2 = runtime2.report(prepareReportRequest(data)).result();
+    evmClient.writeReport(runtime2, {
+      receiver: registry2,
+      report: report2,
+      gasConfig: { gasLimit: runtime2.config.sourceChainWriteGasLimit ?? "850000" }
+    }).result();
   }
 }
-function formatCrossChainResult(analysis) {
-  const lines = [
-    "=== Cross-Chain Token Analysis ===",
-    `Base Token Address: ${analysis.baseTokenAddress}`,
-    `Analysis Timestamp: ${analysis.analysisTimestamp}`,
-    "",
-    "--- Chain Summary ---",
-    `Total Chains Checked: ${analysis.chainVerifications.length}`,
-    `Tokens Found: ${analysis.tokensFound}`,
-    `Verified on Chains: ${analysis.verifiedOnChains}`,
-    `High/Critical Risk on Chains: ${analysis.highRiskOnChains}`,
-    `Medium Risk on Chains: ${analysis.mediumRiskOnChains}`,
-    ""
-  ];
-  if (analysis.chainVerifications.length > 0) {
-    lines.push("--- Per-Chain Status ---");
-    analysis.chainVerifications.forEach((result) => {
-      const status = result.analysis ? `${result.analysis.riskLevel} (${result.analysis.overallScore}/100)` : result.exists ? "UNKNOWN" : "NOT FOUND";
-      lines.push(`${result.chainName}: ${status}`);
-    });
-    lines.push("");
-  }
-  if (analysis.bridgeIndicators.length > 0) {
-    lines.push("--- Bridge Indicators ---");
-    analysis.bridgeIndicators.forEach((indicator) => {
-      lines.push(`• ${indicator}`);
-    });
-    lines.push("");
-  }
-  if (analysis.wrappedVersions.length > 0) {
-    lines.push("--- Wrapped Versions ---");
-    analysis.wrappedVersions.forEach((wrapped) => {
-      lines.push(`${wrapped.wrapperName} on Chain ${wrapped.chain}`);
-    });
-    lines.push("");
-  }
-  lines.push("--- Recommendations ---");
-  analysis.recommendations.forEach((rec) => {
-    lines.push(`• ${rec}`);
-  });
-  return lines.join(`
-`);
-}
-function makeVerificationDecision(analysis, crossChainAnalysis) {
-  const risks = [];
-  let isSafe = false;
-  let canAutomate = false;
-  let requiresApproval = false;
-  if (analysis.error) {
-    risks.push(`Verification Error: ${analysis.error}`);
-    return {
-      isSafe: false,
-      canAutomate: false,
-      requiresApproval: false,
-      risks,
-      reason: `Cannot verify token: ${analysis.error}`
-    };
-  }
-  if (analysis.riskLevel === "CRITICAL") {
-    risks.push("Token rated CRITICAL risk");
-    isSafe = false;
-  } else if (analysis.riskLevel === "HIGH") {
-    risks.push("Token rated HIGH risk");
-    isSafe = false;
-    requiresApproval = true;
-  } else if (analysis.riskLevel === "MEDIUM") {
-    risks.push("Token rated MEDIUM risk");
-    isSafe = false;
-    requiresApproval = true;
-  } else if (analysis.riskLevel === "LOW") {
-    isSafe = true;
-    canAutomate = true;
-  } else {
-    risks.push(`Unknown risk level: ${analysis.riskLevel}`);
-    isSafe = false;
-  }
-  risks.push(...analysis.riskAnalysis.risks);
-  if (crossChainAnalysis) {
-    if (crossChainAnalysis.highRiskOnChains > 0) {
-      risks.push(`High risk on ${crossChainAnalysis.highRiskOnChains} chain(s)`);
-      isSafe = false;
-    }
-    if (crossChainAnalysis.tokensFound === 0) {
-      risks.push("Token not found on any network");
-      isSafe = false;
-    } else if (crossChainAnalysis.verifiedOnChains === 0) {
-      risks.push("Not verified on any chain");
-      isSafe = false;
-    }
-  }
-  if (analysis.riskAnalysis.unverifiedCode) {
-    canAutomate = false;
-    if (isSafe) {
-      isSafe = false;
-      risks.push("Unverified contract source code");
-    }
-  }
-  if (analysis.holderAnalysis.isHighlyConcentrated) {
-    requiresApproval = true;
-    if (isSafe) {
-      isSafe = false;
-      risks.push("Highly concentrated token holdings");
-    }
-  }
-  if (!isSafe && !risks.includes("Token rated CRITICAL risk") && !risks.includes("Token rated HIGH risk") && !risks.includes("Token rated MEDIUM risk")) {
-    risks.push("Unable to verify token safety with confidence");
-  }
-  const reason = isSafe ? canAutomate ? "Token appears safe for automated transactions" : "Token is safe but requires user interaction" : requiresApproval ? "Token has risks and requires approval" : "Token is not safe to interact with";
+async function submitSourceChainWrite(runtime2, resolved, to, calldata) {
+  const sourceSelector = BigInt(resolved.sourceChainSelector);
+  const evmClient = new cre.capabilities.EVMClient(sourceSelector);
+  const report2 = runtime2.report(prepareReportRequest(calldata)).result();
+  const write2 = evmClient.writeReport(runtime2, {
+    receiver: to,
+    report: report2,
+    gasConfig: { gasLimit: runtime2.config.sourceChainWriteGasLimit ?? "1000000" }
+  }).result();
+  const txHash = write2.txHash && write2.txHash.length > 0 ? bytesToHex(write2.txHash) : undefined;
   return {
-    isSafe,
-    canAutomate,
-    requiresApproval,
-    risks: [...new Set(risks)],
-    reason
+    submitted: true,
+    message: "Source chain transaction submitted via CRE EVM write capability",
+    reasonCode: "EXECUTION_SUBMITTED",
+    txHash
   };
 }
-
-class VerificationEngine {
-  config;
-  cache = new Map;
-  requestCounter = 0;
-  constructor(config) {
-    this.config = {
-      enableCaching: true,
-      cacheExpiration: 3600000,
-      timeout: 30000,
-      chainId: 1,
-      ...config
-    };
+function policyBlocked(executionMode, config) {
+  if (executionMode === "CREATE_ORDER" && !config.allowCreateOrderFromWorkflow) {
+    return { blocked: true, reasonCode: "EXECUTION_POLICY_DISABLED_CREATE_ORDER" };
   }
-  generateRequestId() {
-    this.requestCounter++;
-    return `req_${Date.now()}_${this.requestCounter}`;
+  if (executionMode === "RUN_UPKEEP" && !config.allowPerformUpkeepFromWorkflow) {
+    return { blocked: true, reasonCode: "EXECUTION_POLICY_DISABLED_RUN_UPKEEP" };
   }
-  getCacheKey(request) {
-    return `${request.tokenAddress}:${request.chainId || this.config.chainId}:${request.crossChainVerification || false}`;
+  return { blocked: false };
+}
+async function executeServiceAction(runtime2, resolved, request, security, decision) {
+  if (!security.allow) {
+    return { submitted: false, message: "Execution blocked by Feature 6 security policy", reasonCode: security.reasonCode };
   }
-  getCachedResult(request) {
-    if (!this.config.enableCaching)
-      return null;
-    const cacheKey = this.getCacheKey(request);
-    const cached = this.cache.get(cacheKey);
-    if (!cached)
-      return null;
-    const now = Date.now();
-    const age = now - cached.timestamp;
-    if (age > (this.config.cacheExpiration || 3600000)) {
-      this.cache.delete(cacheKey);
-      return null;
-    }
-    return cached.result;
-  }
-  cacheResult(request, result) {
-    if (!this.config.enableCaching)
-      return;
-    const cacheKey = this.getCacheKey(request);
-    this.cache.set(cacheKey, {
-      result,
-      timestamp: Date.now()
-    });
-  }
-  clearCache() {
-    this.cache.clear();
-  }
-  getCacheStats() {
+  if (decision.action !== "EXECUTE") {
     return {
-      size: this.cache.size,
-      entries: Array.from(this.cache.keys())
+      submitted: false,
+      message: `Execution skipped by decision branch: ${decision.action}`,
+      reasonCode: `DECISION_${decision.action}`
     };
   }
-  async verify(request) {
-    try {
-      const cached = this.getCachedResult(request);
-      if (cached) {
-        return { ...cached, requestId: this.generateRequestId() };
-      }
-      const requestId = this.generateRequestId();
-      const timestamp = new Date().toISOString();
-      const chainId = request.chainId || this.config.chainId || 1;
-      let chainAnalysis;
-      try {
-        chainAnalysis = await analyzeToken(request.tokenAddress, {
-          chainId,
-          etherscanApiKey: this.config.etherscanApiKey,
-          timeout: this.config.timeout
-        });
-      } catch (error) {
-        if (!request.crossChainVerification)
-          throw error;
-      }
-      let crossChainAnalysis;
-      if (request.crossChainVerification) {
-        try {
-          crossChainAnalysis = await verifyTokenCrossChain(request.tokenAddress, this.config.etherscanApiKey, request.chainIds);
-        } catch (error) {}
-      }
-      const decision = makeVerificationDecision(chainAnalysis || {
-        tokenAddress: request.tokenAddress,
-        chainId,
-        analysisTimestamp: timestamp,
-        standardAnalysis: {
-          isERC20: false,
-          isERC721: false,
-          isERC1155: false,
-          detectedType: "Unknown",
-          functionSelectors: []
-        },
-        ownershipAnalysis: {
-          owner: null,
-          ownerLabel: null,
-          isMultisig: false,
-          isProxy: false,
-          proxyImplementation: null,
-          ownershipRisks: ["Analysis failed"]
-        },
-        holderAnalysis: {
-          totalHolders: 0,
-          topHolder: null,
-          top5HoldersCombined: 0,
-          top10HoldersCombined: 0,
-          concentrationRisks: ["Analysis failed"],
-          isHighlyConcentrated: false
-        },
-        riskAnalysis: {
-          hasSelfdestruct: false,
-          hasMinting: false,
-          isPausable: false,
-          hasBlacklist: false,
-          proxyPatterns: [],
-          unverifiedCode: true,
-          risks: ["Analysis failed"],
-          riskCount: 1
-        },
-        overallScore: 0,
-        riskLevel: "CRITICAL",
-        recommendations: ["Analysis failed"]
-      }, crossChainAnalysis);
-      let formattedReport = "";
-      if (chainAnalysis) {
-        formattedReport = formatAnalysisResult(chainAnalysis);
-      }
-      if (crossChainAnalysis && request.crossChainVerification) {
-        formattedReport += `
-
-` + formatCrossChainResult(crossChainAnalysis);
-      }
-      const result = {
-        requestId,
-        timestamp,
-        request,
-        chainAnalysis,
-        crossChainAnalysis,
-        decision,
-        formattedReport: formattedReport || "No analysis available"
-      };
-      this.cacheResult(request, result);
-      return result;
-    } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : String(error);
-      return {
-        requestId: this.generateRequestId(),
-        timestamp: new Date().toISOString(),
-        request,
-        decision: {
-          isSafe: false,
-          canAutomate: false,
-          requiresApproval: false,
-          risks: [errorMsg],
-          reason: `Verification failed: ${errorMsg}`
-        },
-        formattedReport: `Error during verification: ${errorMsg}`
-      };
-    }
+  if (resolved.state !== "READY") {
+    return { submitted: false, message: "Execution blocked: unresolved contracts/config", reasonCode: "CONTRACT_NOT_DEPLOYED" };
   }
-  async quickVerify(tokenAddress, chainId) {
-    return this.verify({
-      tokenAddress,
-      chainId: chainId || this.config.chainId,
-      crossChainVerification: false
+  if (!resolved.contracts.automatedTrader || !isAddress2(resolved.contracts.automatedTrader)) {
+    return { submitted: false, message: "Missing AutomatedTrader address", reasonCode: "CONTRACT_NOT_DEPLOYED" };
+  }
+  const policy = policyBlocked(request.executionMode, runtime2.config);
+  if (policy.blocked) {
+    return { submitted: false, message: "Execution disabled by safety policy", reasonCode: policy.reasonCode };
+  }
+  const trader = resolved.contracts.automatedTrader;
+  if (request.executionMode === "CREATE_ORDER") {
+    const calldata = encodeFunctionData({
+      abi: [{
+        type: "function",
+        name: "createTimedOrder",
+        stateMutability: "nonpayable",
+        inputs: [
+          { name: "_intervalSeconds", type: "uint256" },
+          { name: "_token", type: "address" },
+          { name: "_amount", type: "uint256" },
+          { name: "_destinationChain", type: "uint64" },
+          { name: "_receiverContract", type: "address" },
+          { name: "_recipient", type: "address" },
+          { name: "_action", type: "string" },
+          { name: "_recurring", type: "bool" },
+          { name: "_maxExecutions", type: "uint256" },
+          { name: "_deadline", type: "uint256" }
+        ],
+        outputs: [{ name: "orderId", type: "uint256" }]
+      }],
+      functionName: "createTimedOrder",
+      args: [
+        BigInt(request.cadenceSeconds),
+        request.token,
+        BigInt(request.amount),
+        BigInt(resolved.destinationChainSelector),
+        request.receiverContract,
+        request.recipient,
+        request.action,
+        request.recurring,
+        BigInt(request.maxExecutions),
+        BigInt(request.deadline)
+      ]
     });
+    return submitSourceChainWrite(runtime2, resolved, trader, calldata);
   }
-  async deepVerify(tokenAddress, chainIds) {
-    return this.verify({
-      tokenAddress,
-      chainId: this.config.chainId,
-      crossChainVerification: true,
-      chainIds
-    });
+  const sourceSelector = BigInt(resolved.sourceChainSelector);
+  const evmClient = new cre.capabilities.EVMClient(sourceSelector);
+  const checkData = encodeFunctionData({
+    abi: [{
+      type: "function",
+      name: "checkUpkeep",
+      stateMutability: "view",
+      inputs: [{ name: "", type: "bytes" }],
+      outputs: [{ name: "upkeepNeeded", type: "bool" }, { name: "performData", type: "bytes" }]
+    }],
+    functionName: "checkUpkeep",
+    args: ["0x"]
+  });
+  const checkOut = evmClient.callContract(runtime2, {
+    call: encodeCallMsg({
+      from: trader,
+      to: trader,
+      data: checkData
+    }),
+    blockNumber: LATEST_BLOCK_NUMBER
+  }).result();
+  const [needed, performData] = decodeFunctionResult({
+    abi: [{
+      type: "function",
+      name: "checkUpkeep",
+      stateMutability: "view",
+      inputs: [{ name: "", type: "bytes" }],
+      outputs: [{ name: "upkeepNeeded", type: "bool" }, { name: "performData", type: "bytes" }]
+    }],
+    functionName: "checkUpkeep",
+    data: bytesToHex(checkOut.data)
+  });
+  if (!needed) {
+    return { submitted: false, message: "No executable DCA order found (checkUpkeep=false)", reasonCode: "NO_EXECUTABLE_ORDER" };
   }
-  async verifyBatch(requests) {
-    const results = await Promise.all(requests.map((request) => this.verify(request)));
-    return results;
-  }
+  const performCall = encodeFunctionData({
+    abi: [{
+      type: "function",
+      name: "performUpkeep",
+      stateMutability: "nonpayable",
+      inputs: [{ name: "performData", type: "bytes" }],
+      outputs: []
+    }],
+    functionName: "performUpkeep",
+    args: [performData]
+  });
+  return submitSourceChainWrite(runtime2, resolved, trader, performCall);
 }
-function createVerificationEngine(config) {
-  return new VerificationEngine(config);
+function validateRequest(request) {
+  const errors2 = [];
+  if (!request.serviceType)
+    errors2.push("serviceType is required");
+  if (!request.executionMode)
+    errors2.push("executionMode is required");
+  if (!request.user || !isAddress2(request.user))
+    errors2.push("user must be a valid EVM address");
+  if (!request.token || !isAddress2(request.token))
+    errors2.push("token must be a valid EVM address");
+  if (!request.amount)
+    errors2.push("amount is required");
+  if (!request.recipient || !isAddress2(request.recipient))
+    errors2.push("recipient must be a valid EVM address");
+  if (!request.receiverContract || !isAddress2(request.receiverContract))
+    errors2.push("receiverContract must be a valid EVM address");
+  if (!request.action)
+    errors2.push("action is required");
+  if (request.cadenceSeconds <= 0)
+    errors2.push("cadenceSeconds must be > 0");
+  if (!request.walletChainId)
+    errors2.push("walletChainId is required");
+  if (!request.destinationChainId)
+    errors2.push("destinationChainId is required");
+  if (request.executionMode !== "CREATE_ORDER" && request.executionMode !== "RUN_UPKEEP") {
+    errors2.push("executionMode must be CREATE_ORDER or RUN_UPKEEP");
+  }
+  return errors2;
 }
-function generateVerificationReport(result) {
-  const lines = [
-    "═════════════════════════════════════════",
-    "TOKEN VERIFICATION REPORT",
-    "═════════════════════════════════════════",
-    `Request ID: ${result.requestId}`,
-    `Timestamp: ${result.timestamp}`,
-    "",
-    "--- Verification Decision ---",
-    `Safe to Interact: ${result.decision.isSafe ? "✅ YES" : "❌ NO"}`,
-    `Can Automate: ${result.decision.canAutomate ? "✅ YES" : "⚠️ NO"}`,
-    `Requires Approval: ${result.decision.requiresApproval ? "⚠️ YES" : "❌ NO"}`,
-    `Reason: ${result.decision.reason}`,
-    ""
-  ];
-  if (result.decision.risks.length > 0) {
-    lines.push("--- Detected Risks ---");
-    result.decision.risks.forEach((risk) => {
-      lines.push(`• ${risk}`);
-    });
-    lines.push("");
+async function handleAutoPilotRequest(runtime2, request, requestId) {
+  const timestamp = runtime2.now().toISOString();
+  const errors2 = validateRequest(request);
+  if (errors2.length > 0) {
+    return JSON.stringify({ success: false, requestId, timestamp, error: "Validation failed", details: errors2 });
   }
-  lines.push("--- Detailed Analysis ---");
-  lines.push(result.formattedReport);
-  lines.push("");
-  lines.push("═════════════════════════════════════════");
-  return lines.join(`
-`);
-}
-function generateRequestId() {
-  return `req_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-}
-function formatVerificationForUser(analysis, format = "summary") {
-  if (format === "json") {
-    return JSON.stringify(analysis, null, 2);
-  }
-  if (format === "report") {
-    return generateVerificationReport(analysis);
-  }
-  const decision = analysis.decision;
-  const status = decision.isSafe ? "✅ SAFE" : "❌ UNSAFE";
-  const automation = decision.canAutomate ? "✅ YES" : "❌ NO";
-  const lines = [
-    "═══════════════════════════════════════",
-    "TOKEN VERIFICATION RESULT",
-    "═══════════════════════════════════════",
-    "",
-    `Token Address: ${analysis.request.tokenAddress}`,
-    `Status: ${status}`,
-    `Risk Level: ${analysis.chainAnalysis?.riskLevel || "UNKNOWN"}`,
-    `Security Score: ${analysis.chainAnalysis?.overallScore || 0}/100`,
-    `Can Automate: ${automation}`,
-    `Reason: ${decision.reason}`,
-    ""
-  ];
-  if (decision.risks.length > 0) {
-    lines.push("⚠️  DETECTED RISKS:");
-    decision.risks.forEach((risk) => {
-      lines.push(`  • ${risk}`);
-    });
-    lines.push("");
-  }
-  if (analysis.chainAnalysis?.recommendations) {
-    lines.push("\uD83D\uDCA1 RECOMMENDATIONS:");
-    analysis.chainAnalysis.recommendations.forEach((rec) => {
-      lines.push(`  ${rec}`);
-    });
-    lines.push("");
-  }
-  lines.push("═══════════════════════════════════════");
-  return lines.join(`
-`);
-}
-var onHttpVerifyToken = async (runtime2, payload) => {
-  const requestId = generateRequestId();
-  const timestamp = new Date().toISOString();
-  try {
-    if (!payload.input || payload.input.length === 0) {
-      runtime2.log(`[${requestId}] ❌ Empty request payload`);
-      return JSON.stringify({
-        success: false,
-        requestId,
-        timestamp,
-        error: "Empty request body"
-      });
-    }
-    let request;
-    try {
-      request = decodeJson(payload.input);
-    } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : String(error);
-      runtime2.log(`[${requestId}] ❌ Failed to parse JSON: ${errorMsg}`);
-      return JSON.stringify({
-        success: false,
-        requestId,
-        timestamp,
-        error: `Invalid JSON: ${errorMsg}`
-      });
-    }
-    const config = runtime2.config;
-    if (!config.etherscanApiKey) {
-      runtime2.log(`[${requestId}] ❌ Error: ETHERSCAN_API_KEY not configured`);
-      return JSON.stringify({
-        success: false,
-        requestId,
-        timestamp,
-        error: "Etherscan API key not configured. Please set ETHERSCAN_API_KEY environment variable."
-      });
-    }
-    if (!request.tokenAddress) {
-      runtime2.log(`[${requestId}] ❌ Error: Token address not provided`);
-      return JSON.stringify({
-        success: false,
-        requestId,
-        timestamp,
-        error: "Token address is required. Please provide a valid Ethereum address (0x format)"
-      });
-    }
-    const tokenAddress = request.tokenAddress.toLowerCase();
-    if (!/^0x[a-f0-9]{40}$/.test(tokenAddress)) {
-      runtime2.log(`[${requestId}] ❌ Error: Invalid token address format`);
-      return JSON.stringify({
-        success: false,
-        requestId,
-        timestamp,
-        error: `Invalid token address format. Expected: 0x followed by 40 hex characters. Got: ${request.tokenAddress}`
-      });
-    }
-    const chainId = request.chainId || config.defaultChainId || 1;
-    const crossChain = request.crossChain || false;
-    const format = request.format || "summary";
-    runtime2.log(`[${requestId}] \uD83D\uDD0D Starting verification for ${tokenAddress} on chain ${chainId}`);
-    const engine = createVerificationEngine({
-      etherscanApiKey: config.etherscanApiKey,
-      enableCaching: true,
-      cacheExpiration: 3600000,
-      timeout: 30000,
-      chainId
-    });
-    let verificationResult;
-    if (crossChain && config.chainIds) {
-      runtime2.log(`[${requestId}] \uD83C\uDF0D Performing cross-chain verification`);
-      verificationResult = await engine.deepVerify(tokenAddress, config.chainIds);
-    } else {
-      runtime2.log(`[${requestId}] ⚙️  Performing single-chain verification`);
-      verificationResult = await engine.quickVerify(tokenAddress, chainId);
-    }
-    const formattedResult = formatVerificationForUser(verificationResult, format);
-    if (verificationResult.decision.isSafe) {
-      runtime2.log(`[${requestId}] ✅ Token verified as SAFE`);
-    } else {
-      runtime2.log(`[${requestId}] ❌ Token verified as UNSAFE - Risks: ${verificationResult.decision.risks.length}`);
-    }
-    runtime2.log(formattedResult);
-    let responseData;
-    if (format === "json") {
-      responseData = verificationResult;
-    } else if (format === "report") {
-      responseData = {
-        formatted: formattedResult,
-        raw: verificationResult
-      };
-    } else {
-      responseData = {
-        tokenAddress,
-        chainId,
-        isSafe: verificationResult.decision.isSafe,
-        canAutomate: verificationResult.decision.canAutomate,
-        riskLevel: verificationResult.chainAnalysis?.riskLevel,
-        score: verificationResult.chainAnalysis?.overallScore,
-        risks: verificationResult.decision.risks,
-        reason: verificationResult.decision.reason,
-        formatted: formattedResult
-      };
-    }
-    return JSON.stringify({
-      success: true,
+  runtime2.log(`[${requestId}] AutoPilot DCA request mode=${request.executionMode} ${request.walletChainId} -> ${request.destinationChainId}`);
+  const { resolved, preflight } = resolveExecutionConfig(request, runtime2.config);
+  if (resolved.state === "BLOCKED") {
+    const phases2 = ["REQUEST_RECEIVED", "PREFLIGHT_FAILED", "SECURITY_BLOCKED", "DECISION_SKIP"];
+    const decision2 = {
+      action: "SKIP",
+      confidence: 0,
+      reason: `Resolver blocked: ${resolved.blockedReason}`,
+      operatorMessage: "Resolver blocked before execution"
+    };
+    const notifications2 = runtime2.config.notificationsEnabled ? [buildBlockedNotification(requestId, String(resolved.blockedReason ?? "UNKNOWN"))] : [];
+    const outcome2 = {
       requestId,
       timestamp,
-      data: responseData
-    });
-  } catch (error) {
-    const errorMsg = error instanceof Error ? error.message : String(error);
-    runtime2.log(`[${requestId}] ❌ Verification failed: ${errorMsg}`);
+      status: "BLOCKED",
+      resolver: resolved,
+      preflight,
+      security: {
+        allow: false,
+        enforcementMode: runtime2.config.securityEnforcementMode,
+        reasonCode: resolved.blockedReason,
+        incidentLogged: true
+      },
+      decision: decision2,
+      records: buildWorkflowRecords(requestId, request, phases2, runtime2.config.feature5Enabled),
+      execution: { submitted: false, message: "No execution attempted", reasonCode: "RESOLVER_BLOCKED" },
+      notifications: notifications2
+    };
+    return JSON.stringify({ success: true, requestId, timestamp, data: outcome2 });
+  }
+  let security = runSecurityChecks(request, runtime2.config);
+  if (runtime2.config.feature6Enabled) {
+    const onchain = await readOnchainSecurityState(runtime2, resolved);
+    if (runtime2.config.securityEnforcementMode === "ENFORCE" || onchain.enforcementMode === "ENFORCE") {
+      security.enforcementMode = "ENFORCE";
+    }
+    if (onchain.paused) {
+      security = {
+        allow: onchain.enforcementMode === "MONITOR",
+        enforcementMode: onchain.enforcementMode,
+        reasonCode: "SECURITY_BLOCKED:PAUSED",
+        incidentLogged: true
+      };
+    } else if (onchain.tokenStatus === 6) {
+      security = {
+        allow: onchain.enforcementMode === "MONITOR",
+        enforcementMode: onchain.enforcementMode,
+        reasonCode: "SECURITY_BLOCKED:TOKEN_BLOCKLISTED",
+        incidentLogged: true
+      };
+    }
+  }
+  if ((security.reasonCode?.startsWith("SECURITY_BLOCKED") ?? false) && security.enforcementMode === "ENFORCE") {
+    security = { ...security, allow: false };
+  }
+  const decision = decideWithGemini(runtime2, request);
+  const execution = await executeServiceAction(runtime2, resolved, request, security, decision);
+  const securityPhase = security.allow ? "SECURITY_ALLOWED" : "SECURITY_BLOCKED";
+  const decisionPhase = `DECISION_${decision.action}`;
+  const phases = ["REQUEST_RECEIVED", "PREFLIGHT_PASSED", securityPhase, decisionPhase];
+  if (execution.submitted)
+    phases.push("EXECUTION_SUBMITTED");
+  await appendWorkflowRecordsOnchain(runtime2, resolved, request, requestId, phases, execution.txHash);
+  const notifications = [];
+  if (runtime2.config.notificationsEnabled) {
+    notifications.push(buildDecisionNotification(decision, request, requestId));
+    if (execution.submitted)
+      notifications.push(buildExecutionNotification(requestId, execution.txHash));
+    if (!security.allow && security.reasonCode)
+      notifications.push(buildBlockedNotification(requestId, security.reasonCode));
+  }
+  for (const n of notifications)
+    runtime2.log(`[${requestId}] ${n}`);
+  const status = resolved.state === "READY" && security.allow && execution.submitted ? "READY" : !security.allow ? "BLOCKED" : resolved.state === "DEGRADED" ? "DEGRADED" : "READY";
+  const outcome = {
+    requestId,
+    timestamp,
+    status,
+    resolver: resolved,
+    preflight,
+    security,
+    decision,
+    records: buildWorkflowRecords(requestId, request, phases, runtime2.config.feature5Enabled),
+    execution,
+    notifications
+  };
+  return JSON.stringify({ success: true, requestId, timestamp, data: outcome });
+}
+var onHttpAutoPilot = async (runtime2, payload) => {
+  if (!payload.input || payload.input.length === 0) {
     return JSON.stringify({
       success: false,
-      requestId,
-      timestamp,
-      error: `Verification failed: ${errorMsg}`
+      requestId: "dca_empty_input",
+      timestamp: runtime2.now().toISOString(),
+      error: "Empty request body"
     });
+  }
+  const requestId = deterministicRequestId(payload.input);
+  try {
+    const request = decodeJson(payload.input);
+    return handleAutoPilotRequest(runtime2, request, requestId);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    runtime2.log(`[${requestId}] AutoPilot error: ${message}`);
+    return JSON.stringify({ success: false, requestId, timestamp: runtime2.now().toISOString(), error: message });
   }
 };
-var onCronTrigger = async (runtime2) => {
-  try {
-    const config = runtime2.config;
-    runtime2.log(`[DEBUG_CRON] enableTokenVerification: ${config.enableTokenVerification}`);
-    runtime2.log(`[DEBUG_CRON] etherscanApiKey: ${config.etherscanApiKey ? "***" : "undefined"}`);
-    runtime2.log("\uD83D\uDCCA Fetching gas prices from Etherscan...");
-    const httpClient = new cre.capabilities.HTTPClient;
-    const aggregationConfig = ConsensusAggregationByFields({
-      safeGasPrice: () => median(),
-      proposeGasPrice: () => median(),
-      fastGasPrice: () => median(),
-      baseFee: () => median(),
-      lastBlock: () => median()
+var onCronAutoPilot = async (runtime2) => {
+  const request = runtime2.config.cronRequest;
+  if (!request) {
+    return JSON.stringify({
+      success: false,
+      requestId: "dca_cron_missing_config",
+      timestamp: runtime2.now().toISOString(),
+      error: "Missing cronRequest in workflow config"
     });
-    const requestFn = httpClient.sendRequest(runtime2, fetchGasPrices, aggregationConfig);
-    const response = requestFn(config);
-    const gasPrices = response.result();
-    runtime2.log("═══════════════════════════════════════");
-    runtime2.log("⛽ GAS PRICES REPORT");
-    runtime2.log("═══════════════════════════════════════");
-    runtime2.log(`Safe Gas Price: ${gasPrices.safeGasPrice} gwei`);
-    runtime2.log(`Propose Gas Price: ${gasPrices.proposeGasPrice} gwei`);
-    runtime2.log(`Fast Gas Price: ${gasPrices.fastGasPrice} gwei`);
-    runtime2.log(`Base Fee: ${gasPrices.baseFee} gwei`);
-    runtime2.log(`Last Block: ${gasPrices.lastBlock}`);
-    runtime2.log("═══════════════════════════════════════");
-    return JSON.stringify(gasPrices);
-  } catch (error) {
-    const errorMsg = error instanceof Error ? error.message : String(error);
-    runtime2.log(`❌ Gas price fetch error: ${errorMsg}`);
-    return JSON.stringify({ error: errorMsg });
   }
+  const requestId = toBytes32FromText(JSON.stringify(request)).slice(0, 10).replace("0x", "dca_");
+  return handleAutoPilotRequest(runtime2, request, requestId);
 };
 var initWorkflow = (config) => {
+  validateRuntimeConfig(config);
   const handlers = [];
-  console.log("⚙️  Initializing workflow handlers...");
-  console.log(`[DEBUG] enableTokenVerification: ${config.enableTokenVerification}`);
-  console.log(`[DEBUG] etherscanApiKey: ${config.etherscanApiKey ? "***" : "undefined"}`);
   const cron = new cre.capabilities.CronCapability;
-  const cronHandler = cre.handler(cron.trigger({ schedule: config.schedule }), onCronTrigger);
-  handlers.push(cronHandler);
-  console.log("✅ Gas price Cron trigger registered");
-  if (config.enableTokenVerification) {
-    try {
-      const httpCapability = new cre.capabilities.HTTPCapability;
-      const httpTrigger = httpCapability.trigger({});
-      const httpHandler = cre.handler(httpTrigger, onHttpVerifyToken);
-      if (httpHandler) {
-        handlers.push(httpHandler);
-        console.log("✅ Token verification HTTP trigger registered");
-      }
-    } catch (error) {
-      console.log(`ℹ️  HTTP trigger registration note: ${error instanceof Error ? error.message : error}`);
-      console.log("   Gas price fetching (Cron trigger) is still active");
-    }
-  } else {
-    console.log("⚠️  Token verification HTTP trigger disabled");
-  }
-  console.log(`✅ Workflow initialization complete
-`);
+  handlers.push(cre.handler(cron.trigger({ schedule: config.schedule }), onCronAutoPilot));
+  const http = new cre.capabilities.HTTPCapability;
+  const configuredKeys = (config.authorizedEVMAddresses ?? []).filter((addr) => isAddress2(addr)).map((addr) => ({ type: "KEY_TYPE_ECDSA_EVM", publicKey: addr }));
+  const httpTrigger = configuredKeys.length > 0 ? http.trigger({ authorizedKeys: configuredKeys }) : http.trigger({});
+  handlers.push(cre.handler(httpTrigger, onHttpAutoPilot));
   return handlers;
 };
 async function main() {
@@ -15849,7 +17101,7 @@ async function main() {
   await runner.run(initWorkflow);
 }
 main().catch((error) => {
-  console.log("❌ Workflow failed:", error);
+  console.log("AutoPilot workflow failed:", error);
   process.exit(1);
 });
 export {
