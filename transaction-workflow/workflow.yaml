@@ -49,3 +49,21 @@ chainshield-production-settings:
     workflow-path: "./chainshield.ts"
     config-path: "./config.chainshield.production.json"
     secrets-path: ""
+
+# ==========================================================================
+autopilot-staging-settings:
+  user-workflow:
+    workflow-name: "autopilot-dca-staging"
+  workflow-artifacts:
+    workflow-path: "./autopilot.ts"
+    config-path: "./config.autopilot.staging.json"
+    secrets-path: "./secrets.autopilot.yaml"
+
+# ==========================================================================
+autopilot-production-settings:
+  user-workflow:
+    workflow-name: "autopilot-dca-production"
+  workflow-artifacts:
+    workflow-path: "./autopilot.ts"
+    config-path: "./config.autopilot.production.json"
+    secrets-path: "./secrets.autopilot.yaml"
