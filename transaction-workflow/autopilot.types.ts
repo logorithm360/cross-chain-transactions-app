@@ -136,5 +136,13 @@ export interface AutoPilotConfig {
   geminiApiUrl: string;
   geminiApiKey?: string;
   lowFundsWarningThreshold: number;
+  chainResolver: {
+    enabled: boolean;
+    registryAddressByChainId: Record<string, string>;
+    chainSelectorByChainId: Record<string, string>;
+    mode: "onchain";
+    cacheTtlMs: number;
+    strict: boolean;
+  };
   cronRequest?: AutoPilotRequest;
 }

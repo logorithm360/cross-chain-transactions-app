@@ -11,6 +11,7 @@ import {
   decodeJson
 } from "@chainlink/cre-sdk";
 import { encodeFunctionData, decodeFunctionResult, keccak256, toBytes, type Hex } from "viem";
+import { resolveExecutionConfig as resolveExecutionConfigFromRegistry } from "./chain-resolver";
 
 type ResolutionState = "READY" | "BLOCKED" | "DEGRADED";
 type EnforcementMode = "MONITOR" | "ENFORCE";
@@ -33,11 +34,6 @@ interface ResolveRequest {
   token: string;
   amount: string;
   action: string;
-}
-
-interface ChainMeta {
-  name: string;
-  selector: string;
 }
 
 interface ResolvedExecutionConfig {
@@ -120,15 +116,15 @@ interface ChainShieldConfig {
   tokenVerifierContract?: string;
   userRecordRegistryContract?: string;
   sourceChainWriteGasLimit?: string;
+  chainResolver: {
+    enabled: boolean;
+    registryAddressByChainId: Record<string, string>;
+    chainSelectorByChainId: Record<string, string>;
+    mode: "onchain";
+    cacheTtlMs: number;
+    strict: boolean;
+  };
 }
-
-const CHAINS: Record<number, ChainMeta> = {
-  11155111: { name: "Ethereum Sepolia", selector: "16015286601757825753" },
-  80002: { name: "Polygon Amoy", selector: "16281711391670634445" },
-  421614: { name: "Arbitrum Sepolia", selector: "3478487238524512106" },
-  84532: { name: "Base Sepolia", selector: "10344971235874465080" },
-  11155420: { name: "OP Sepolia", selector: "5224473277236331295" }
-};
 
 function normalizeAddress(input: string): string {
   return input.toLowerCase();
@@ -138,16 +134,6 @@ function isAddress(value: string): boolean {
   return /^0x[a-fA-F0-9]{40}$/.test(value);
 }
 
-function laneKey(sourceChainId: number, destinationChainId: number): string {
-  return `${sourceChainId}->${destinationChainId}`;
-}
-
-function pseudoEstimateFeeWei(amountWei: bigint, sourceChainId: number, destinationChainId: number): bigint {
-  const base = 30_000_000_000_000_000n;
-  const variable = amountWei / 1_000_000_000n;
-  const distance = BigInt(Math.abs(sourceChainId - destinationChainId) % 1000);
-  return base + variable + distance * 1_000_000_000_000n;
-}
 
 function mapToMetadataHash(input: ResolveRequest): string {
   const raw = `${input.user}|${input.token}|${input.amount}|${input.action}|${input.walletChainId}|${input.destinationChainId}`;
@@ -167,169 +153,14 @@ function deterministicRequestId(payload: Uint8Array): string {
   return `cs_${hash.toString(16).padStart(8, "0")}`;
 }
 
-function resolveExecutionConfig(request: ResolveRequest, config: ChainShieldConfig): {
-  resolved: ResolvedExecutionConfig;
-  preflight: PreflightReport;
-} {
-  const source = CHAINS[request.walletChainId];
-  const destination = CHAINS[request.destinationChainId];
-
-  const preflight: PreflightReport = {
-    sourceChainSupported: Boolean(source),
-    destinationChainSupported: Boolean(destination),
-    laneEnabled: false,
-    contractsResolved: false,
-    tokenMapped: false,
-    amountParsed: false
-  };
-
-  if (!source || !destination) {
-    return {
-      resolved: {
-        state: "BLOCKED",
-        blockedReason: "CHAIN_UNSUPPORTED",
-        sourceChainId: request.walletChainId,
-        sourceChainName: source?.name ?? "Unsupported",
-        sourceChainSelector: source?.selector ?? "",
-        destinationChainId: request.destinationChainId,
-        destinationChainName: destination?.name ?? "Unsupported",
-        destinationChainSelector: destination?.selector ?? "",
-        serviceType: request.serviceType,
-        token: request.token,
-        amount: request.amount,
-        action: request.action,
-        recipient: request.recipient,
-        contracts: {}
-      },
-      preflight
-    };
-  }
-
-  const key = laneKey(request.walletChainId, request.destinationChainId);
-  preflight.laneEnabled = config.enabledLaneKeys.includes(key);
-
-  if (!preflight.laneEnabled) {
-    return {
-      resolved: {
-        state: "BLOCKED",
-        blockedReason: "LANE_DISABLED",
-        sourceChainId: request.walletChainId,
-        sourceChainName: source.name,
-        sourceChainSelector: source.selector,
-        destinationChainId: request.destinationChainId,
-        destinationChainName: destination.name,
-        destinationChainSelector: destination.selector,
-        serviceType: request.serviceType,
-        token: request.token,
-        amount: request.amount,
-        action: request.action,
-        recipient: request.recipient,
-        contracts: {}
-      },
-      preflight
-    };
-  }
-
-  const sourceSender = config.sourceSenderByChainId[String(request.walletChainId)];
-  const destinationReceiver = config.destinationReceiverByChainId[String(request.destinationChainId)];
-
-  preflight.contractsResolved = Boolean(sourceSender && destinationReceiver);
-  preflight.tokenMapped = isAddress(request.token);
-
-  let parsedAmount = 0n;
-  try {
-    parsedAmount = BigInt(request.amount);
-    preflight.amountParsed = parsedAmount > 0n;
-  } catch {
-    preflight.amountParsed = false;
-  }
-
-  if (!preflight.tokenMapped) {
-    return {
-      resolved: {
-        state: "BLOCKED",
-        blockedReason: "TOKEN_MAPPING_MISSING",
-        sourceChainId: request.walletChainId,
-        sourceChainName: source.name,
-        sourceChainSelector: source.selector,
-        destinationChainId: request.destinationChainId,
-        destinationChainName: destination.name,
-        destinationChainSelector: destination.selector,
-        serviceType: request.serviceType,
-        token: request.token,
-        amount: request.amount,
-        action: request.action,
-        recipient: request.recipient,
-        contracts: {
-          sourceSender,
-          destinationReceiver,
-          securityManager: config.securityManagerContract,
-          tokenVerifier: config.tokenVerifierContract,
-          userRecordRegistry: config.userRecordRegistryContract
-        }
-      },
-      preflight
-    };
-  }
-
-  if (!preflight.amountParsed) {
-    return {
-      resolved: {
-        state: "BLOCKED",
-        blockedReason: "FEE_ESTIMATION_FAILED",
-        sourceChainId: request.walletChainId,
-        sourceChainName: source.name,
-        sourceChainSelector: source.selector,
-        destinationChainId: request.destinationChainId,
-        destinationChainName: destination.name,
-        destinationChainSelector: destination.selector,
-        serviceType: request.serviceType,
-        token: request.token,
-        amount: request.amount,
-        action: request.action,
-        recipient: request.recipient,
-        contracts: {
-          sourceSender,
-          destinationReceiver,
-          securityManager: config.securityManagerContract,
-          tokenVerifier: config.tokenVerifierContract,
-          userRecordRegistry: config.userRecordRegistryContract
-        }
-      },
-      preflight
-    };
-  }
-
-  const feeWei = pseudoEstimateFeeWei(parsedAmount, request.walletChainId, request.destinationChainId);
-  preflight.estimatedFeeWei = feeWei.toString();
-
-  const state: ResolutionState = preflight.contractsResolved ? "READY" : "DEGRADED";
-
-  return {
-    resolved: {
-      state,
-      degradedReason: state === "DEGRADED" ? "Sender/receiver contracts are not fully configured in CRE config" : undefined,
-      sourceChainId: request.walletChainId,
-      sourceChainName: source.name,
-      sourceChainSelector: source.selector,
-      destinationChainId: request.destinationChainId,
-      destinationChainName: destination.name,
-      destinationChainSelector: destination.selector,
-      serviceType: request.serviceType,
-      token: normalizeAddress(request.token),
-      amount: request.amount,
-      action: request.action,
-      recipient: normalizeAddress(request.recipient),
-      contracts: {
-        sourceSender,
-        destinationReceiver,
-        securityManager: config.securityManagerContract,
-        tokenVerifier: config.tokenVerifierContract,
-        userRecordRegistry: config.userRecordRegistryContract
-      },
-      estimatedFeeWei: feeWei.toString()
-    },
-    preflight
+async function resolveExecutionConfig(
+  request: ResolveRequest,
+  config: ChainShieldConfig,
+  runtime: Runtime<ChainShieldConfig>
+): Promise<{ resolved: ResolvedExecutionConfig; preflight: PreflightReport }> {
+  return (await resolveExecutionConfigFromRegistry(request, config, runtime)) as {
+    resolved: ResolvedExecutionConfig;
+    preflight: PreflightReport;
   };
 }
 
@@ -844,7 +675,7 @@ const onHttpChainShield = async (
 
     runtime.log(`[${requestId}] ChainShield request: ${request.walletChainId} -> ${request.destinationChainId}`);
 
-    const { resolved, preflight } = resolveExecutionConfig(request, runtime.config);
+    const { resolved, preflight } = await resolveExecutionConfig(request, runtime.config, runtime);
 
     if (resolved.state === "BLOCKED") {
       const security = {
