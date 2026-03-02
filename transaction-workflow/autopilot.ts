@@ -14,7 +14,6 @@ import type {
   AutoPilotConfig,
   AutoPilotOutcome,
   AutoPilotRequest,
-  ChainMeta,
   ExecutionMode,
   GeminiDecision,
   PreflightReport,
@@ -22,20 +21,13 @@ import type {
   SecurityDecision,
   WorkflowRecord
 } from "./autopilot.types";
+import { resolveExecutionConfig as resolveExecutionConfigFromRegistry } from "./chain-resolver";
 import {decideWithGemini} from "./autopilot.gemini";
 import {
   buildBlockedNotification,
   buildDecisionNotification,
   buildExecutionNotification
 } from "./autopilot.notifications";
-
-const CHAINS: Record<number, ChainMeta> = {
-  11155111: {name: "Ethereum Sepolia", selector: "16015286601757825753"},
-  80002: {name: "Polygon Amoy", selector: "16281711391670634445"},
-  421614: {name: "Arbitrum Sepolia", selector: "3478487238524512106"},
-  84532: {name: "Base Sepolia", selector: "10344971235874465080"},
-  11155420: {name: "OP Sepolia", selector: "5224473277236331295"}
-};
 
 function isAddress(value: string): boolean {
   return /^0x[a-fA-F0-9]{40}$/.test(value);
@@ -45,9 +37,6 @@ function normalizeAddress(input: string): string {
   return input.toLowerCase();
 }
 
-function laneKey(sourceChainId: number, destinationChainId: number): string {
-  return `${sourceChainId}->${destinationChainId}`;
-}
 
 function deterministicRequestId(payload: Uint8Array): string {
   const raw = new TextDecoder().decode(payload);
@@ -171,152 +160,23 @@ function applyGeminiFailurePolicy(
   };
 }
 
-function resolveExecutionConfig(request: AutoPilotRequest, config: AutoPilotConfig): {
-  resolved: ResolvedExecutionConfig;
-  preflight: PreflightReport;
-} {
-  const source = CHAINS[request.walletChainId];
-  const destination = CHAINS[request.destinationChainId];
-  const preflight: PreflightReport = {
-    sourceChainSupported: Boolean(source),
-    destinationChainSupported: Boolean(destination),
-    laneEnabled: false,
-    contractsResolved: false,
-    tokenMapped: false,
-    amountParsed: false
-  };
-
-  if (!source || !destination) {
-    return {
-      resolved: {
-        state: "BLOCKED",
-        blockedReason: "CHAIN_UNSUPPORTED",
-        sourceChainId: request.walletChainId,
-        sourceChainName: source?.name ?? "Unsupported",
-        sourceChainSelector: source?.selector ?? "",
-        destinationChainId: request.destinationChainId,
-        destinationChainName: destination?.name ?? "Unsupported",
-        destinationChainSelector: destination?.selector ?? "",
-        serviceType: request.serviceType,
-        executionMode: request.executionMode,
-        token: request.token,
-        amount: request.amount,
-        action: request.action,
-        recipient: request.recipient,
-        receiverContract: request.receiverContract,
-        contracts: {}
-      },
-      preflight
-    };
-  }
-
-  preflight.laneEnabled = config.enabledLaneKeys.includes(laneKey(request.walletChainId, request.destinationChainId));
-  if (!preflight.laneEnabled) {
-    return {
-      resolved: {
-        state: "BLOCKED",
-        blockedReason: "LANE_DISABLED",
-        sourceChainId: request.walletChainId,
-        sourceChainName: source.name,
-        sourceChainSelector: source.selector,
-        destinationChainId: request.destinationChainId,
-        destinationChainName: destination.name,
-        destinationChainSelector: destination.selector,
-        serviceType: request.serviceType,
-        executionMode: request.executionMode,
-        token: request.token,
-        amount: request.amount,
-        action: request.action,
-        recipient: request.recipient,
-        receiverContract: request.receiverContract,
-        contracts: {}
-      },
-      preflight
-    };
-  }
-
-  const automatedTrader = config.automatedTraderByChainId[String(request.walletChainId)];
-  preflight.contractsResolved = Boolean(automatedTrader && isAddress(automatedTrader));
-  preflight.tokenMapped = isAddress(request.token);
-  try {
-    preflight.amountParsed = BigInt(request.amount) > 0n;
-  } catch {
-    preflight.amountParsed = false;
-  }
-
-  if (!preflight.tokenMapped) {
-    return {
-      resolved: {
-        state: "BLOCKED",
-        blockedReason: "TOKEN_MAPPING_MISSING",
-        sourceChainId: request.walletChainId,
-        sourceChainName: source.name,
-        sourceChainSelector: source.selector,
-        destinationChainId: request.destinationChainId,
-        destinationChainName: destination.name,
-        destinationChainSelector: destination.selector,
-        serviceType: request.serviceType,
-        executionMode: request.executionMode,
-        token: request.token,
-        amount: request.amount,
-        action: request.action,
-        recipient: request.recipient,
-        receiverContract: request.receiverContract,
-        contracts: {automatedTrader}
-      },
-      preflight
-    };
-  }
-
-  if (!preflight.amountParsed) {
-    return {
-      resolved: {
-        state: "BLOCKED",
-        blockedReason: "FEE_ESTIMATION_FAILED",
-        sourceChainId: request.walletChainId,
-        sourceChainName: source.name,
-        sourceChainSelector: source.selector,
-        destinationChainId: request.destinationChainId,
-        destinationChainName: destination.name,
-        destinationChainSelector: destination.selector,
-        serviceType: request.serviceType,
-        executionMode: request.executionMode,
-        token: request.token,
-        amount: request.amount,
-        action: request.action,
-        recipient: request.recipient,
-        receiverContract: request.receiverContract,
-        contracts: {automatedTrader}
-      },
-      preflight
-    };
-  }
-
+async function resolveExecutionConfig(
+  request: AutoPilotRequest,
+  config: AutoPilotConfig,
+  runtime: Runtime<AutoPilotConfig>
+): Promise<{ resolved: ResolvedExecutionConfig; preflight: PreflightReport }> {
+  const base = await resolveExecutionConfigFromRegistry(request, config, runtime);
   return {
     resolved: {
-      state: preflight.contractsResolved ? "READY" : "DEGRADED",
-      degradedReason: preflight.contractsResolved ? undefined : "AutomatedTrader not configured for source chain",
-      sourceChainId: request.walletChainId,
-      sourceChainName: source.name,
-      sourceChainSelector: source.selector,
-      destinationChainId: request.destinationChainId,
-      destinationChainName: destination.name,
-      destinationChainSelector: destination.selector,
-      serviceType: request.serviceType,
+      ...(base.resolved as unknown as ResolvedExecutionConfig),
       executionMode: request.executionMode,
-      token: normalizeAddress(request.token),
-      amount: request.amount,
-      action: request.action,
-      recipient: normalizeAddress(request.recipient),
       receiverContract: request.receiverContract,
       contracts: {
-        automatedTrader,
-        securityManager: config.securityManagerContract,
-        tokenVerifier: config.tokenVerifierContract,
-        userRecordRegistry: config.userRecordRegistryContract
+        ...(base.resolved.contracts as unknown as ResolvedExecutionConfig["contracts"]),
+        automatedTrader: base.resolved.contracts.automatedTrader ?? base.resolved.contracts.sourceSender
       }
     },
-    preflight
+    preflight: base.preflight as unknown as PreflightReport
   };
 }
 
@@ -774,7 +634,7 @@ async function handleAutoPilotRequest(
     destinationChainId: request.destinationChainId
   });
 
-  const {resolved, preflight} = resolveExecutionConfig(request, runtime.config);
+  const {resolved, preflight} = await resolveExecutionConfig(request, runtime.config, runtime);
   if (resolved.state === "BLOCKED") {
     const phases = ["REQUEST_RECEIVED", "PREFLIGHT_FAILED", "SECURITY_BLOCKED", "DECISION_SKIP"];
     const decision: GeminiDecision = {
