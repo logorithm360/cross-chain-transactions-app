@@ -1,0 +1,126 @@
+{
+  "serviceName": "CrossVault",
+  "schedule": "0 9 * * 1",
+  "authorizedEVMAddresses": [
+    "0xe2a5d3EE095de5039D42B00ddc2991BD61E48D55"
+  ],
+  "feature5Enabled": true,
+  "feature6Enabled": true,
+  "securityEnforcementMode": "ENFORCE",
+  "maxTransferAmountWei": "100000000000000000000",
+  "tokenAllowlist": [
+    "0xFd57b4ddBf88a4e07fF4e34C487b99af2Fe82a05"
+  ],
+  "tokenBlocklist": [],
+  "enabledLaneKeys": [
+    "11155111->80002"
+  ],
+  "securityManagerContract": "0xe8A2A5Ca7f163762517C0Ed0E063b0A733386B5f",
+  "tokenVerifierContract": "0x6d8eAbeda50a43EE7b960DfFB8aA44f5F6B6BE6D",
+  "userRecordRegistryContract": "0x5c80ec9703c4eb9491100239793a719cbf4a0bfe",
+  "sourceChainWriteGasLimit": "900000",
+  "notificationsEnabled": true,
+  "requireExplicitApprovalForExecute": true,
+  "recommendationMode": "OPENAI",
+  "emitStructuredLogs": true,
+  "allowAiDestinationOverride": true,
+  "supportedOpportunityChainIds": [
+    80002,
+    421614,
+    84532,
+    11155420
+  ],
+  "openaiModel": "gpt-4o-mini",
+  "recommendationPolicy": {
+    "cacheTtlMs": 900000,
+    "maxRetries": 1,
+    "timeoutMs": 8000,
+    "allowedProtocols": [
+      "Aave",
+      "Compound",
+      "Morpho"
+    ],
+    "fallbackExecutionMaxAmountWei": "300000000000000000",
+    "fallbackRequireApproval": true,
+    "opportunityCatalog": [
+      {
+        "chainId": 80002,
+        "protocol": "Aave",
+        "strategyAction": "lend",
+        "baseApyBps": 640,
+        "risk": "LOW",
+        "enabled": true
+      },
+      {
+        "chainId": 421614,
+        "protocol": "Aave",
+        "strategyAction": "stake",
+        "baseApyBps": 780,
+        "risk": "MEDIUM",
+        "enabled": true
+      },
+      {
+        "chainId": 84532,
+        "protocol": "Compound",
+        "strategyAction": "lend",
+        "baseApyBps": 720,
+        "risk": "MEDIUM",
+        "enabled": true
+      },
+      {
+        "chainId": 11155420,
+        "protocol": "Morpho",
+        "strategyAction": "vault",
+        "baseApyBps": 880,
+        "risk": "HIGH",
+        "enabled": true
+      }
+    ]
+  },
+  "weeklyReviewEnabled": true,
+  "reviewRequest": {
+    "walletChainId": 11155111,
+    "destinationChainId": 80002,
+    "serviceType": "CROSSVAULT",
+    "user": "0xe2a5d3EE095de5039D42B00ddc2991BD61E48D55",
+    "recipient": "0xb3CcDfCC821fC7693e0CbF4b352f7Ca51b33c89B",
+    "token": "0xFd57b4ddBf88a4e07fF4e34C487b99af2Fe82a05",
+    "amount": "100000000000000000",
+    "action": "transfer",
+    "intent": "REBALANCE",
+    "executionMode": "PLAN",
+    "riskProfile": "MEDIUM",
+    "approvalRequired": true,
+    "approved": false,
+    "userHistorySummary": "3 stake operations, 2 swaps",
+    "priorStakeOps": 3,
+    "priorSwapOps": 2
+  },
+  "chainResolver": {
+    "enabled": true,
+    "registryAddressByChainId": {
+      "80002": "0x0000000000000000000000000000000000000000",
+      "84532": "0x0000000000000000000000000000000000000000",
+      "421614": "0x0000000000000000000000000000000000000000",
+      "11155111": "0x9AE3783657244Fd1ee544bef42376E28D4c89a6f",
+      "11155420": "0x0000000000000000000000000000000000000000"
+    },
+    "chainSelectorByChainId": {
+      "80002": "16281711391670634445",
+      "84532": "10344971235874465080",
+      "421614": "3478487238524512106",
+      "11155111": "16015286601757825753",
+      "11155420": "5224473277236331295"
+    },
+    "chainNameByChainId": {
+      "80002": "Polygon Amoy",
+      "84532": "Base Sepolia",
+      "421614": "Arbitrum Sepolia",
+      "11155111": "Ethereum Sepolia",
+      "11155420": "OP Sepolia"
+    },
+    "mode": "onchain",
+    "cacheTtlMs": 30000,
+    "strict": true
+  }
+}
