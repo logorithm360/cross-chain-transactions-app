@@ -116,6 +116,7 @@ type GeminiApiResponse = {
 };
 
 function buildGeminiRequest(
+  url: string,
   prompt: string,
   apiKey: string
 ): (sendRequester: HTTPSendRequester, config: AutoPilotConfig) => GeminiHttpResponse {
@@ -130,7 +131,7 @@ function buildGeminiRequest(
     };
 
     const req = {
-      url: config.geminiApiUrl,
+      url,
       method: "POST" as const,
       headers: {
         "Content-Type": "application/json",
@@ -160,6 +161,10 @@ function buildGeminiRequest(
   };
 }
 
+function resolveGeminiUrl(config: AutoPilotConfig): string {
+  return `https://generativelanguage.googleapis.com/v1beta/models/${config.geminiModel}:generateContent`;
+}
+
 export function decideWithGemini(
   runtime: Runtime<AutoPilotConfig>,
   request: AutoPilotRequest
@@ -173,11 +178,12 @@ export function decideWithGemini(
   }
 
   try {
+    const url = resolveGeminiUrl(runtime.config);
     const httpClient = new HTTPClient();
     const result = httpClient
       .sendRequest(
         runtime,
-        buildGeminiRequest(prompt, apiKey),
+        buildGeminiRequest(url, prompt, apiKey),
         consensusIdenticalAggregation<GeminiHttpResponse>()
       )(runtime.config)
       .result();

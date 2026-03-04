@@ -23,6 +23,7 @@ export interface ChainResolverSettings {
   enabled: boolean;
   registryAddressByChainId: Record<string, string>;
   chainSelectorByChainId: Record<string, string>;
+  chainNameByChainId?: Record<string, string>;
   mode: "onchain";
   cacheTtlMs: number;
   strict: boolean;

@@ -133,7 +133,7 @@ export interface AutoPilotConfig {
   emitStructuredLogs?: boolean;
   requiredCreCliVersion?: string;
   notificationsEnabled: boolean;
-  geminiApiUrl: string;
+  geminiModel: string;
   geminiApiKey?: string;
   lowFundsWarningThreshold: number;
   chainResolver: {

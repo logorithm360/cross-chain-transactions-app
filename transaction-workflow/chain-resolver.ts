@@ -26,25 +26,10 @@ const CHAIN_REGISTRY_ABI = [
   },
   {
     type: "function",
-    name: "getChainBySelector",
+    name: "isChainSupported",
     stateMutability: "view",
     inputs: [{ name: "selector", type: "uint64" }],
-    outputs: [
-      {
-        name: "",
-        type: "tuple",
-        components: [
-          { name: "chainId", type: "uint256" },
-          { name: "selector", type: "uint64" },
-          { name: "name", type: "string" },
-          { name: "router", type: "address" },
-          { name: "linkToken", type: "address" },
-          { name: "wrappedNative", type: "address" },
-          { name: "isActive", type: "bool" },
-          { name: "isTestnet", type: "bool" }
-        ]
-      }
-    ]
+    outputs: [{ name: "", type: "bool" }]
   },
   {
     type: "function",
@@ -90,7 +75,8 @@ const DEFAULT_SERVICE_BINDINGS: Record<string, ServiceBindings> = {
   },
   MESSAGE: { source: "MESSAGE_SENDER", destination: "MESSAGE_RECEIVER" },
   DCA: { source: "AUTOMATED_TRADER", destination: "PROGRAMMABLE_TRANSFER_RECEIVER" },
-  AUTOMATED_TRADER: { source: "AUTOMATED_TRADER", destination: "PROGRAMMABLE_TRANSFER_RECEIVER" }
+  AUTOMATED_TRADER: { source: "AUTOMATED_TRADER", destination: "PROGRAMMABLE_TRANSFER_RECEIVER" },
+  CROSSVAULT: { source: "PROGRAMMABLE_TRANSFER_SENDER", destination: "PROGRAMMABLE_TRANSFER_RECEIVER" }
 };
 
 interface ChainMeta {
@@ -98,6 +84,12 @@ interface ChainMeta {
   selector: string;
   name: string;
   isActive: boolean;
+}
+
+function chainNameFromConfig(config: ChainResolverRuntimeConfig, chainId: number): string {
+  const configured = config.chainResolver.chainNameByChainId?.[String(chainId)];
+  if (configured && configured.trim().length > 0) return configured;
+  return `chain-${chainId}`;
 }
 
 interface CachedResolution {
@@ -189,46 +181,55 @@ async function callRegistry<T>(
 }
 
 export async function loadChainMeta(
+  config: ChainResolverRuntimeConfig,
   runtime: Runtime<ChainResolverRuntimeConfig>,
   sourceRegistryAddress: string,
   sourceBootstrapSelector: bigint,
   chainId: number
 ): Promise<ChainMeta | null> {
-  const selector = await callRegistry<bigint>(
-    runtime,
-    sourceRegistryAddress,
-    sourceBootstrapSelector,
-    "getSelectorByChainId",
-    [BigInt(chainId)]
-  );
-
-  if (selector === 0n) return null;
-
+  let selector: bigint;
   try {
-    const record = await callRegistry<readonly [
-      bigint,
-      bigint,
-      string,
-      `0x${string}`,
-      `0x${string}`,
-      `0x${string}`,
-      boolean,
-      boolean
-    ]>(
+    selector = await callRegistry<bigint>(
       runtime,
       sourceRegistryAddress,
       sourceBootstrapSelector,
-      "getChainBySelector",
+      "getSelectorByChainId",
+      [BigInt(chainId)]
+    );
+  } catch (error) {
+    runtime.log(
+      `[resolver] getSelectorByChainId failed chainId=${chainId} registry=${sourceRegistryAddress} selector=${sourceBootstrapSelector.toString()} error=${error instanceof Error ? error.message : String(error)}`
+    );
+    return null;
+  }
+
+  if (selector === 0n) {
+    runtime.log(`[resolver] getSelectorByChainId returned 0 for chainId=${chainId}`);
+    return null;
+  }
+
+  try {
+    const isSupported = await callRegistry<boolean>(
+      runtime,
+      sourceRegistryAddress,
+      sourceBootstrapSelector,
+      "isChainSupported",
       [selector]
     );
-
+    if (!isSupported) {
+      runtime.log(`[resolver] isChainSupported returned false selector=${selector.toString()} chainId=${chainId}`);
+      return null;
+    }
     return {
-      chainId: Number(record[0]),
-      selector: record[1].toString(),
-      name: record[2],
-      isActive: record[6]
+      chainId,
+      selector: selector.toString(),
+      name: chainNameFromConfig(config, chainId),
+      isActive: true
     };
-  } catch {
+  } catch (error) {
+    runtime.log(
+      `[resolver] isChainSupported failed selector=${selector.toString()} chainId=${chainId} error=${error instanceof Error ? error.message : String(error)}`
+    );
     return null;
   }
 }
@@ -303,12 +304,15 @@ export async function resolveExecutionConfig(
   const bootstrapSelector = config.chainResolver.chainSelectorByChainId[String(request.walletChainId)];
 
   if (!registryAddress || !isAddress(registryAddress) || !bootstrapSelector) {
+    runtime.log(
+      `[resolver] missing bootstrap config walletChainId=${request.walletChainId} registry=${registryAddress ?? "undefined"} selector=${bootstrapSelector ?? "undefined"}`
+    );
     return blocked(request, "CHAIN_UNSUPPORTED", {}, {});
   }
 
   const sourceBootstrap = BigInt(bootstrapSelector);
-  const source = await loadChainMeta(runtime, registryAddress, sourceBootstrap, request.walletChainId);
-  const destination = await loadChainMeta(runtime, registryAddress, sourceBootstrap, request.destinationChainId);
+  const source = await loadChainMeta(config, runtime, registryAddress, sourceBootstrap, request.walletChainId);
+  const destination = await loadChainMeta(config, runtime, registryAddress, sourceBootstrap, request.destinationChainId);
 
   if (!source || !destination || !source.isActive || !destination.isActive) {
     return blocked(request, "CHAIN_UNSUPPORTED", source ?? {}, destination ?? {});

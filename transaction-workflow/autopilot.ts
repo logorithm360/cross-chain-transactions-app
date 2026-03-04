@@ -62,8 +62,8 @@ function validateRuntimeConfig(config: AutoPilotConfig): void {
   if (config.decisionMode !== "GEMINI") {
     throw new Error("Invalid config: decisionMode must be GEMINI");
   }
-  if (!config.geminiApiUrl) {
-    throw new Error("Invalid config: geminiApiUrl is required");
+  if (!config.geminiModel || config.geminiModel.trim().length === 0) {
+    throw new Error("Invalid config: geminiModel is required");
   }
   if (config.geminiFailurePolicy === "EXECUTE_SAFE") {
     const maxAmount = config.executeSafeMaxAmountWei ?? "0";
