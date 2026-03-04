@@ -21,6 +21,13 @@
       "84532": "10344971235874465080",
       "11155420": "5224473277236331295"
     },
+    "chainNameByChainId": {
+      "11155111": "Ethereum Sepolia",
+      "80002": "Polygon Amoy",
+      "421614": "Arbitrum Sepolia",
+      "84532": "Base Sepolia",
+      "11155420": "OP Sepolia"
+    },
     "mode": "onchain",
     "cacheTtlMs": 30000,
     "strict": true

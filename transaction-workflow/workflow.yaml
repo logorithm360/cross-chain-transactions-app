@@ -67,3 +67,21 @@ autopilot-production-settings:
     workflow-path: "./autopilot.ts"
     config-path: "./config.autopilot.production.json"
     secrets-path: "./secrets.autopilot.yaml"
+
+# ==========================================================================
+crossvault-staging-settings:
+  user-workflow:
+    workflow-name: "crossvault-staging"
+  workflow-artifacts:
+    workflow-path: "./crossvault.ts"
+    config-path: "./config.crossvault.staging.json"
+    secrets-path: "../secrets.yaml"
+
+# ==========================================================================
+crossvault-production-settings:
+  user-workflow:
+    workflow-name: "crossvault-production"
+  workflow-artifacts:
+    workflow-path: "./crossvault.ts"
+    config-path: "./config.crossvault.production.json"
+    secrets-path: "../secrets.yaml"
