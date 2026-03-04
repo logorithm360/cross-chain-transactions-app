@@ -7,3 +7,8 @@ tmp.wasm
 .cre_build_tmp.js
 ERRORS.TXT
 config.autopilot.local.json
+CRE-AI-DEV-DOCS.TXT
+cre-http-capability-reference.md
+cre-secrets-management.md
+cross-vault.txt
+CROSSVAULT.md
