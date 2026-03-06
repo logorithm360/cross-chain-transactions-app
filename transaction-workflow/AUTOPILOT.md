@@ -16,7 +16,7 @@ This is the dedicated CRE workflow for Feature 2 (`AutoPilot DCA`).
 ## Files
 1. `transaction-workflow/autopilot.ts`
 2. `transaction-workflow/autopilot.types.ts`
-3. `transaction-workflow/autopilot.gemini.ts`
+3. `transaction-workflow/autopilot.openai.ts`
 4. `transaction-workflow/autopilot.notifications.ts`
 5. `transaction-workflow/config.autopilot.staging.json`
 6. `transaction-workflow/config.autopilot.production.json`
@@ -40,8 +40,8 @@ Fill in these before real execution:
 Safety defaults:
 1. `allowCreateOrderFromWorkflow=false`
 2. `allowPerformUpkeepFromWorkflow=false`
-3. `geminiFailurePolicy=SKIP` in production
-4. `geminiApiKey=""` in committed config files (use secrets/env)
+3. `openaiFailurePolicy=SKIP` in production
+4. `openaiApiKey=""` in committed config files (use secrets/env)
 
 The workflow will never call owner/forwarder-protected execution paths unless you explicitly enable those flags.
 

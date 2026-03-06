@@ -1,7 +1,7 @@
-import type {AutoPilotRequest, GeminiDecision} from "./autopilot.types";
+import type {AIDecision, AutoPilotRequest} from "./autopilot.types";
 
 export function buildDecisionNotification(
-  decision: GeminiDecision,
+  decision: AIDecision,
   request: AutoPilotRequest,
   requestId: string
 ): string {
@@ -32,4 +32,3 @@ export function buildBlockedNotification(
 ): string {
   return `AutoPilot DCA blocked | requestId=${requestId} | reason=${reasonCode}`;
 }
-

@@ -11,18 +11,18 @@ import {
 } from "@chainlink/cre-sdk";
 import {decodeFunctionResult, encodeFunctionData, keccak256, toBytes, type Hex} from "viem";
 import type {
+  AIDecision,
   AutoPilotConfig,
   AutoPilotOutcome,
   AutoPilotRequest,
   ExecutionMode,
-  GeminiDecision,
   PreflightReport,
   ResolvedExecutionConfig,
   SecurityDecision,
   WorkflowRecord
 } from "./autopilot.types";
 import { resolveExecutionConfig as resolveExecutionConfigFromRegistry } from "./chain-resolver";
-import {decideWithGemini} from "./autopilot.gemini";
+import {decideWithOpenAI} from "./autopilot.openai";
 import {
   buildBlockedNotification,
   buildDecisionNotification,
@@ -59,13 +59,13 @@ function mapToMetadataHash(input: AutoPilotRequest): string {
 }
 
 function validateRuntimeConfig(config: AutoPilotConfig): void {
-  if (config.decisionMode !== "GEMINI") {
-    throw new Error("Invalid config: decisionMode must be GEMINI");
+  if (config.decisionMode !== "OPENAI") {
+    throw new Error("Invalid config: decisionMode must be OPENAI");
   }
-  if (!config.geminiModel || config.geminiModel.trim().length === 0) {
-    throw new Error("Invalid config: geminiModel is required");
+  if (!config.openaiModel || config.openaiModel.trim().length === 0) {
+    throw new Error("Invalid config: openaiModel is required");
   }
-  if (config.geminiFailurePolicy === "EXECUTE_SAFE") {
+  if (config.openaiFailurePolicy === "EXECUTE_SAFE") {
     const maxAmount = config.executeSafeMaxAmountWei ?? "0";
     if (BigInt(maxAmount) <= 0n) {
       throw new Error("Invalid config: EXECUTE_SAFE policy requires executeSafeMaxAmountWei > 0");
@@ -102,22 +102,22 @@ function emitOpsLog(
   runtime.log(`[ops] ${JSON.stringify({service: "AUTOPILOT_DCA", event, ...payload})}`);
 }
 
-function isGeminiUnavailableReason(reason: string): boolean {
-  return reason.startsWith("GEMINI_") || reason.includes("Gemini API error");
+function isOpenAIUnavailableReason(reason: string): boolean {
+  return reason.startsWith("OPENAI_") || reason.includes("OpenAI API error");
 }
 
-function applyGeminiFailurePolicy(
+function applyOpenAIFailurePolicy(
   config: AutoPilotConfig,
   request: AutoPilotRequest,
   security: SecurityDecision
-): GeminiDecision {
-  const policy = config.geminiFailurePolicy ?? "SKIP";
+): AIDecision {
+  const policy = config.openaiFailurePolicy ?? "SKIP";
   if (policy !== "EXECUTE_SAFE") {
     return {
       action: "SKIP",
       confidence: 0,
-      reason: "GEMINI_UNAVAILABLE_POLICY_SKIP",
-      operatorMessage: "Gemini unavailable; policy set to SKIP"
+      reason: "OPENAI_UNAVAILABLE_POLICY_SKIP",
+      operatorMessage: "OpenAI unavailable; policy set to SKIP"
     };
   }
 
@@ -125,8 +125,8 @@ function applyGeminiFailurePolicy(
     return {
       action: "SKIP",
       confidence: 0,
-      reason: "GEMINI_UNAVAILABLE_SECURITY_BLOCKED",
-      operatorMessage: "Gemini unavailable; security gate blocks execution"
+      reason: "OPENAI_UNAVAILABLE_SECURITY_BLOCKED",
+      operatorMessage: "OpenAI unavailable; security gate blocks execution"
     };
   }
 
@@ -137,8 +137,8 @@ function applyGeminiFailurePolicy(
     return {
       action: "SKIP",
       confidence: 0,
-      reason: "GEMINI_UNAVAILABLE_INVALID_AMOUNT",
-      operatorMessage: "Gemini unavailable; invalid amount for safe fallback"
+      reason: "OPENAI_UNAVAILABLE_INVALID_AMOUNT",
+      operatorMessage: "OpenAI unavailable; invalid amount for safe fallback"
     };
   }
 
@@ -147,16 +147,16 @@ function applyGeminiFailurePolicy(
     return {
       action: "SKIP",
       confidence: 0,
-      reason: "GEMINI_UNAVAILABLE_ABOVE_SAFE_MAX",
-      operatorMessage: "Gemini unavailable; amount exceeds safe fallback limit"
+      reason: "OPENAI_UNAVAILABLE_ABOVE_SAFE_MAX",
+      operatorMessage: "OpenAI unavailable; amount exceeds safe fallback limit"
     };
   }
 
   return {
     action: "EXECUTE",
     confidence: 35,
-    reason: "GEMINI_UNAVAILABLE_FALLBACK_EXECUTE_SAFE",
-    operatorMessage: "Gemini unavailable; executing under bounded safe fallback policy"
+    reason: "OPENAI_UNAVAILABLE_FALLBACK_EXECUTE_SAFE",
+    operatorMessage: "OpenAI unavailable; executing under bounded safe fallback policy"
   };
 }
 
@@ -479,7 +479,7 @@ async function executeServiceAction(
   resolved: ResolvedExecutionConfig,
   request: AutoPilotRequest,
   security: SecurityDecision,
-  decision: GeminiDecision
+  decision: AIDecision
 ): Promise<{submitted: boolean; message: string; reasonCode?: string; txHash?: string}> {
   if (!security.allow) {
     return {submitted: false, message: "Execution blocked by Feature 6 security policy", reasonCode: security.reasonCode};
@@ -637,7 +637,7 @@ async function handleAutoPilotRequest(
   const {resolved, preflight} = await resolveExecutionConfig(request, runtime.config, runtime);
   if (resolved.state === "BLOCKED") {
     const phases = ["REQUEST_RECEIVED", "PREFLIGHT_FAILED", "SECURITY_BLOCKED", "DECISION_SKIP"];
-    const decision: GeminiDecision = {
+    const decision: AIDecision = {
       action: "SKIP",
       confidence: 0,
       reason: `Resolver blocked: ${resolved.blockedReason}`,
@@ -693,19 +693,19 @@ async function handleAutoPilotRequest(
     security = {...security, allow: false};
   }
 
-  const aiDecision = decideWithGemini(runtime, request);
+  const aiDecision = decideWithOpenAI(runtime, request);
   const aiRawReason = aiDecision.reason;
   let decision = aiDecision;
-  let decisionSource: AutoPilotOutcome["decisionSource"] = "GEMINI";
-  if (isGeminiUnavailableReason(decision.reason)) {
-    decision = applyGeminiFailurePolicy(runtime.config, request, security);
+  let decisionSource: AutoPilotOutcome["decisionSource"] = "OPENAI";
+  if (isOpenAIUnavailableReason(decision.reason)) {
+    decision = applyOpenAIFailurePolicy(runtime.config, request, security);
     decisionSource = "FALLBACK_POLICY";
     decision.operatorMessage = `${decision.operatorMessage} | aiReason=${aiRawReason}`;
     emitOpsLog(runtime, "ai_fallback_applied", {
       requestId,
       aiRawReason,
       fallbackReason: decision.reason,
-      policy: runtime.config.geminiFailurePolicy ?? "SKIP"
+      policy: runtime.config.openaiFailurePolicy ?? "SKIP"
     });
   }
 

@@ -4,15 +4,15 @@ This checklist closes the five blockers identified for production readiness.
 
 ## 1) AI decision reliability
 - Requirement:
-  - `decisionMode` is `GEMINI`.
-  - `geminiFailurePolicy` is explicitly set.
-  - Production must stay fail-closed (`securityEnforcementMode=ENFORCE` and `geminiFailurePolicy=SKIP`).
+  - `decisionMode` is `OPENAI`.
+  - `openaiFailurePolicy` is explicitly set.
+  - Production must stay fail-closed (`securityEnforcementMode=ENFORCE` and `openaiFailurePolicy=SKIP`).
 - Validation:
 ```bash
 cre workflow simulate transaction-workflow -T autopilot-staging-settings -e .env -v
 ```
 - Pass criteria:
-  - On Gemini outage/quota, decision reason is deterministic (`GEMINI_*`) and workflow does not crash.
+  - On OpenAI outage/quota, decision reason is deterministic (`OPENAI_*`) and workflow does not crash.
   - In production config, fallback does not auto-execute.
 
 ## 2) Toolchain/version alignment
@@ -28,14 +28,14 @@ cre workflow simulate transaction-workflow -T autopilot-staging-settings -e .env
 
 ## 3) Secrets hygiene
 - Requirement:
-  - `geminiApiKey` in committed config files is empty.
+  - `openaiApiKey` in committed config files is empty.
   - Runtime key provided through secrets/env only.
 - Validation:
 ```bash
-rg -n '"geminiApiKey"' transaction-workflow/config.autopilot.*.json
+rg -n '"openaiApiKey"' transaction-workflow/config.autopilot.*.json
 ```
 - Pass criteria:
-  - Both config files show `"geminiApiKey": ""`.
+  - Both config files show `"openaiApiKey": ""`.
 
 ## 4) Observability and incident clarity
 - Requirement:
@@ -55,7 +55,7 @@ cre workflow simulate transaction-workflow -T autopilot-staging-settings -e .env
 - Execute:
 1. Positive path: allowlisted token, security allow, decision execute.
 2. Security blocked path: blocklisted token in ENFORCE.
-3. Gemini unavailable path: quota/auth failure.
+3. OpenAI unavailable path: quota/auth failure.
 4. No executable upkeep path: `checkUpkeep=false`.
 5. Feature 5 write path: record append succeeds.
 - Pass criteria:
