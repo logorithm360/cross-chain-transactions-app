@@ -7,7 +7,7 @@
   "chainResolver": {
     "enabled": true,
     "registryAddressByChainId": {
-      "11155111": "0x0000000000000000000000000000000000000000",
+      "11155111": "0x9AE3783657244Fd1ee544bef42376E28D4c89a6f",
       "80002": "0x0000000000000000000000000000000000000000",
       "421614": "0x0000000000000000000000000000000000000000",
       "84532": "0x0000000000000000000000000000000000000000",
@@ -32,16 +32,16 @@
     "strict": true
   },
   "securityEnforcementMode": "MONITOR",
-  "decisionMode": "GEMINI",
-  "geminiFailurePolicy": "EXECUTE_SAFE",
+  "decisionMode": "OPENAI",
+  "openaiFailurePolicy": "EXECUTE_SAFE",
   "executeSafeMaxAmountWei": "100000000000000000",
   "allowCreateOrderFromWorkflow": false,
   "allowPerformUpkeepFromWorkflow": false,
   "emitStructuredLogs": true,
   "requiredCreCliVersion": "1.1.0",
   "notificationsEnabled": true,
-  "geminiModel": "gemini-2.0-flash",
-  "geminiApiKey": "",
+  "openaiModel": "gpt-4o-mini",
+  "openaiApiKey": "",
   "lowFundsWarningThreshold": 3,
   "maxTransferAmountWei": "1000000000000000000000",
   "tokenAllowlist": [

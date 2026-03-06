@@ -32,19 +32,25 @@ if [[ -n "${REQUIRED_CLI_VERSION}" && -n "${CURRENT_CLI_VERSION}" ]]; then
   fi
 fi
 
-CFG_KEY="$(grep -oE '"geminiApiKey"\s*:\s*"[^"]*"' "${CFG_FILE}" | sed -E 's/.*"([^"]*)"$/\1/' || true)"
+CFG_KEY="$(grep -oE '"openaiApiKey"\s*:\s*"[^"]*"' "${CFG_FILE}" | sed -E 's/.*"([^"]*)"$/\1/' || true)"
 if [[ -n "${CFG_KEY}" ]]; then
-  echo "security check failed: geminiApiKey must be empty in ${CFG_FILE}"
+  echo "security check failed: openaiApiKey must be empty in ${CFG_FILE}"
   exit 1
 fi
 
-ENV_KEY="${GEMINI_API_KEY:-}"
+ENV_KEY="${OPENAI_API_KEY:-}"
+if [[ -z "${ENV_KEY}" ]]; then
+  ENV_KEY="${OPENAI_API_KEY_ALL:-}"
+fi
 if [[ -z "${ENV_KEY}" && -f "${ROOT_DIR}/.env" ]]; then
-  ENV_KEY="$(grep -E '^GEMINI_API_KEY=' "${ROOT_DIR}/.env" | head -n1 | cut -d= -f2- || true)"
+  ENV_KEY="$(grep -E '^OPENAI_API_KEY=' "${ROOT_DIR}/.env" | head -n1 | cut -d= -f2- || true)"
+  if [[ -z "${ENV_KEY}" ]]; then
+    ENV_KEY="$(grep -E '^OPENAI_API_KEY_ALL=' "${ROOT_DIR}/.env" | head -n1 | cut -d= -f2- || true)"
+  fi
 fi
 
 if [[ -z "${ENV_KEY}" ]]; then
-  echo "missing GEMINI_API_KEY in shell env or ${ROOT_DIR}/.env"
+  echo "missing OPENAI_API_KEY/OPENAI_API_KEY_ALL in shell env or ${ROOT_DIR}/.env"
   exit 1
 fi
 

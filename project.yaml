@@ -82,3 +82,19 @@ crossvault-production-settings:
       url: https://ethereum-sepolia-rpc.publicnode.com
     - chain-name: polygon-testnet-amoy
       url: https://rpc-amoy.polygon.technology
+
+# ==========================================================================
+chainAlert-intelligence-staging-settings:
+  rpcs:
+    - chain-name: ethereum-testnet-sepolia
+      url: https://sepolia.infura.io/v3/89fbdbed48754cdc9bc2d473729fc0dd
+    - chain-name: polygon-testnet-amoy
+      url: https://rpc-amoy.polygon.technology
+
+# ==========================================================================
+chainAlert-intelligence-production-settings:
+  rpcs:
+    - chain-name: ethereum-testnet-sepolia
+      url: https://ethereum-sepolia-rpc.publicnode.com
+    - chain-name: polygon-testnet-amoy
+      url: https://rpc-amoy.polygon.technology

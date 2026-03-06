@@ -1,9 +1,9 @@
 export type ResolutionState = "READY" | "BLOCKED" | "DEGRADED";
 export type EnforcementMode = "MONITOR" | "ENFORCE";
 export type ExecutionMode = "CREATE_ORDER" | "RUN_UPKEEP";
-export type DecisionMode = "GEMINI";
+export type DecisionMode = "OPENAI";
 export type DecisionAction = "EXECUTE" | "PAUSE" | "SKIP";
-export type GeminiFailurePolicy = "SKIP" | "EXECUTE_SAFE";
+export type OpenAIFailurePolicy = "SKIP" | "EXECUTE_SAFE";
 
 export type BlockedReason =
   | "CHAIN_UNSUPPORTED"
@@ -83,7 +83,7 @@ export interface WorkflowRecord {
   metadataHash: string;
 }
 
-export interface GeminiDecision {
+export interface AIDecision {
   action: DecisionAction;
   confidence: number;
   reason: string;
@@ -97,8 +97,8 @@ export interface AutoPilotOutcome {
   resolver: ResolvedExecutionConfig;
   preflight: PreflightReport;
   security: SecurityDecision;
-  decision: GeminiDecision;
-  decisionSource?: "GEMINI" | "FALLBACK_POLICY";
+  decision: AIDecision;
+  decisionSource?: "OPENAI" | "FALLBACK_POLICY";
   records: WorkflowRecord[];
   execution: {
     submitted: boolean;
@@ -126,15 +126,15 @@ export interface AutoPilotConfig {
   userRecordRegistryContract?: string;
   sourceChainWriteGasLimit?: string;
   decisionMode: DecisionMode;
-  geminiFailurePolicy?: GeminiFailurePolicy;
+  openaiFailurePolicy?: OpenAIFailurePolicy;
   executeSafeMaxAmountWei?: string;
   allowCreateOrderFromWorkflow: boolean;
   allowPerformUpkeepFromWorkflow: boolean;
   emitStructuredLogs?: boolean;
   requiredCreCliVersion?: string;
   notificationsEnabled: boolean;
-  geminiModel: string;
-  geminiApiKey?: string;
+  openaiModel: string;
+  openaiApiKey?: string;
   lowFundsWarningThreshold: number;
   chainResolver: {
     enabled: boolean;

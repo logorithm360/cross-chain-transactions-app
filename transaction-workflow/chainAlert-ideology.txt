@@ -1,0 +1,514 @@
+Service 4 — ChainAlert Intelligence
+"Monitor any wallet or token cross-chain. Get AI-powered alerts before something goes wrong."
+The user experience:
+The user wants to know: when my portfolio drops 15%, tell me. When this token I hold gets flagged as suspicious, tell me immediately. When my automated DCA order fails for any reason, tell me why. They set up monitoring rules once, and the service watches everything forever.
+
+
+What CRE does behind the scenes:
+1. User configures alert rules:
+   → "Alert me when ETH price drops below $2,000"
+   → "Alert me if any token I hold gets flagged dangerous"
+   → "Alert me when my DCA order executes or fails"
+   → "Alert me if my wallet receives unexpected tokens"
+
+2. CRE runs a continuous monitoring workflow:
+
+   PRICE MONITORING (every 5 minutes):
+   → Chainlink Data Feed → current prices
+   → Compare against user thresholds
+   → If threshold breached → Gemini AI analysis:
+     "ETH dropped to $1,950. Is this a temporary dip or trend?"
+     Gemini returns: severity + recommendation + context
+   → Alert sent to user with AI explanation
+
+   TOKEN SAFETY MONITORING (every 24 hours):
+   → Read user's TransactionLedger for tokens they have interacted with
+   → For each token: TokenVerifier.getVerdict(token)
+   → Check if any previously SAFE token has expired verification
+   → Trigger re-verification via Chainlink Functions
+   → If status changed to DANGEROUS: IMMEDIATE alert + auto-block
+
+   ORDER MONITORING (event-driven):
+   → Watch AutomatedTrader events on-chain
+   → OrderExecuted → confirm delivery, record in ledger
+   → OrderFailed → log incident in SecurityManager, alert user with reason
+
+3. All alerts include Gemini AI context:
+   → Not just "price dropped"
+   → But "price dropped 12% in 4 hours, here is what Gemini says about it,
+      here is what happened to your DCA order as a result,
+      here is the recommended action"
+
+4. Full audit trail:
+   → Every alert stored in TransactionLedger as AI_DECISION record
+   → User can see complete history: what was monitored, what triggered, what AI said
+
+
+Let me think about this deeply before giving you anything, because ChainAlert is fundamentally different from the other three services.
+
+---
+
+## The Core Insight You Need to Internalize First
+
+AutoPilot DCA, ChainShield Transfer, CrossVault — those are **action services**. A user initiates something, the service executes it, done.
+
+ChainAlert is a **surveillance service**. It never stops. It has no natural completion. It watches forever and only speaks when something is wrong. This changes everything about how you architect it.
+
+The mental model shift:
+
+```
+Action services:    Trigger → Execute → Report → Sleep
+ChainAlert:         Trigger → Observe → Observe → Observe → ALERT → Observe → Observe...
+```
+
+This means the hardest problems are not the alerts themselves. The hardest problems are:
+
+1. **State persistence** — what did the portfolio look like last cycle? Without memory, every cycle is a false alarm or a miss.
+2. **Noise suppression** — a 15% drop that recovers in 4 minutes is not the same as a 15% drop that holds for 6 hours. If you alert on every dip you are useless.
+3. **Alert deduplication** — if the condition is still true next cycle, do you alert again? How many times?
+4. **Rule composition** — "alert me when X AND Y" vs "alert me when X OR Y" — these are fundamentally different evaluation engines.
+5. **The cold start problem** — what is the baseline? You cannot detect a 15% drop without knowing what 100% was.
+
+---
+
+## What ChainAlert Actually Is — The Three Layers
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  LAYER 1 — DATA COLLECTION                                  │
+│  What is happening right now across chains?                 │
+│  Price feeds, token balances, CCIP message status,          │
+│  DCA order state, on-chain token flags                      │
+└─────────────────────────────────────────────────────────────┘
+                          ↓
+┌─────────────────────────────────────────────────────────────┐
+│  LAYER 2 — RULE EVALUATION ENGINE                           │
+│  Has any monitored condition crossed a threshold?           │
+│  Compare current state against stored baseline.             │
+│  Apply user-defined rules. Produce TRIGGER or NO_TRIGGER.   │
+└─────────────────────────────────────────────────────────────┘
+                          ↓
+┌─────────────────────────────────────────────────────────────┐
+│  LAYER 3 — AI ANALYSIS + NOTIFICATION                       │
+│  When a rule triggers: WHY did this happen?                 │
+│  Is this actually dangerous or just noise?                  │
+│  What should the user do about it?                          │
+│  Deliver the alert in plain language.                       │
+└─────────────────────────────────────────────────────────────┘
+```
+
+Layer 1 runs every cycle regardless. Layer 2 runs every cycle regardless. Layer 3 only runs when Layer 2 says something fired — this is critical for cost control, because Gemini API calls are not free and you cannot call AI on every single observation cycle.
+
+---
+
+## The Alert Rules — A Complete Taxonomy
+
+Before writing any code you need to define every type of alert the system can produce. Here is the complete set for ChainAlert Intelligence:
+
+### Category A — Portfolio Health
+```
+PORTFOLIO_DROP_PERCENT
+  condition: portfolio_value_now < baseline * (1 - threshold_pct)
+  params:    { threshold_pct: 0.15, baseline: "24h_high" | "7d_high" | "entry_price" }
+  example:   "Alert when my portfolio drops 15% from yesterday's high"
+
+PORTFOLIO_DROP_ABSOLUTE
+  condition: portfolio_value_now < portfolio_value_then - threshold_usd
+  params:    { threshold_usd: 5000, lookback_hours: 24 }
+  example:   "Alert when I lose more than $5,000 in a day"
+
+TOKEN_CONCENTRATION
+  condition: single_token_pct_of_portfolio > threshold
+  params:    { threshold: 0.50 }
+  example:   "Alert when any single token is more than 50% of my portfolio"
+```
+
+### Category B — Token Surveillance
+```
+TOKEN_FLAGGED_SUSPICIOUS
+  condition: tokenVerifier.verdict IN ["SUSPICIOUS", "MALICIOUS"]
+  params:    { tokens: ["0x...", "0x..."], check_interval: "1h" }
+  example:   "Alert me if any token I hold gets flagged"
+
+TOKEN_PRICE_SPIKE
+  condition: abs(price_change_pct) > threshold IN window
+  params:    { threshold: 0.20, window_minutes: 60 }
+  example:   "Alert when any of my tokens moves 20% in an hour"
+
+TOKEN_LIQUIDITY_DROP
+  condition: liquidity_now < liquidity_baseline * (1 - threshold)
+  params:    { threshold: 0.40 }
+  example:   "Alert when liquidity drops 40% — possible rug setup"
+
+TOKEN_HOLDER_CONCENTRATION
+  condition: top_10_holders_pct > threshold
+  params:    { threshold: 0.80 }
+  example:   "Alert when 10 wallets control 80% of supply"
+```
+
+### Category C — DCA Order Monitoring
+```
+DCA_ORDER_FAILED
+  condition: order.lastFailedMessageIds contains new non-zero entry
+  params:    { order_ids: [0, 1, 2] }
+  example:   "Alert me when any DCA execution fails"
+
+DCA_LOW_FUNDS
+  condition: order.executionsRemainingFunded < threshold
+  params:    { threshold: 3 }
+  example:   "Alert me when I have fewer than 3 executions of LINK left"
+
+DCA_ORDER_PAUSED_BY_AI
+  condition: order.dcaStatus == PAUSED_BY_WORKFLOW
+  params:    { order_ids: [0] }
+  example:   "Tell me when the AI pauses my DCA and why"
+
+DCA_EXECUTION_STUCK
+  condition: pending message not confirmed after threshold_hours
+  params:    { threshold_hours: 2 }
+  example:   "Alert me if a cross-chain transfer is stuck for 2+ hours"
+```
+
+### Category D — Wallet Activity
+```
+WALLET_LARGE_OUTFLOW
+  condition: outflow_in_window > threshold_usd
+  params:    { threshold_usd: 10000, window_minutes: 60, wallets: ["0x..."] }
+  example:   "Alert if more than $10k leaves any watched wallet in an hour"
+
+WALLET_INTERACTION_WITH_FLAGGED
+  condition: wallet interacted with address on flagged list
+  params:    { wallets: ["0x..."] }
+  example:   "Alert if my wallet touches a known scam contract"
+
+WALLET_NEW_TOKEN_RECEIVED
+  condition: new token appeared in wallet that wasn't there last cycle
+  params:    { wallets: ["0x..."] }
+  example:   "Alert when I receive any new token — could be airdrop or dust attack"
+```
+
+---
+
+## The State Problem — This is the Most Important Design Decision
+
+Every alert type above requires comparing **now** against **some past state**. Where does that past state live?
+
+You have three options and each has real tradeoffs:
+
+### Option A — Store state on-chain in a contract
+
+```solidity
+// ChainAlertRegistry.sol
+mapping(bytes32 => AlertState) public alertStates;
+
+struct AlertState {
+    uint256 lastCheckedAt;
+    uint256 baselineValue;      // what "100%" was
+    uint256 lastAlertedAt;      // when we last fired an alert
+    uint8   alertCount;         // how many times we've alerted
+    bool    isActive;
+}
+```
+
+**Pros:** Survives CRE restarts, decentralised, auditable, trustless.  
+**Cons:** Every state update costs gas. For a monitoring service that checks every 15 minutes, this gets expensive fast.
+
+### Option B — Store state in CRE workflow using artifact storage
+
+The CRE SDK's persistent storage API (`window.storage` pattern) keeps key-value data that survives between workflow executions.
+
+```ts
+// Store portfolio baseline
+await runtime.storage.set(`baseline:${userAddress}`, JSON.stringify({
+  value: currentPortfolioUsd,
+  capturedAt: runtime.now().toISOString(),
+  captureReason: "initial"
+}))
+
+// Read it next cycle
+const baseline = await runtime.storage.get(`baseline:${userAddress}`)
+```
+
+**Pros:** No gas costs, fast read/write, natural for workflow state.  
+**Cons:** If the workflow is re-deployed, you lose state. Not accessible to other contracts.
+
+### Option C — Hybrid (recommended)
+
+- **Workflow storage** for frequently-updated ephemeral state: last-seen prices, cycle counters, last-alerted-at timestamps
+- **On-chain registry** for user-defined rules and alert history: what the user configured, what alerts were fired (for auditability)
+- **Never** store state in the workflow's TypeScript variables — those reset every execution
+
+```
+User configures rules → stored on-chain in ChainAlertRegistry.sol
+Workflow reads rules → evaluates against current data
+Workflow stores cycle state → CRE persistent storage
+Alert fires → write alert record on-chain → notify user off-chain
+```
+
+---
+
+## The Alert Deduplication Problem
+
+This is where most alert systems fail. Imagine a wallet drops 20% and stays down for 3 days. Do you alert:
+- Once, when it first crosses the threshold? (Under-alerting — user may miss it)
+- Every 15-minute cycle while it's below threshold? (Spam — user mutes you)
+- Once, then again if it drops another 5%? (Step-down alerting — this is right)
+
+The correct model is **edge detection + re-arm logic**:
+
+```
+State machine per alert rule:
+
+WATCHING → (condition met) → TRIGGERED → (alert sent) → COOLING_DOWN
+COOLING_DOWN → (condition still met + cooldown expired) → TRIGGERED again
+COOLING_DOWN → (condition no longer met) → WATCHING (re-armed)
+
+Re-arm means: the alert can fire again if the condition becomes true again
+Cooldown prevents spam while the condition persists
+```
+
+In code:
+
+```ts
+interface AlertRuleState {
+  ruleId:         string
+  status:         "WATCHING" | "TRIGGERED" | "COOLING_DOWN"
+  lastTriggeredAt: number | null   // unix timestamp
+  triggerCount:   number
+  baselineValue:  number           // captured at rule creation or last reset
+  coolingUntil:   number | null    // unix timestamp
+}
+
+function shouldTrigger(rule: AlertRule, state: AlertRuleState, currentValue: number): boolean {
+  const now = Date.now()
+
+  // In cooldown — do not fire
+  if (state.status === "COOLING_DOWN" && state.coolingUntil && now < state.coolingUntil) {
+    return false
+  }
+
+  // Condition not met — re-arm if we were cooling down
+  if (!isConditionMet(rule, currentValue, state.baselineValue)) {
+    // Condition resolved — reset to WATCHING so next breach triggers fresh alert
+    return false
+  }
+
+  // Condition is met and we are not in cooldown — fire
+  return true
+}
+```
+
+---
+
+## The AI Layer — What Gemini Actually Does in ChainAlert
+
+In AutoPilot DCA, Gemini makes a **decision** (EXECUTE / PAUSE / SKIP). In ChainAlert, Gemini does something different — it provides **context and explanation**. The rule engine already decided to alert. Gemini's job is to answer: **why did this happen and what should the user do?**
+
+This distinction matters because it changes the prompt completely:
+
+```ts
+// NOT: "Should I alert?" — the rule engine already answered yes
+// YES: "This happened. What does it mean? What should the user do?"
+
+function buildAlertAnalysisPrompt(
+  alert: FiredAlert,
+  marketContext: MarketContext,
+  portfolioContext: PortfolioContext
+): string {
+  return `
+You are a DeFi risk analyst. The following alert has just triggered for a user.
+
+ALERT TYPE: ${alert.type}
+ALERT DETAILS: ${JSON.stringify(alert.details)}
+
+MARKET CONTEXT:
+- ETH price 24h change: ${marketContext.ethChange24h}%
+- Overall market sentiment: ${marketContext.sentiment}
+- Recent major events: ${marketContext.recentEvents}
+
+USER PORTFOLIO CONTEXT:
+- Portfolio composition: ${JSON.stringify(portfolioContext.composition)}
+- Total value change: ${portfolioContext.changePercent}% in last ${portfolioContext.windowHours}h
+- Other active alerts: ${portfolioContext.otherActiveAlerts}
+
+Your task: Explain in plain English why this alert fired and what the user should consider doing.
+Be specific, be honest about uncertainty, and prioritise actionable advice.
+
+Respond ONLY with valid JSON matching this exact schema — no markdown, no preamble:
+{
+  "severity": "INFO" | "WARNING" | "CRITICAL",
+  "headline": "<one sentence, max 100 chars>",
+  "explanation": "<2-3 sentences explaining why this happened>",
+  "likelyCause": "<what probably caused this>",
+  "recommendedActions": ["<action 1>", "<action 2>", "<action 3>"],
+  "isLikelyNoise": <boolean>,
+  "noiseReason": "<if isLikelyNoise true: why this might be a false alarm>"
+}
+`
+}
+```
+
+The `isLikelyNoise` field is critical — if Gemini says the alert is likely noise (e.g. the 15% drop is a market-wide correction, not a specific risk to this token), you can downgrade the notification urgency. The user gets informed but not panicked.
+
+---
+
+## The Complete Development Sequence
+
+Here is the exact order to build this, with clear dependency lines between each step:
+
+### Phase 1 — Foundation (build first, everything depends on this)
+
+```
+1a. ChainAlertRegistry.sol
+    - Stores user-defined alert rules
+    - Stores alert history (what fired, when, what was the value)
+    - Integrates with ChainRegistry for multi-chain awareness
+    - Methods: createRule(), pauseRule(), deleteRule(), getAlertHistory()
+
+1b. AlertRule data model (TypeScript types)
+    - AlertRule interface with all rule types as a discriminated union
+    - AlertRuleState interface for the state machine
+    - FiredAlert interface for what gets passed to Gemini and the user
+```
+
+### Phase 2 — Data Collection Layer
+
+```
+2a. dataCollectors/portfolioCollector.ts
+    - Reads token balances across all five registered chains
+    - Calculates USD value using Chainlink Data Feeds
+    - Returns PortfolioSnapshot with per-chain, per-token breakdown
+
+2b. dataCollectors/tokenSurveillance.ts
+    - Calls TokenVerifier.sol for each watched token
+    - Reads price from Data Feeds
+    - Returns TokenSurveillanceSnapshot
+
+2c. dataCollectors/dcaOrderMonitor.ts
+    - Calls getUserOrders() from AutomatedTrader
+    - Checks pending CCIP messages on destination chains
+    - Returns DCAOrderSnapshot array
+
+2d. dataCollectors/walletMonitor.ts
+    - Reads recent transaction history via EVM log triggers or RPC
+    - Detects new tokens, large outflows, flagged interactions
+    - Returns WalletActivitySnapshot
+```
+
+### Phase 3 — Rule Evaluation Engine
+
+```
+3a. engine/ruleEvaluator.ts
+    - Takes current snapshots + user rules + stored state
+    - For each rule: runs shouldTrigger()
+    - Returns array of FiredAlert[] — rules that crossed their threshold
+
+3b. engine/stateManager.ts
+    - Reads/writes AlertRuleState from CRE persistent storage
+    - Manages the WATCHING → TRIGGERED → COOLING_DOWN state machine
+    - Updates baselines when rules are re-armed
+
+3c. engine/deduplicator.ts
+    - Prevents the same alert from firing twice in a cooldown window
+    - Manages step-down alerting (alert again only if drops further)
+```
+
+### Phase 4 — AI Analysis Layer
+
+```
+4a. ai/alertAnalyzer.ts
+    - Builds prompt from FiredAlert + market context
+    - Calls Gemini inside runInNodeMode with consensusIdenticalAggregation
+    - Returns AIAlertAnalysis with severity, explanation, recommendations
+
+4b. ai/noiseFilter.ts
+    - Uses isLikelyNoise from Gemini response
+    - Optionally suppresses or downgrades noise alerts
+    - Logs suppressed alerts for transparency
+```
+
+### Phase 5 — Notification Layer
+
+```
+5a. notifications/alertBuilder.ts
+    - Combines FiredAlert + AIAlertAnalysis into human-readable message
+    - Includes CCIP Explorer links where relevant
+    - Formats differently by severity: CRITICAL gets SMS-style brevity, INFO gets detail
+
+5b. notifications/notificationRouter.ts
+    - Routes alerts to the right channel: webhook, email, on-chain event
+    - Respects user notification preferences per alert type
+    - Tracks delivery confirmation
+```
+
+### Phase 6 — Workflow Assembly
+
+```
+6a. workflow.ts
+    - TRIGGER 1: Cron every 15 minutes — runs full monitoring cycle
+    - TRIGGER 2: EVM Log — fires immediately when AutomatedTrader emits OrderExecuted or OrderFailed
+    - TRIGGER 3: HTTP — on-demand rule management and status check
+
+6b. The 15-minute cycle runs in this exact order:
+    1. Read all user rules from ChainAlertRegistry
+    2. Collect all data snapshots (parallel where possible)
+    3. Load all rule states from persistent storage
+    4. Run rule evaluator → get FiredAlert[]
+    5. For each fired alert: call Gemini for analysis (sequential, consensus)
+    6. Update rule states in persistent storage
+    7. Write fired alerts to on-chain registry for history
+    8. Send notifications for non-noise alerts
+    9. Log suppressed noise alerts for transparency
+```
+
+---
+
+## The EVM Log Trigger — The Key Differentiator
+
+The cron trigger gives you 15-minute resolution. But some alerts need to be near-instant — specifically DCA failures. If a cross-chain transfer fails, the user wants to know in seconds, not 15 minutes.
+
+This is where the EVM Log Trigger comes in. Instead of polling, you subscribe to events:
+
+```ts
+import { EVMLogTrigger } from "@chainlink/cre-sdk"
+
+// Subscribe to DCA failure events directly from the contract
+const dcaFailureTrigger = new EVMLogTrigger({
+  chainSelectorName: "ethereum-testnet-sepolia",
+  address: TRADER_CONTRACT_ADDRESS,
+  eventSignature: "ExecutionFailed(uint256 indexed orderId, bytes32 indexed messageId)",
+})
+
+// This fires IMMEDIATELY when the contract emits ExecutionFailed
+const onDCAFailure = (runtime: Runtime<Config>, log: EVMLog): string => {
+  const { orderId, messageId } = decodeLog(log)
+
+  // Skip the cron cycle — go straight to AI analysis and notification
+  const analysis = analyzeFailure(runtime, orderId, messageId)
+  sendCriticalAlert(runtime, analysis)
+
+  return "Alerted"
+}
+```
+
+This means the user gets a DCA failure notification within seconds of the on-chain event — not after waiting for the next cron tick.
+
+---
+
+## Three Things That Will Break You If You Do Not Plan For Them
+
+**1. Portfolio valuation across chains requires price feeds on every chain.** You cannot get the USD value of tokens on Polygon Amoy by reading a Sepolia price feed. You need a price feed on each chain, or you need to bridge the price data. Plan this before you write the portfolio collector.
+
+**2. The "new token received" alert is a dust attack vector.** Attackers routinely send worthless tokens to wallets to trigger honeypot traps. Your `WALLET_NEW_TOKEN_RECEIVED` alert will fire constantly on active wallets. You need a minimum value threshold (e.g. only alert if the received token is worth more than $10) and the TokenVerifier integration should run immediately on any new token before alerting.
+
+**3. Gemini consensus requires temperature=0 AND identical prompts across all nodes.** Market data fetched inside the prompt (ETH price, sentiment) must be fetched once, cached, and passed in as a static value — not fetched independently by each node. If Node A and Node B see different ETH prices in the prompt, the prompts differ, the responses differ, and consensus fails. Fetch market context before entering `runInNodeMode`, then pass it in as a parameter.
+
+---
+
+## The Mental Model in One Sentence
+
+ChainAlert is a **stateful rule evaluation engine** wrapped in a **CRE workflow**, where the rule engine runs every cycle for free and the AI layer only activates when something actually crosses a threshold — keeping costs low while delivering high-value, contextualised intelligence exactly when the user needs it.
+
+That distinction — cheap constant evaluation, expensive AI only on trigger — is the entire architecture.
+
+Ready to start building Phase 1?
