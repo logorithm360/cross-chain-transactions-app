@@ -1,0 +1,52 @@
+{
+  "serviceName": "chainAlert Intelligence",
+  "schedule": "*/10 * * * *",
+  "authorizedEVMAddresses": [
+    "0xe2a5d3EE095de5039D42B00ddc2991BD61E48D55"
+  ],
+  "emitStructuredLogs": true,
+  "notificationsEnabled": true,
+  "sourceChainWriteGasLimit": "1200000",
+  "feature5Enabled": true,
+  "feature6Enabled": true,
+  "securityEnforcementMode": "MONITOR",
+  "openaiModel": "gpt-4o-mini",
+  "openaiApiKey": "",
+  "etherscanApiKey": "",
+  "dexScreenerApiBaseUrl": "https://api.dexscreener.com/latest/dex/tokens",
+  "etherscanApiBaseUrl": "https://api-sepolia.etherscan.io/api",
+  "alertRegistryByChainId": {
+    "11155111": "0xaa63f3971361aD16265B8b7Bd1B179391E50c7a8"
+  },
+  "chainSelectorByChainId": {
+    "11155111": "16015286601757825753",
+    "80002": "16281711391670634445",
+    "421614": "3478487238524512106",
+    "84532": "10344971235874465080",
+    "11155420": "5224473277236331295"
+  },
+  "automatedTraderByChainId": {
+    "11155111": "0x91a936a3a3e4361e7F5b05270631c5e1d113f0d4"
+  },
+  "tokenVerifierByChainId": {
+    "11155111": "0x6d8eAbeda50a43EE7b960DfFB8aA44f5F6B6BE6D"
+  },
+  "securityManagerByChainId": {
+    "11155111": "0xe8A2A5Ca7f163762517C0Ed0E063b0A733386B5f"
+  },
+  "userRecordRegistryByChainId": {
+    "11155111": "0x5c80ec9703c4eb9491100239793a719cbf4a0bfe"
+  },
+  "monitoredUsers": [
+    "0xe2a5d3EE095de5039D42B00ddc2991BD61E48D55"
+  ],
+  "monitoredTokens": [
+    "0xFd57b4ddBf88a4e07fF4e34C487b99af2Fe82a05"
+  ],
+  "monitoredWallets": [
+    "0xe2a5d3EE095de5039D42B00ddc2991BD61E48D55"
+  ],
+  "cronRun": {
+    "chainId": 11155111
+  }
+}
