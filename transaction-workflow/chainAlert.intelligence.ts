@@ -38,6 +38,7 @@ import {
   stringArrayFrom,
   stringFrom
 } from "./chainAlert.eval.shared";
+import { resolveConfidentialContext } from "./confidential.compute";
 
 const ALERT_TYPES: Feature4AlertType[] = [
   "PORTFOLIO_DROP_PERCENT",
@@ -1116,8 +1117,25 @@ const onHttpFeature4 = (runtime: Runtime<Feature4Config>, payload: HTTPPayload):
 
   try {
     const request = decodeJson(payload.input) as Feature4HttpRequest;
+    const confidential = resolveConfidentialContext(runtime.config, request);
+    if (confidential.enabled) {
+      runtime.log(`[${requestId}] Confidential Compute active provider=${confidential.provider}`);
+    }
     const data = handleHttpAction(runtime, request);
-    return JSON.stringify({success: true, requestId, timestamp, data});
+    return JSON.stringify({
+      success: true,
+      requestId,
+      timestamp,
+      data: {
+        ...data,
+        confidential: {
+          mode: confidential.mode,
+          enabled: confidential.enabled,
+          provider: confidential.provider,
+          flags: confidential.flags
+        }
+      }
+    });
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     emitOpsLog(runtime, "http_action_error", {requestId, error: message});
@@ -1136,6 +1154,13 @@ const onCronFeature4 = (runtime: Runtime<Feature4Config>): string => {
     runKey,
     triggerSource: "CRON"
   });
+  const confidential = resolveConfidentialContext(runtime.config, undefined);
+  summary.confidential = {
+    mode: confidential.mode,
+    enabled: confidential.enabled,
+    provider: confidential.provider,
+    flags: confidential.flags
+  };
 
   emitOpsLog(runtime, "cron_summary", {
     evaluated: summary.evaluated,

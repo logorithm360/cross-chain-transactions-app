@@ -78,11 +78,19 @@ export interface Feature4EvaluationSummary {
   resolved: number;
   suppressedOrNoop: number;
   outcomes: Feature4RuleEvaluationOutcome[];
+  confidential?: {
+    mode: "CONFIDENTIAL" | "PUBLIC";
+    enabled: boolean;
+    provider: string;
+    flags: string[];
+  };
 }
 
 export interface Feature4HttpRequest {
   action: Feature4OpsAction;
   payload?: Record<string, unknown>;
+  confidentialMode?: boolean;
+  confidentialFlags?: string[];
 }
 
 export interface Feature4Config {
@@ -92,6 +100,13 @@ export interface Feature4Config {
   emitStructuredLogs?: boolean;
   notificationsEnabled: boolean;
   sourceChainWriteGasLimit?: string;
+  confidentialCompute?: {
+    enabledByDefault?: boolean;
+    strict?: boolean;
+    provider?: string;
+    tokenApiBaseUrl?: string;
+    hideSenderDefault?: boolean;
+  };
   feature5Enabled: boolean;
   feature6Enabled: boolean;
   securityEnforcementMode: "MONITOR" | "ENFORCE";

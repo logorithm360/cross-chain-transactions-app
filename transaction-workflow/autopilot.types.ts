@@ -28,6 +28,8 @@ export interface AutoPilotRequest {
   recurring: boolean;
   maxExecutions: number;
   deadline: number;
+  confidentialMode?: boolean;
+  confidentialFlags?: string[];
 }
 
 export interface ChainMeta {
@@ -106,6 +108,12 @@ export interface AutoPilotOutcome {
     reasonCode?: string;
     txHash?: string;
   };
+  confidential?: {
+    mode: "CONFIDENTIAL" | "PUBLIC";
+    enabled: boolean;
+    provider: string;
+    flags: string[];
+  };
   notifications?: string[];
 }
 
@@ -136,6 +144,13 @@ export interface AutoPilotConfig {
   openaiModel: string;
   openaiApiKey?: string;
   lowFundsWarningThreshold: number;
+  confidentialCompute?: {
+    enabledByDefault?: boolean;
+    strict?: boolean;
+    provider?: string;
+    tokenApiBaseUrl?: string;
+    hideSenderDefault?: boolean;
+  };
   chainResolver: {
     enabled: boolean;
     registryAddressByChainId: Record<string, string>;

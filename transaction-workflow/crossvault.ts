@@ -24,6 +24,7 @@ import type {
 } from "./crossvault.types";
 import { resolveExecutionConfig as resolveExecutionConfigFromRegistry } from "./chain-resolver";
 import { resolveRecommendation } from "./crossvault.recommendation";
+import { resolveConfidentialContext } from "./confidential.compute";
 
 function isAddress(value: string): boolean {
   return /^0x[a-fA-F0-9]{40}$/.test(value);
@@ -606,6 +607,7 @@ async function handleCrossVaultRequest(
   requestId: string
 ): Promise<string> {
   const timestamp = runtime.now().toISOString();
+  const confidential = resolveConfidentialContext(runtime.config, request);
   if (!request.serviceType) request.serviceType = "CROSSVAULT";
 
   const errors = validateRequest(request);
@@ -620,6 +622,9 @@ async function handleCrossVaultRequest(
   }
 
   runtime.log(`[${requestId}] CrossVault request: ${request.walletChainId} -> ${request.destinationChainId}`);
+  if (confidential.enabled) {
+    runtime.log(`[${requestId}] Confidential Compute active provider=${confidential.provider}`);
+  }
   runtime.log(
     `[${requestId}] CrossVault runtime config serviceName=${runtime.config.serviceName} registry=${runtime.config.chainResolver?.registryAddressByChainId?.[String(request.walletChainId)] ?? "undefined"} selector=${runtime.config.chainResolver?.chainSelectorByChainId?.[String(request.walletChainId)] ?? "undefined"}`
   );
@@ -696,6 +701,12 @@ async function handleCrossVaultRequest(
           submitted: false,
           message: recommendationResult.userMessage,
           reasonCode: recommendationResult.userReason
+        },
+        confidential: {
+          mode: confidential.mode,
+          enabled: confidential.enabled,
+          provider: confidential.provider,
+          flags: confidential.flags
         },
         notifications: runtime.config.notificationsEnabled ? ["CrossVault recommendation service temporarily unavailable."] : undefined
       }
@@ -783,6 +794,12 @@ async function handleCrossVaultRequest(
       recommendation,
       records,
       execution: { submitted: false, message: "Route is not currently supported for this request.", reasonCode: userReason },
+      confidential: {
+        mode: confidential.mode,
+        enabled: confidential.enabled,
+        provider: confidential.provider,
+        flags: confidential.flags
+      },
       notifications: runtime.config.notificationsEnabled ? [buildApprovalMessage(executionRequest, recommendation)] : []
     };
     return JSON.stringify({ success: true, requestId, timestamp, data: outcome });
@@ -904,6 +921,12 @@ async function handleCrossVaultRequest(
       message: approvalMessage
     },
     execution,
+    confidential: {
+      mode: confidential.mode,
+      enabled: confidential.enabled,
+      provider: confidential.provider,
+      flags: confidential.flags
+    },
     notifications
   };
 

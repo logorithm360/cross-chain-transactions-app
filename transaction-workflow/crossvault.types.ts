@@ -38,6 +38,8 @@ export interface CrossVaultRequest {
   userHistorySummary?: string;
   priorStakeOps?: number;
   priorSwapOps?: number;
+  confidentialMode?: boolean;
+  confidentialFlags?: string[];
 }
 
 export interface VaultRecommendation {
@@ -152,6 +154,12 @@ export interface CrossVaultOutcome {
     txHash?: string;
   };
   opsMeta?: RecommendationInternalMeta;
+  confidential?: {
+    mode: "CONFIDENTIAL" | "PUBLIC";
+    enabled: boolean;
+    provider: string;
+    flags: string[];
+  };
   notifications?: string[];
 }
 
@@ -174,6 +182,13 @@ export interface CrossVaultConfig {
   requireExplicitApprovalForExecute: boolean;
   recommendationMode: RecommendationMode;
   emitStructuredLogs?: boolean;
+  confidentialCompute?: {
+    enabledByDefault?: boolean;
+    strict?: boolean;
+    provider?: string;
+    tokenApiBaseUrl?: string;
+    hideSenderDefault?: boolean;
+  };
   allowAiDestinationOverride: boolean;
   supportedOpportunityChainIds: number[];
   openaiModel: string;

@@ -28,6 +28,7 @@ import {
   buildDecisionNotification,
   buildExecutionNotification
 } from "./autopilot.notifications";
+import { resolveConfidentialContext } from "./confidential.compute";
 
 function isAddress(value: string): boolean {
   return /^0x[a-fA-F0-9]{40}$/.test(value);
@@ -621,6 +622,7 @@ async function handleAutoPilotRequest(
   requestId: string
 ): Promise<string> {
   const timestamp = runtime.now().toISOString();
+  const confidential = resolveConfidentialContext(runtime.config, request);
   const errors = validateRequest(request);
   if (errors.length > 0) {
     return JSON.stringify({success: false, requestId, timestamp, error: "Validation failed", details: errors});
@@ -631,8 +633,13 @@ async function handleAutoPilotRequest(
     requestId,
     mode: request.executionMode,
     sourceChainId: request.walletChainId,
-    destinationChainId: request.destinationChainId
+    destinationChainId: request.destinationChainId,
+    confidentialMode: confidential.mode,
+    confidentialProvider: confidential.provider
   });
+  if (confidential.enabled) {
+    runtime.log(`[${requestId}] Confidential Compute active provider=${confidential.provider}`);
+  }
 
   const {resolved, preflight} = await resolveExecutionConfig(request, runtime.config, runtime);
   if (resolved.state === "BLOCKED") {
@@ -661,6 +668,12 @@ async function handleAutoPilotRequest(
       decision,
       records: buildWorkflowRecords(requestId, request, phases, runtime.config.feature5Enabled),
       execution: {submitted: false, message: "No execution attempted", reasonCode: "RESOLVER_BLOCKED"},
+      confidential: {
+        mode: confidential.mode,
+        enabled: confidential.enabled,
+        provider: confidential.provider,
+        flags: confidential.flags
+      },
       notifications
     };
     return JSON.stringify({success: true, requestId, timestamp, data: outcome});
@@ -742,6 +755,12 @@ async function handleAutoPilotRequest(
     decisionSource,
     records: buildWorkflowRecords(requestId, request, phases, runtime.config.feature5Enabled),
     execution,
+    confidential: {
+      mode: confidential.mode,
+      enabled: confidential.enabled,
+      provider: confidential.provider,
+      flags: confidential.flags
+    },
     notifications
   };
 
