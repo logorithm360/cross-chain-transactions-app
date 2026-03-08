@@ -12,6 +12,7 @@ import {
 } from "@chainlink/cre-sdk";
 import { encodeFunctionData, decodeFunctionResult, keccak256, toBytes, type Hex } from "viem";
 import { resolveExecutionConfig as resolveExecutionConfigFromRegistry } from "./chain-resolver";
+import { resolveConfidentialContext } from "./confidential.compute";
 
 type ResolutionState = "READY" | "BLOCKED" | "DEGRADED";
 type EnforcementMode = "MONITOR" | "ENFORCE";
@@ -34,6 +35,8 @@ interface ResolveRequest {
   token: string;
   amount: string;
   action: string;
+  confidentialMode?: boolean;
+  confidentialFlags?: string[];
 }
 
 interface ResolvedExecutionConfig {
@@ -98,6 +101,12 @@ interface WorkflowOutcome {
     message: string;
     txHash?: string;
   };
+  confidential?: {
+    mode: "CONFIDENTIAL" | "PUBLIC";
+    enabled: boolean;
+    provider: string;
+    flags: string[];
+  };
 }
 
 interface ChainShieldConfig {
@@ -116,6 +125,13 @@ interface ChainShieldConfig {
   tokenVerifierContract?: string;
   userRecordRegistryContract?: string;
   sourceChainWriteGasLimit?: string;
+  confidentialCompute?: {
+    enabledByDefault?: boolean;
+    strict?: boolean;
+    provider?: string;
+    tokenApiBaseUrl?: string;
+    hideSenderDefault?: boolean;
+  };
   chainResolver: {
     enabled: boolean;
     registryAddressByChainId: Record<string, string>;
@@ -661,6 +677,7 @@ const onHttpChainShield = async (
     requestId = deterministicRequestId(payload.input);
     timestamp = runtime.now().toISOString();
     const request = decodeJson(payload.input) as ResolveRequest;
+    const confidential = resolveConfidentialContext(runtime.config, request);
     const errors = validateRequest(request);
 
     if (errors.length > 0) {
@@ -674,6 +691,9 @@ const onHttpChainShield = async (
     }
 
     runtime.log(`[${requestId}] ChainShield request: ${request.walletChainId} -> ${request.destinationChainId}`);
+    if (confidential.enabled) {
+      runtime.log(`[${requestId}] Confidential Compute active provider=${confidential.provider}`);
+    }
 
     const { resolved, preflight } = await resolveExecutionConfig(request, runtime.config, runtime);
 
@@ -694,7 +714,13 @@ const onHttpChainShield = async (
         preflight,
         security,
         records,
-        execution: { submitted: false, message: "No execution attempted" }
+        execution: { submitted: false, message: "No execution attempted" },
+        confidential: {
+          mode: confidential.mode,
+          enabled: confidential.enabled,
+          provider: confidential.provider,
+          flags: confidential.flags
+        }
       };
 
       return JSON.stringify({ success: true, requestId, timestamp, data: outcome });
@@ -761,7 +787,13 @@ const onHttpChainShield = async (
       preflight,
       security,
       records,
-      execution
+      execution,
+      confidential: {
+        mode: confidential.mode,
+        enabled: confidential.enabled,
+        provider: confidential.provider,
+        flags: confidential.flags
+      }
     };
 
     return JSON.stringify({ success: true, requestId, timestamp, data: outcome });
