@@ -1,0 +1,213 @@
+Yes, I get you exactly. You want a **CLI orchestrator** — a single entry point that acts as the frontend for the entire system when running locally. The user runs one command and gets an interactive menu that routes them to any of the four services.
+
+Before I design anything let me think about what this actually needs to do.
+
+---
+
+## What This Actually Is
+
+This is not a CRE workflow. CRE workflows compile to WASM and run on the DON — they have no concept of interactive terminal input, no `readline`, no `process.stdin`. You cannot build a press-1-press-2 menu inside a CRE workflow.
+
+What you are building is a **local CLI orchestrator** that:
+- Lives outside the CRE workflow layer
+- Runs on the user's machine as a Node/Bun process
+- Connects to MetaMask or a local wallet
+- Reads user input interactively
+- Calls the deployed CRE workflows via their HTTP endpoints
+- Calls smart contracts directly via RPC for read operations
+- Handles the full conversation with the user from start to finish
+
+The relationship between the orchestrator and the CRE workflows:
+
+```
+USER
+  ↕  (terminal interaction)
+CLI ORCHESTRATOR  (runs locally — this is what we are building)
+  ↕  (HTTP calls to CRE workflow endpoints)
+CRE WORKFLOWS    (deployed on the DON — the four services)
+  ↕  (EVM calls)
+SMART CONTRACTS  (deployed on Sepolia/Amoy/etc)
+```
+
+---
+
+## The Full User Journey Before We Write Anything
+
+Let me map every screen and every decision the user makes from launch to completion:
+
+```
+LAUNCH
+  └─ cre-suite start
+        │
+        ▼
+┌─────────────────────────────────────────────────────────┐
+│  SCREEN 0 — WELCOME + WALLET CONNECTION                 │
+│                                                         │
+│  Welcome to CRE Suite — Chainlink-Powered DeFi          │
+│                                                         │
+│  [1] Connect MetaMask (browser extension via WalletConnect)
+│  [2] Connect with private key (local dev only)          │
+│  [3] Read-only mode (no transactions)                   │
+│  [Q] Quit                                               │
+└─────────────────────────────────────────────────────────┘
+        │
+        ▼ (wallet connected — address shown)
+┌─────────────────────────────────────────────────────────┐
+│  SCREEN 1 — MAIN MENU                                   │
+│                                                         │
+│  Connected: 0x1234...abcd  │  Sepolia  │  0.45 ETH      │
+│                                                         │
+│  What would you like to do?                             │
+│                                                         │
+│  [1] AutoPilot DCA        — Set up automated investing  │
+│  [2] ChainShield Transfer — Send tokens cross-chain     │
+│  [3] CrossVault           — Cross-chain yield           │
+│  [4] ChainAlert           — Monitor wallet & tokens     │
+│  [5] View all active services                           │
+│  [6] Settings & configuration                           │
+│  [Q] Quit                                               │
+└─────────────────────────────────────────────────────────┘
+        │
+        ├─── [1] ──► DCA FLOW
+        ├─── [2] ──► TRANSFER FLOW
+        ├─── [3] ──► VAULT FLOW
+        └─── [4] ──► ALERT FLOW
+```
+
+Each flow is a sub-menu sequence with validation, confirmation, and feedback. Let me map each one completely.
+
+---
+
+## Screen Maps for All Four Flows
+
+### Flow 1 — AutoPilot DCA
+
+```
+DCA MENU
+│
+├─ [1] Create new DCA order
+│       └─ Enter token to sell: ___
+│       └─ Enter destination chain: [1]Amoy [2]Arbitrum [3]Base [4]Fuji
+│       └─ Enter amount per execution: ___
+│       └─ Enter interval: [1]Daily [2]Weekly [3]Custom(hours)
+│       └─ Enter max executions (0=unlimited): ___
+│       └─ Enter deadline (0=none, or date): ___
+│       └─ AI gate? [Y/N] — Gemini evaluates before each execution
+│       └─ CONFIRM: "Send 50 USDC to Amoy every 24h, max 10 times. Gas est: 0.002 ETH"
+│       └─ [Y] Submit → calls AutomatedTrader.createTimedOrder()
+│       └─ [N] Back
+│
+├─ [2] View my DCA orders
+│       └─ Reads getUserOrders() → shows table with DCAStatus, next run, funded status
+│       └─ [Select order] → shows full snapshot + CCIP history links
+│
+├─ [3] Manage order
+│       └─ Enter order ID: ___
+│       └─ [1] Pause  [2] Resume  [3] Cancel  [4] View CCIP history
+│
+├─ [4] Fund contract (deposit LINK or tokens)
+│       └─ Shows current LINK balance + estimated executions remaining
+│       └─ Enter amount to deposit: ___
+│       └─ Calls LINK.transfer() to contract address
+│
+└─ [B] Back to main menu
+```
+
+### Flow 2 — ChainShield Transfer
+
+```
+TRANSFER MENU
+│
+├─ [1] New transfer
+│       └─ Select source chain (auto-detected from wallet)
+│       └─ Select destination chain: [1]Amoy [2]Arbitrum [3]Base [4]Fuji
+│       └─ Select token: [list of allowlisted tokens]
+│       └─ Enter amount: ___
+│       └─ Enter recipient address: ___
+│       └─ Select action: [1]Transfer [2]Stake [3]Swap [4]Deposit
+│       └─ VERIFY: calls TokenVerifier → shows verdict + risk level
+│       └─ FEE ESTIMATE: calls estimateFee() → shows LINK cost
+│       └─ CONFIRM: shows full summary + CCIP explorer link pattern
+│       └─ [Y] Submit → calls ccipSend() or the transfer contract
+│
+├─ [2] Track existing transfer
+│       └─ Enter CCIP message ID: ___
+│       └─ Opens: https://ccip.chain.link/msg/{id}
+│       └─ Also calls isProcessed() on destination → shows local status
+│
+└─ [B] Back to main menu
+```
+
+### Flow 3 — CrossVault
+
+```
+CROSSVAULT MENU
+│
+├─ [1] Deposit to vault
+│       └─ Select source chain + token + amount
+│       └─ Select destination vault (chain + protocol)
+│       └─ Shows APY estimate
+│       └─ Confirm + submit
+│
+├─ [2] View my positions
+│       └─ Shows all active vault positions across chains
+│       └─ Shows current APY, deposited amount, accrued yield
+│
+├─ [3] Withdraw
+│       └─ Select position → enter amount → confirm
+│
+└─ [B] Back to main menu
+```
+
+### Flow 4 — ChainAlert Intelligence
+
+```
+ALERT MENU
+│
+├─ [1] Create alert rule
+│       └─ Select category:
+│           [1] Portfolio drop %
+│           [2] Token flagged suspicious
+│           [3] DCA order failed
+│           [4] Large wallet outflow
+│           [5] Token price spike
+│           [6] CCIP transfer stuck
+│       └─ Configure rule params (per category)
+│       └─ Set cooldown period: [1]1h [2]4h [3]24h [4]Custom
+│       └─ Set notification: [1]Webhook [2]Terminal only
+│       └─ Confirm → calls ChainAlertRegistry.createRule()
+│
+├─ [2] View active alerts
+│       └─ Lists all rules with current status (WATCHING/COOLING_DOWN/TRIGGERED)
+│       └─ Shows last triggered time + how many times fired
+│
+├─ [3] View alert history
+│       └─ Reads on-chain alert history
+│       └─ Shows what fired, when, AI explanation
+│
+├─ [4] Pause/delete alert
+│       └─ Select rule → [1]Pause [2]Delete
+│
+└─ [B] Back to main menu
+```
+
+---
+
+## Now I Know Exactly What to Build
+
+The orchestrator needs:
+
+1. **`cli/index.ts`** — entry point, launches the app
+2. **`cli/screens/welcome.ts`** — wallet connection screen
+3. **`cli/screens/mainMenu.ts`** — the hub
+4. **`cli/screens/dca.ts`** — full DCA flow
+5. **`cli/screens/transfer.ts`** — full transfer flow
+6. **`cli/screens/vault.ts`** — CrossVault flow
+7. **`cli/screens/alerts.ts`** — ChainAlert flow
+8. **`cli/wallet/connector.ts`** — wallet connection logic
+9. **`cli/contracts/reader.ts`** — all on-chain read calls
+10. **`cli/contracts/writer.ts`** — all on-chain write calls
+11. **`cli/utils/display.ts`** — table rendering, colours, formatting
+12. **`cli/utils/input.ts`** — all user input validation
+
+Let me build it now.
